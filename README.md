@@ -1,36 +1,66 @@
 # MdStyled
 
-**Style Markdown previews with external CSS/JS and comment selectors.**
+Style Markdown in VS Code with external CSS and JavaScript, without cluttering the Markdown itself.
 
-MdStyled is a VS Code extension that lets you style Markdown previews using normal CSS and JavaScript, while keeping the Markdown clean, portable, and AI-friendly.
+<p align="center">
+  <img src="icons/workflow.svg" alt="MdStyled turns Markdown plus CSS and JS directives into a styled preview in VS Code" width="900" />
+</p>
 
-## Quick start
+MdStyled is a VS Code extension for authors who want rich, branded, interactive Markdown previews while keeping source files portable and AI-friendly. Add CSS and JS with frontmatter or invisible HTML comments, then open a live preview inside VS Code.
 
-```bash
-npm run compile        # build
-```
+## How to use
 
-Press **F5** (or run `code --extensionDevelopmentPath=.`) to launch the Extension Host.
+1. Install **MdStyled** in VS Code.
+2. Open any Markdown file.
+3. Run **MdStyled: Apply Template** to scaffold a starter theme.
+4. Run **MdStyled: Open Preview** to see the styled result.
+5. Edit your Markdown, CSS, or JS and watch the preview refresh live.
 
-Open any `.md` file, then right-click in the editor → **MdStyled: Apply Template** → select `default-light` or `default-dark`. This creates a `.mdstyled/` folder with the template files and inserts the necessary directives. Click the `MdStyled` status bar button (appears when the file contains MdStyled markers) to preview.
+### Minimal example
 
-## How it works
-
-Reference CSS and JS files using comment directives at the top of your Markdown:
+Put this at the top of a Markdown file:
 
 ```md
 <!-- @style: ./theme.css -->
 <!-- @script: ./behavior.js -->
 
-# My Document
+# Product Brief
 
-<!-- .cover -->
-Welcome to styled Markdown.
+<!-- .hero -->
+Build polished Markdown documents with normal web tools.
 ```
 
-Invisible HTML comments (`<!-- .cover -->`) act as selectors — they apply classes to the next block element without polluting the output.
+Then create `theme.css`:
 
-You can also use YAML frontmatter instead of comment directives:
+```css
+.hero {
+  padding: 1rem 1.25rem;
+  border-left: 4px solid #2563eb;
+  background: #eff6ff;
+  font-size: 1.1rem;
+}
+```
+
+Open **MdStyled: Open Preview** and the paragraph under `# Product Brief` will render with the `hero` class applied.
+
+## Why MdStyled
+
+- Keep Markdown clean while styling the preview with real CSS and JavaScript
+- Apply classes, IDs, and attributes using invisible comment selectors
+- Build branded documentation, slide-like pages, reports, and interactive notes
+- Use local assets instead of forcing presentation markup into the document body
+- Preview everything directly inside VS Code
+
+## Core syntax
+
+### Attach styles and scripts
+
+```md
+<!-- @style: ./theme.css -->
+<!-- @script: ./behavior.js -->
+```
+
+You can also use frontmatter:
 
 ```md
 ---
@@ -40,106 +70,90 @@ mdstyled:
   scripts:
     - ./behavior.js
 ---
-
-# My Document
 ```
 
-### Comment selectors
+### Apply selectors to the next block
 
-| Comment | Effect |
+```md
+<!-- .callout -->
+Important note
+
+<!-- #hero -->
+# Landing Page
+
+<!-- [data-theme=dark] -->
+## Themed section
+```
+
+These comments are removed from the final preview and only affect the next renderable block.
+
+## What you can do
+
+| Syntax | Result |
 |---|---|
-| `<!-- .class -->` | Adds `class` to the next block element |
-| `<!-- #id -->` | Sets `id` on the next block element |
-| `<!-- [key=value] -->` | Sets attribute on the next block element |
-| `<!-- .foo .bar -->` | Applies multiple classes |
-| `<!-- @section: name -->` | Wraps the following heading + content in `<section class="name">` until the next same-or-higher heading |
-| `<!-- @page: name -->` | Wraps entire doc in `<div class="mdstyled-root name">` |
+| `<!-- .class -->` | Add one or more classes to the next block |
+| `<!-- #id -->` | Set an `id` on the next block |
+| `<!-- [key=value] -->` | Add an attribute to the next block |
+| `<!-- @style: ./file.css -->` | Load a CSS file into the preview |
+| `<!-- @script: ./file.js -->` | Load a JS file into the preview |
+| `<!-- @section: name -->` | Wrap the following heading and content in a named `<section>` |
+| `<!-- @page: name -->` | Wrap the full document in `<div class="mdstyled-root name">` |
 
-### File references
+## Built-in extras
 
-- `<!-- @style: ./path.css -->` — inject a CSS file
-- `<!-- @script: ./path.js -->` — inject a JavaScript file
-- Files with the same stem as the `.md` are auto-discovered (`.css`, `.mdstyled`, `.js`, `.mdjs`)
-
-### Configuration priority
-
-When multiple sources define styles or scripts, they merge in this order (later sources win via normal CSS cascade):
-
-1. Workspace config (`mdstyled.config.json`)
-2. Frontmatter (`mdstyled:` block)
-3. Comment directives (`<!-- @style: ... -->`, `<!-- @script: ... -->`)
-4. Auto-discovered matching files
-
-## Extensions
-
-MdStyled ships with built-in extensions that add interactive features to the preview. They're enabled by default — you can disable them or add your own.
+MdStyled ships with a few built-in preview extensions:
 
 | Extension | What it does |
 |---|---|
-| `mermaid` | Renders ` ```mermaid ` blocks as diagrams (loads Mermaid from local `node_modules`, falling back to CDN) |
-| `copy-code` | Adds copy buttons to all code blocks |
-| `highlight` | Basic code block font styling |
+| `mermaid` | Renders ` ```mermaid ` blocks as diagrams |
+| `copy-code` | Adds copy buttons to code blocks |
+| `highlight` | Applies basic code block styling |
 
-### Configure in VS Code settings
-
-Open **Settings (JSON)** and add:
+Enable or disable them in VS Code settings:
 
 ```json
 {
-  "mdstyled.extensions.enabled": ["mermaid", "copy-code"]
-}
-```
-
-This disables `highlight` while keeping diagram rendering and copy buttons.
-
-### Adding custom extensions
-
-To add your own extension, place CSS/JS files in your project and inject them via comment directives:
-
-```md
-<!-- @style: ./.mdstyled/my-ext/style.css -->
-<!-- @script: ./.mdstyled/my-ext/script.js -->
-```
-
-Or for project-wide defaults, create a `mdstyled.config.json` next to your `.md` file:
-
-```json
-{
-  "styles": [".mdstyled/my-ext/style.css"],
-  "scripts": [".mdstyled/my-ext/script.js"]
+  "mdstyled.extensions.enabled": ["mermaid", "copy-code", "highlight"]
 }
 ```
 
 ## Commands
 
-| Command | What it does |
+| Command | Description |
 |---|---|
-| `MdStyled: Open Preview` | Opens styled preview in current tab |
-| `MdStyled: Open Preview to Side` | Opens styled preview in a split editor |
-| `MdStyled: Apply Template` | Creates `.mdstyled/` folder with template assets and inserts directives |
+| `MdStyled: Open Preview` | Open the styled preview in the current editor area |
+| `MdStyled: Open Preview to Side` | Open the styled preview beside the current editor |
+| `MdStyled: Apply Template` | Create a starter `.mdstyled/` folder and insert directives |
 
-All commands also available via the M icon in the editor toolbar (when an MdStyled file is open), the status bar, and the right-click context menu.
+## Auto-discovery
 
-## Samples
+If a Markdown file has matching companion files, MdStyled can load them automatically:
 
-| File | What it shows |
-|---|---|
-| `samples/basic.md` | Minimal styled document with paired CSS |
-| `samples/test-all.md` | Every Markdown element styled with comment selectors |
-| `samples/docusaurus.md` | Documentation theme with TOC sidebar via JS |
-| `samples/rcm-deployment.md` | Styled deployment guide with section wrappers |
-| `samples/test-diagram.md` | Mermaid diagram rendering |
+- `example.md` -> `example.css`
+- `example.md` -> `example.js`
+- `example.md` -> `example.mdstyled`
+- `example.md` -> `example.mdjs`
 
-Open any sample and click the `MdStyled` status bar button to preview.
+You can also define shared defaults with `mdstyled.config.json`.
+
+## Sample files
+
+The repository includes examples in [`samples/`](/Users/osama.abusitta/repositories/MDCSS/code/samples):
+
+- `basic.md`
+- `test-all.md`
+- `docusaurus.md`
+- `rcm-deployment.md`
+- `test-diagram.md`
 
 ## Development
 
 ```bash
-npm run compile    # build once
-npm run watch      # auto-rebuild on save
+npm run compile
+npm run watch
 ```
 
-Press **F5** to launch the Extension Host with debugger attached.
+Press `F5` in VS Code to launch an Extension Host for local testing.
 
 ## License
 
