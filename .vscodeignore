@@ -2,7 +2,9 @@
 .vscode-test/**
 src/**
 node_modules/**
+!node_modules/mermaid/dist/mermaid.min.js
 !node_modules/highlight.js/**
+esbuild.js
 .gitignore
 tsconfig.json
 AGENTS.md

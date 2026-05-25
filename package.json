@@ -2,7 +2,7 @@
   "name": "mdstyled",
   "displayName": "MdStyled",
   "description": "Style Markdown previews with external CSS/JS and comment selectors",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "OAS",
   "author": "Osama Abu-Sitta",
   "license": "MIT",
@@ -93,9 +93,9 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
+    "vscode:prepublish": "node esbuild.js --production",
+    "compile": "node esbuild.js",
+    "watch": "node esbuild.js --watch",
     "test": "node ./out/test/runTest.js",
     "lint": "eslint src --ext ts"
   },
@@ -105,6 +105,7 @@
     "@types/sanitize-html": "^2.16.1",
     "@types/vscode": "^1.85.0",
     "@vscode/test-electron": "^2.4.0",
+    "esbuild": "^0.28.0",
     "typescript": "^5.4.0"
   },
   "dependencies": {
