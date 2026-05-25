@@ -2,7 +2,7 @@
   "name": "mdstyled",
   "displayName": "MdStyled",
   "description": "Style Markdown previews with external CSS/JS and comment selectors",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "publisher": "OAS",
   "author": "Osama Abu-Sitta",
   "license": "MIT",
