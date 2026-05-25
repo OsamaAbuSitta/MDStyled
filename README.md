@@ -1,7 +1,7 @@
 # MdStyled
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/OsamaAbuSitta/MDStyled/main/code/img/Screenshot.png" alt="MdStyled Preview Screenshot" width="900" />
+  <img src="https://raw.githubusercontent.com/OsamaAbuSitta/MDStyled/blob/main/code/img/Screenshot.png" alt="MdStyled Preview Screenshot" width="900" />
 </p>
 
 Style Markdown in VS Code with external CSS and JavaScript, without cluttering the Markdown itself.
