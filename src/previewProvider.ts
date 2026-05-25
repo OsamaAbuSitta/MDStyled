@@ -12,7 +12,9 @@ export class MdStyledPreviewProvider {
   private extensionUri: vscode.Uri;
 
   public static createOrShow(extensionUri: vscode.Uri, column: vscode.ViewColumn, documentUri: vscode.Uri): void {
+    const title = path.basename(documentUri.fsPath) + ' - MdStyled Preview';
     if (MdStyledPreviewProvider.currentPanel) {
+      MdStyledPreviewProvider.currentPanel.panel.title = title;
       MdStyledPreviewProvider.currentPanel.panel.reveal(column);
       MdStyledPreviewProvider.currentPanel.documentUri = documentUri;
       MdStyledPreviewProvider.currentPanel.refresh();
@@ -21,7 +23,7 @@ export class MdStyledPreviewProvider {
 
     const panel = vscode.window.createWebviewPanel(
       'mdstyled.preview',
-      'MdStyled Preview',
+      title,
       column,
       {
         enableScripts: true,

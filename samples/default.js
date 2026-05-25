@@ -1,24 +1,26 @@
 (function () {
   'use strict';
 
+  /* ── Table of contents ── */
+
   function buildTOC() {
-    var root = document.querySelector('.mdcss-root');
+    var root = document.querySelector('.mdstyled-root');
     if (!root) return;
 
     var headings = root.querySelectorAll('h2, h3');
     if (headings.length < 2) return;
 
     var toc = document.createElement('nav');
-    toc.className = 'mdcss-toc';
+    toc.className = 'mdstyled-toc';
     toc.setAttribute('aria-label', 'On this page');
 
     var title = document.createElement('div');
-    title.className = 'mdcss-toc-title';
+    title.className = 'mdstyled-toc-title';
     title.textContent = 'On this page';
     toc.appendChild(title);
 
     var list = document.createElement('ul');
-    list.className = 'mdcss-toc-list';
+    list.className = 'mdstyled-toc-list';
 
     var items = [];
     headings.forEach(function (h) {
@@ -29,7 +31,7 @@
       var level = parseInt(h.tagName[1], 10);
 
       var li = document.createElement('li');
-      li.className = 'mdcss-toc-item mdcss-toc-level-' + level;
+      li.className = 'mdstyled-toc-item mdstyled-toc-level-' + level;
 
       var a = document.createElement('a');
       a.href = '#' + h.id;
@@ -63,6 +65,8 @@
     updateActive();
     window.addEventListener('scroll', updateActive);
   }
+
+  /* ── Init ── */
 
   function init() {
     buildTOC();

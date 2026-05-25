@@ -134,6 +134,65 @@ else loadMermaid();
 const HIGHLIGHT_CSS = `
 pre { position: relative; }
 code { font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace; }
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-tag,
+.hljs-name {
+  color: #d73a49;
+}
+
+.hljs-string,
+.hljs-regexp,
+.hljs-addition,
+.hljs-attribute {
+  color: #2ea043;
+}
+
+.hljs-number,
+.hljs-literal,
+.hljs-bullet,
+.hljs-code {
+  color: #9a6700;
+}
+
+.hljs-function,
+.hljs-class,
+.hljs-title,
+.hljs-variable,
+.hljs-template-variable {
+  color: #218bff;
+}
+
+.hljs-comment,
+.hljs-quote,
+.hljs-meta {
+  color: #6e7781;
+}
+
+.hljs-built_in,
+.hljs-type {
+  color: #8250df;
+}
+
+.hljs-operator,
+.hljs-symbol,
+.hljs-link {
+  color: #cf222e;
+}
+
+.hljs-emphasis {
+  font-style: italic;
+}
+
+.hljs-strong {
+  font-weight: 700;
+}
+
+.hljs-deletion {
+  color: #d73a49;
+  text-decoration: line-through;
+}
 `;
 
 export const BUILTIN_EXTENSIONS: Record<string, MdStyledExtensionDef> = {
@@ -151,7 +210,7 @@ export const BUILTIN_EXTENSIONS: Record<string, MdStyledExtensionDef> = {
   },
   'highlight': {
     name: 'highlight',
-    description: 'Basic code block styling',
+    description: 'Syntax highlighting for code blocks',
     css: HIGHLIGHT_CSS
   }
 };

@@ -3,6 +3,7 @@ import matter from 'gray-matter';
 import MarkdownIt from 'markdown-it';
 import taskLists from 'markdown-it-task-lists';
 import sanitizeHtmlLib from 'sanitize-html';
+import hljs from 'highlight.js';
 
 import { resolveConfig } from './config';
 import { applyMdStyledDirectives } from './transformer';
@@ -30,7 +31,17 @@ export async function renderMdStyled(markdownFilePath: string, enabledExtensions
     const parsed = matter(markdownRaw);
     const config = await resolveConfig(markdownFilePath, markdownRaw);
 
-    const md = new MarkdownIt({ html: true });
+    const md = new MarkdownIt({
+      html: true,
+      highlight: (str, lang) => {
+        if (lang && hljs.getLanguage(lang)) {
+          try {
+            return hljs.highlight(str, { language: lang, ignoreIllegals: true }).value;
+          } catch (__) {}
+        }
+        return '';
+      }
+    });
     md.use(taskLists);
     const tokens = md.parse(parsed.content, {});
     const transformedTokens = applyMdStyledDirectives(tokens);

@@ -2,9 +2,9 @@
 <!-- @script: ./default.js -->
 
 <!-- .doc-hero -->
-# Docusaurus Style
+# MDStyled
 
-A reference sample showing MdStyled styled like a Docusaurus documentation site.
+A reference sample showing MdStyled styled like a documentation site.
 
 ## Getting Started
 

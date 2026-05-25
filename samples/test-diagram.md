@@ -149,7 +149,7 @@ gantt
   Renderer             :done, 2025-02-01, 25d
 
   section Themes
-  Docusaurus           :active, 2025-03-01, 20d
+  MdStyled           :active, 2025-03-01, 20d
   Dark Mode            :2025-04-01, 15d
 
   section Runtime
@@ -175,7 +175,7 @@ mindmap
       Webview Preview
       Export HTML
     Templates
-      Docusaurus
+      Default
       Minimal
       Custom
 ```

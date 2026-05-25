@@ -2,6 +2,7 @@
 .vscode-test/**
 src/**
 node_modules/**
+!node_modules/highlight.js/**
 .gitignore
 tsconfig.json
 AGENTS.md

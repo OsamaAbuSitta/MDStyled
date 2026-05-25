@@ -1,5 +1,11 @@
 /* ── Docusaurus-style theme ── */
 
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   max-width: 1200px;
@@ -13,7 +19,7 @@ body {
   gap: 48px;
 }
 
-.mdcss-root {
+.mdstyled-root {
   flex: 1;
   min-width: 0;
   max-width: 780px;
@@ -63,6 +69,10 @@ a:hover {
   text-decoration: underline;
 }
 
+::selection {
+  background: rgba(53, 120, 229, 0.2);
+}
+
 /* ── paragraphs ── */
 
 p {
@@ -84,7 +94,8 @@ code {
 /* ── code blocks ── */
 
 pre {
-  background: #1e1e2e;
+  background: #f6f8fa;
+  border: 1px solid #e3e8ee;
   border-radius: 8px;
   padding: 16px 20px;
   overflow-x: auto;
@@ -96,7 +107,7 @@ pre code {
   border: none;
   padding: 0;
   font-size: 0.85rem;
-  color: #cdd6f4;
+  color: #24292f;
   line-height: 1.5;
 }
 
@@ -320,7 +331,7 @@ img {
    Table of contents (right sidebar)
    ═══════════════════════════════════════ */
 
-.mdcss-toc {
+.mdstyled-toc {
   width: 200px;
   flex-shrink: 0;
   position: sticky;
@@ -331,7 +342,7 @@ img {
   padding: 0 0 24px;
 }
 
-.mdcss-toc-title {
+.mdstyled-toc-title {
   font-size: 0.7rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -340,47 +351,51 @@ img {
   margin-bottom: 12px;
 }
 
-.mdcss-toc-list {
+.mdstyled-toc-list {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.mdcss-toc-item {
+.mdstyled-toc-item {
   margin: 0;
   padding: 2px 0;
   border-left: 2px solid transparent;
   transition: border-color 0.15s;
 }
 
-.mdcss-toc-item.active {
+.mdstyled-toc-item.active {
   border-left-color: #3578e5;
 }
 
-.mdcss-toc-item a {
+.mdstyled-toc-item a {
   display: block;
   color: #606770;
   font-size: 0.8rem;
   line-height: 1.4;
   padding: 2px 8px;
   text-decoration: none;
-  transition: color 0.15s;
+  transition: color 0.15s, background 0.15s;
+  border-radius: 3px;
+  outline: none;
 }
 
-.mdcss-toc-item a:hover {
+.mdstyled-toc-item a:hover,
+.mdstyled-toc-item a:focus-visible {
   color: #3578e5;
+  background: rgba(53, 120, 229, 0.06);
 }
 
-.mdcss-toc-item.active a {
+.mdstyled-toc-item.active a {
   color: #1c1e21;
   font-weight: 500;
 }
 
-.mdcss-toc-level-2 {
+.mdstyled-toc-level-2 {
   padding-left: 0;
 }
 
-.mdcss-toc-level-3 {
+.mdstyled-toc-level-3 {
   padding-left: 12px;
 }
 
@@ -398,25 +413,72 @@ img {
 
 pre { position: relative; }
 
-.mdcss-copy-btn {
+.mdstyled-copy-btn {
   position: absolute; top: 8px; right: 8px; z-index: 10;
-  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
-  color: #8b949e; padding: 6px; border-radius: 4px;
-  cursor: pointer; opacity: 0; line-height: 0;
-  transition: opacity 0.2s, background 0.2s, border-color 0.2s;
+  background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.08);
+  color: #6e7781; padding: 6px; border-radius: 4px;
+  cursor: pointer; opacity: 1; line-height: 0;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
 }
-.mdcss-copy-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; display: block; }
-pre:hover .mdcss-copy-btn { opacity: 1; }
-.mdcss-copy-btn:hover { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.3); color: #e6edf3; }
-.mdcss-copy-btn.copied { background: #1b4527; border-color: #2ea043; color: #7ee787; }
+.mdstyled-copy-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; display: block; }
+.mdstyled-copy-btn:hover { background: rgba(0,0,0,0.08); border-color: rgba(0,0,0,0.15); color: #444950; }
+.mdstyled-copy-btn.copied { background: #dafbe1; border-color: #2ea043; color: #1a7f37; }
 
 /* ═══════════════════════════════════════
    Mermaid diagrams
    ═══════════════════════════════════════ */
 
-.mdcss-mermaid {
+.mdstyled-mermaid {
   background: #f8f9fa; border-radius: 8px; padding: 16px;
   margin: 12px 0 20px; text-align: center; min-height: 80px;
   display: flex; align-items: center; justify-content: center;
 }
-.mdcss-mermaid svg { max-width: 100%; }
+.mdstyled-mermaid svg { max-width: 100%; }
+
+/* ── Gantt chart ── */
+
+.mdstyled-mermaid .gantt .grid .gridTick { stroke: #d0d5dd; stroke-dasharray: 3 3; }
+
+.mdstyled-mermaid .gantt .sectionTitle { font-size: 13px; font-weight: 700; fill: #1c1e21; }
+.mdstyled-mermaid .gantt .sectionTitle rect { fill: #eef0f4; rx: 3; }
+
+.mdstyled-mermaid .gantt .task rect {
+  rx: 4; ry: 4;
+  stroke-width: 1.5;
+}
+.mdstyled-mermaid .gantt .task.done rect { fill: #1f883d; stroke: #146430; }
+.mdstyled-mermaid .gantt .task.active rect { fill: #2d7ff9; stroke: #1a5cc7; }
+.mdstyled-mermaid .gantt .task.crit.done rect { fill: #d93a3a; stroke: #b02828; }
+.mdstyled-mermaid .gantt .task.crit.active rect { fill: #f85149; stroke: #d03533; }
+.mdstyled-mermaid .gantt .task.task0 rect { fill: #1f883d; stroke: #146430; }
+.mdstyled-mermaid .gantt .task.task1 rect { fill: #2d7ff9; stroke: #1a5cc7; }
+.mdstyled-mermaid .gantt .task.task2 rect { fill: #9b59b6; stroke: #7d3c98; }
+.mdstyled-mermaid .gantt .task.task3 rect { fill: #e8a838; stroke: #c48a24; }
+.mdstyled-mermaid .gantt .task.task4 rect { fill: #1abc9c; stroke: #148f77; }
+
+.mdstyled-mermaid .gantt .taskText {
+  font-size: 11px; fill: #fff; font-weight: 600;
+}
+.mdstyled-mermaid .gantt .taskTextOutsideRight,
+.mdstyled-mermaid .gantt .taskTextOutsideLeft {
+  font-size: 11px; fill: #444950;
+}
+
+.mdstyled-mermaid .gantt .milestone rect {
+  fill: #8250df; stroke: #6c3dcf; rx: 0; ry: 0;
+  transform: rotate(45deg);
+}
+
+.mdstyled-mermaid .gantt .today { stroke: #f85149; stroke-width: 2.5; }
+.mdstyled-mermaid .gantt .todayText { fill: #f85149; font-size: 11px; font-weight: 700; }
+
+.mdstyled-mermaid .gantt .titleText { font-size: 14px; font-weight: 700; fill: #1c1e21; }
+
+.mdstyled-mermaid .gantt text {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+.mdstyled-mermaid .gantt .grid .tick line { stroke: #e3e8ee; }
+.mdstyled-mermaid .gantt .grid .tick text { fill: #606770; font-size: 10px; }
+
+.mdstyled-mermaid .gantt .task .task-progress { rx: 4; ry: 4; }

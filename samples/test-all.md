@@ -1,5 +1,5 @@
-<!-- @style: ./.mdstyled/default-dark.css -->
-<!-- @script: ./.mdstyled/default-dark.js -->
+<!-- @style: ./.mdstyled/default-light.css -->
+<!-- @script: ./.mdstyled/default-light.js -->
 
 <!-- .page-title -->
 # MdStyled Test Page
