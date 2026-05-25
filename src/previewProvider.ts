@@ -4,20 +4,22 @@ import { renderMdStyled } from './engine';
 import sanitizeHtml from 'sanitize-html';
 
 export class MdStyledPreviewProvider {
-  public static currentPanel: MdStyledPreviewProvider | undefined;
+  private static panels = new Map<string, MdStyledPreviewProvider>();
   public readonly panel: vscode.WebviewPanel;
   public documentUri: vscode.Uri;
   private disposables: vscode.Disposable[] = [];
-  private debounceTimer: NodeJS.Timeout | undefined;
+  private debounceTimer: ReturnType<typeof setTimeout> | undefined;
   private extensionUri: vscode.Uri;
 
   public static createOrShow(extensionUri: vscode.Uri, column: vscode.ViewColumn, documentUri: vscode.Uri): void {
+    const key = documentUri.toString();
     const title = path.basename(documentUri.fsPath) + ' - MdStyled Preview';
-    if (MdStyledPreviewProvider.currentPanel) {
-      MdStyledPreviewProvider.currentPanel.panel.title = title;
-      MdStyledPreviewProvider.currentPanel.panel.reveal(column);
-      MdStyledPreviewProvider.currentPanel.documentUri = documentUri;
-      MdStyledPreviewProvider.currentPanel.refresh();
+    const existing = MdStyledPreviewProvider.panels.get(key);
+    if (existing) {
+      existing.panel.title = title;
+      existing.panel.reveal(column);
+      existing.documentUri = documentUri;
+      existing.refresh();
       return;
     }
 
@@ -34,7 +36,13 @@ export class MdStyledPreviewProvider {
       }
     );
 
-    MdStyledPreviewProvider.currentPanel = new MdStyledPreviewProvider(panel, extensionUri, documentUri);
+    const provider = new MdStyledPreviewProvider(panel, extensionUri, documentUri);
+    MdStyledPreviewProvider.panels.set(key, provider);
+  }
+
+  public static getFirstDocumentUri(): vscode.Uri | undefined {
+    const first = MdStyledPreviewProvider.panels.values().next().value;
+    return first?.documentUri;
   }
 
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, documentUri: vscode.Uri) {
@@ -67,7 +75,7 @@ export class MdStyledPreviewProvider {
   }
 
   public dispose(): void {
-    MdStyledPreviewProvider.currentPanel = undefined;
+    MdStyledPreviewProvider.panels.delete(this.documentUri.toString());
 
     if (this.debounceTimer) {
       clearTimeout(this.debounceTimer);

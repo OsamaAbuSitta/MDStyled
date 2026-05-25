@@ -1,6 +1,7 @@
 <!-- @style: ./.mdstyled/default-light.css -->
 <!-- @script: ./.mdstyled/default-light.js -->
 
+
 # Basic Mermaid Test
 
 ## Simple flowchart (should work)

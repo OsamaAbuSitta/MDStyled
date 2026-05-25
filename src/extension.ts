@@ -41,7 +41,7 @@ export function activate(context: vscode.ExtensionContext) {
         editor = vscode.window.visibleTextEditors.find(e => e.document.languageId === 'markdown');
       }
       if (!editor) {
-        const previewUri = MdStyledPreviewProvider.currentPanel?.documentUri;
+        const previewUri = MdStyledPreviewProvider.getFirstDocumentUri();
         if (previewUri) {
           const doc = await vscode.workspace.openTextDocument(previewUri);
           const revealedEditor = await vscode.window.showTextDocument(doc);

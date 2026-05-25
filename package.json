@@ -6,6 +6,11 @@
   "publisher": "Osama Abu-Sitta",
   "author": "Osama Abu-Sitta",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OsamaAbuSitta/MDStyled.git"
+  },
+  "homepage": "https://github.com/OsamaAbuSitta/MDStyled#readme",
   "icon": "icons/icon.png",
   "categories": [
     "Other",
@@ -23,8 +28,7 @@
     "vscode": "^1.85.0"
   },
   "activationEvents": [
-    "onLanguage:markdown",
-    "*"
+    "onLanguage:markdown"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -97,7 +101,7 @@
   },
   "devDependencies": {
     "@types/markdown-it": "^14.1.2",
-    "@types/node": "^20.0.0",
+    "@types/node": "^20.19.41",
     "@types/sanitize-html": "^2.16.1",
     "@types/vscode": "^1.85.0",
     "@vscode/test-electron": "^2.4.0",
