@@ -247,6 +247,7 @@
         });
 
         autocompleteList.style.display = 'block';
+        searchInput.classList.add('has-autocomplete');
         activeIndex = 0;
         updateActiveItem();
       }
@@ -261,6 +262,7 @@
 
       function hideAutocomplete() {
         autocompleteList.style.display = 'none';
+        searchInput.classList.remove('has-autocomplete');
         activeIndex = -1;
       }
 
@@ -419,7 +421,10 @@
 
       headers.forEach(function(th, colIndex) {
         th.classList.add('sortable-header');
-        th.addEventListener('click', function() {
+        th.setAttribute('tabindex', '0');
+        th.setAttribute('role', 'button');
+
+        function doSort() {
           var ascending = !th.classList.contains('sort-asc');
           headers.forEach(function(h) { h.classList.remove('sort-asc', 'sort-desc'); });
           th.classList.add(ascending ? 'sort-asc' : 'sort-desc');
@@ -435,6 +440,14 @@
 
           filteredRows.forEach(function(row) { tbody.appendChild(row); });
           renderPage();
+        }
+
+        th.addEventListener('click', doSort);
+        th.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            doSort();
+          }
         });
       });
 

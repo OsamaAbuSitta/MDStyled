@@ -481,3 +481,28 @@ pre { position: relative; }
 .mdstyled-mermaid .gantt .grid .tick text { fill: #8b949e; font-size: 10px; }
 
 .mdstyled-mermaid .gantt .task .task-progress { rx: 4; ry: 4; }
+
+/* ── Scrollbar ── */
+
+* {
+  scrollbar-color: #30363d #0d1117;
+  scrollbar-width: thin;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0d1117;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #30363d;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #8b949e;
+}

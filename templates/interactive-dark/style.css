@@ -33,6 +33,7 @@ h1 {
   letter-spacing: -0.02em;
   margin: 0 0 6px;
   color: #c9d1d9;
+  line-height: 1.2;
 }
 
 h2 {
@@ -152,6 +153,10 @@ td {
 
 tr:nth-child(even) td {
   background: #161b22;
+}
+
+tr:hover td {
+  background: #1c2128;
 }
 
 /* ── horizontal rule ── */
@@ -446,7 +451,7 @@ ul.cards > li > ol {
 
 .mdstyled-toc-item {
   margin: 0;
-  padding: 2px 0;
+  padding: 1px 0;
   border-left: 2px solid transparent;
   transition: border-color 0.15s;
 }
@@ -460,7 +465,7 @@ ul.cards > li > ol {
   color: #8b949e;
   font-size: 0.8rem;
   line-height: 1.4;
-  padding: 2px 8px;
+  padding: 4px 8px;
   text-decoration: none;
   transition: color 0.15s, background 0.15s;
   border-radius: 3px;
@@ -478,12 +483,12 @@ ul.cards > li > ol {
   font-weight: 500;
 }
 
-.mdstyled-toc-level-1 a { padding-left: 8px; font-weight: 600; }
-.mdstyled-toc-level-2 a { padding-left: 8px; }
-.mdstyled-toc-level-3 a { padding-left: 16px; }
-.mdstyled-toc-level-4 a { padding-left: 24px; }
-.mdstyled-toc-level-5 a { padding-left: 32px; }
-.mdstyled-toc-level-6 a { padding-left: 40px; }
+.mdstyled-toc-level-1 a { padding-left: 4px; font-weight: 600; }
+.mdstyled-toc-level-2 a { padding-left: 12px; }
+.mdstyled-toc-level-3 a { padding-left: 20px; }
+.mdstyled-toc-level-4 a { padding-left: 28px; }
+.mdstyled-toc-level-5 a { padding-left: 36px; }
+.mdstyled-toc-level-6 a { padding-left: 44px; }
 
 /* ═══════════════════════════════════════
    Task list / checkboxes
@@ -584,15 +589,10 @@ pre { position: relative; }
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 }
 
-.mdstyled-mermaid .gantt .grid .tick line { stroke: #30363d; }
-.mdstyled-mermaid .gantt .grid .tick text { fill: #8b949e; font-size: 10px; }
-
-.mdstyled-mermaid .gantt .task .task-progress { rx: 4; ry: 4; }
-
 /* ── Interactive Tables ── */
 
 .table-interactive-controls {
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   display: flex;
 }
 
@@ -602,31 +602,37 @@ pre { position: relative; }
 }
 
 .table-search-input {
-  padding: 6px 12px;
+  padding: 8px 12px 8px 36px;
   border: 1px solid #30363d;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 0.85rem;
   width: 100%;
   outline: none;
-  transition: border-color 0.2s;
-  background: #0d1117;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background: #0d1117 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23484f58' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E") no-repeat 10px center;
   color: #c9d1d9;
   box-sizing: border-box;
 }
 
 .table-search-input:focus {
   border-color: #58a6ff;
+  box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.15);
+}
+
+.table-search-input.has-autocomplete {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 .table-search-autocomplete {
   position: absolute;
-  top: 100%;
+  top: calc(100% - 1px);
   left: 0;
   right: 0;
   background: #0d1117;
   border: 1px solid #30363d;
   border-top: none;
-  border-radius: 0 0 4px 4px;
+  border-radius: 0 0 6px 6px;
   z-index: 100;
   max-height: 200px;
   overflow-y: auto;
@@ -634,7 +640,7 @@ pre { position: relative; }
 }
 
 .table-search-autocomplete-item {
-  padding: 6px 12px;
+  padding: 8px 12px;
   cursor: pointer;
   font-size: 0.85rem;
   color: #c9d1d9;
@@ -650,10 +656,16 @@ th.sortable-header {
   cursor: pointer;
   position: relative;
   padding-right: 24px !important;
+  user-select: none;
 }
 
 th.sortable-header:hover {
-  background: #161b22;
+  background: #21262d;
+}
+
+th.sortable-header:focus-visible {
+  outline: 2px solid #58a6ff;
+  outline-offset: -2px;
 }
 
 th.sortable-header::after {
@@ -678,7 +690,7 @@ th.sortable-header.sort-desc::after {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 8px;
+  margin-top: 10px;
   font-size: 0.85rem;
 }
 
@@ -688,7 +700,7 @@ th.sortable-header.sort-desc::after {
 
 .table-pagination-buttons {
   display: flex;
-  gap: 4px;
+  gap: 6px;
   align-items: center;
 }
 
@@ -709,10 +721,19 @@ th.sortable-header.sort-desc::after {
   color: #c9d1d9;
 }
 
+.table-page-btn:active:not(:disabled) {
+  background: #21262d;
+}
+
 .table-page-btn.active {
   background: #58a6ff;
   border-color: #58a6ff;
   color: #0d1117;
+}
+
+.table-page-btn:focus-visible {
+  outline: 2px solid #58a6ff;
+  outline-offset: 2px;
 }
 
 .table-page-btn:disabled,
@@ -740,8 +761,8 @@ th.sortable-header.sort-desc::after {
   background: transparent;
   border: none;
   cursor: pointer;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   padding: 0;
   border-radius: 6px;
   display: flex;
@@ -757,10 +778,15 @@ th.sortable-header.sort-desc::after {
   color: #8b949e;
 }
 
+.accordion-toggle:focus-visible {
+  outline: 2px solid #58a6ff;
+  outline-offset: 2px;
+}
+
 .accordion-chevron {
   display: block;
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   border-right: 2px solid currentColor;
   border-bottom: 2px solid currentColor;
   transform: rotate(45deg);
@@ -770,4 +796,15 @@ th.sortable-header.sort-desc::after {
 
 .accordion-toggle.collapsed .accordion-chevron {
   transform: rotate(-45deg);
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 800px) {
+  .mdstyled-toc {
+    display: none;
+  }
+  body {
+    gap: 24px;
+  }
 }
