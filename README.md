@@ -1,13 +1,13 @@
 # MdStyled
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/OsamaAbuSitta/MDStyled/blob/main/code/img/Screenshot.png" alt="MdStyled Preview Screenshot" width="900" />
+  <img src="https://github.com/OsamaAbuSitta/MDStyled/blob/main/img/Screenshot.png" alt="MdStyled Preview Screenshot" width="900" />
 </p>
 
 Style Markdown in VS Code with external CSS and JavaScript, without cluttering the Markdown itself.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/OsamaAbuSitta/MDStyled/main/code/img/workflow.png" alt="MdStyled turns Markdown plus CSS and JS directives into a styled preview in VS Code" width="900" />
+  <img src="https://github.com/OsamaAbuSitta/MDStyled/blob/main/img/workflow.png" alt="MdStyled turns Markdown plus CSS and JS directives into a styled preview in VS Code" width="900" />
 </p>
 
 MdStyled is a VS Code extension for authors who want rich, branded, interactive Markdown previews while keeping source files portable and AI-friendly. Add CSS and JS with frontmatter or invisible HTML comments, then open a live preview inside VS Code.
