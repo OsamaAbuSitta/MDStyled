@@ -1,13 +1,13 @@
 # MdStyled
 
 <p align="center">
-  <img src="img/Screenshot.png" alt="MdStyled Preview Screenshot" width="900" />
+  <img src="https://raw.githubusercontent.com/OsamaAbuSitta/MDStyled/main/code/img/Screenshot.png" alt="MdStyled Preview Screenshot" width="900" />
 </p>
 
 Style Markdown in VS Code with external CSS and JavaScript, without cluttering the Markdown itself.
 
 <p align="center">
-  <img src="img/workflow.png" alt="MdStyled turns Markdown plus CSS and JS directives into a styled preview in VS Code" width="900" />
+  <img src="https://raw.githubusercontent.com/OsamaAbuSitta/MDStyled/main/code/img/workflow.png" alt="MdStyled turns Markdown plus CSS and JS directives into a styled preview in VS Code" width="900" />
 </p>
 
 MdStyled is a VS Code extension for authors who want rich, branded, interactive Markdown previews while keeping source files portable and AI-friendly. Add CSS and JS with frontmatter or invisible HTML comments, then open a live preview inside VS Code.
@@ -121,6 +121,39 @@ Enable or disable them in VS Code settings:
 }
 ```
 
+## Templates
+
+Apply any template with **MdStyled: Apply Template** and choose a theme from the list.
+
+### Default templates
+
+The **default-light** and **default-dark** templates provide a clean documentation layout:
+
+- **TOC sidebar** — all heading levels (H1–H6) with hierarchical indentation and scroll-aware active highlighting
+- **Copy buttons** — fixed-position copy button on every code block that stays in place while scrolling horizontally
+- **Syntax highlighting** — code block styling with theme-appropriate colors
+- **Mermaid diagrams** — renders ` ```mermaid ` blocks inline
+
+### Interactive templates
+
+The **interactive-light** and **interactive-dark** templates include everything in the default templates, plus client-side interactivity:
+
+#### Interactive tables
+Every Markdown table automatically gets:
+
+| Feature | How it works |
+|---|---|
+| **Full-width search** | Type to filter rows across all columns |
+| **Column search** | Type `ColumnName: term` to search a single column (autocomplete suggests column names as you type) |
+| **Sortable headers** | Click any column header to sort ascending or descending |
+| **Pagination** | Long tables show 10 rows per page with Prev / Next / page number controls |
+
+#### Collapsible sections
+Every heading (`h1`–`h6`) becomes an accordion with a toggle button. Click ▼ to collapse or expand the section content. Nested headings work independently — collapse a parent to hide all its children, or collapse a child while keeping the parent open.
+
+#### Table of contents
+The right sidebar shows all heading levels (H1–H6) with hierarchical indentation and scroll-aware active highlighting. Clicking a TOC entry immediately highlights it and scrolls to the correct heading.
+
 ## Commands
 
 | Command | Description |
@@ -142,7 +175,7 @@ You can also define shared defaults with `mdstyled.config.json`.
 
 ## Sample files
 
-The repository includes examples in [`samples/`](/Users/osama.abusitta/repositories/MDCSS/code/samples):
+The repository includes examples in [`samples/`](https://github.com/OsamaAbuSitta/MDStyled/tree/main/code/samples):
 
 - `basic.md`
 - `test-all.md`

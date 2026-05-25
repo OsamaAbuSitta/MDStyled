@@ -38,6 +38,14 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand('mdstyled.applyTemplate', async () => {
       let editor = vscode.window.activeTextEditor;
       if (!editor || editor.document.languageId !== 'markdown') {
+        // Preview panel is focused — use the file it's showing
+        const activePreviewUri = MdStyledPreviewProvider.getActiveDocumentUri();
+        if (activePreviewUri) {
+          const doc = await vscode.workspace.openTextDocument(activePreviewUri);
+          const revealedEditor = await vscode.window.showTextDocument(doc);
+          await applyTemplate(revealedEditor, context.extensionPath);
+          return;
+        }
         editor = vscode.window.visibleTextEditors.find(e => e.document.languageId === 'markdown');
       }
       if (!editor) {

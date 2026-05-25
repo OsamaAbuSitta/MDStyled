@@ -5,6 +5,7 @@ import sanitizeHtml from 'sanitize-html';
 
 export class MdStyledPreviewProvider {
   private static panels = new Map<string, MdStyledPreviewProvider>();
+  private static _activePanel: MdStyledPreviewProvider | undefined;
   public readonly panel: vscode.WebviewPanel;
   public documentUri: vscode.Uri;
   private disposables: vscode.Disposable[] = [];
@@ -40,6 +41,10 @@ export class MdStyledPreviewProvider {
     MdStyledPreviewProvider.panels.set(key, provider);
   }
 
+  public static getActiveDocumentUri(): vscode.Uri | undefined {
+    return MdStyledPreviewProvider._activePanel?.documentUri;
+  }
+
   public static getFirstDocumentUri(): vscode.Uri | undefined {
     const first = MdStyledPreviewProvider.panels.values().next().value;
     return first?.documentUri;
@@ -51,8 +56,16 @@ export class MdStyledPreviewProvider {
     this.documentUri = documentUri;
 
     this.disposables.push(
-      panel.onDidDispose(() => this.dispose())
+      panel.onDidDispose(() => this.dispose()),
+      panel.onDidChangeViewState(e => {
+        if (e.webviewPanel.active) {
+          MdStyledPreviewProvider._activePanel = this;
+        } else if (MdStyledPreviewProvider._activePanel === this) {
+          MdStyledPreviewProvider._activePanel = undefined;
+        }
+      })
     );
+    MdStyledPreviewProvider._activePanel = this;
 
     this.disposables.push(
       vscode.workspace.onDidChangeTextDocument(e => {
@@ -76,6 +89,9 @@ export class MdStyledPreviewProvider {
 
   public dispose(): void {
     MdStyledPreviewProvider.panels.delete(this.documentUri.toString());
+    if (MdStyledPreviewProvider._activePanel === this) {
+      MdStyledPreviewProvider._activePanel = undefined;
+    }
 
     if (this.debounceTimer) {
       clearTimeout(this.debounceTimer);

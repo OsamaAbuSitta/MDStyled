@@ -10,17 +10,18 @@ export interface ExtensionJsOptions {
 }
 
 const COPY_CODE_CSS = `
+.mdstyled-code-wrap { position: relative; }
 .mdstyled-copy-btn {
   position: absolute; top: 8px; right: 8px;
   width: 24px; height: 24px;
   padding: 2px; border: 1px solid transparent;
   border-radius: 4px; background: transparent;
-  cursor: pointer; opacity: 0;
+  cursor: pointer; opacity: 0; z-index: 1;
   transition: opacity 0.2s, border-color 0.2s;
   color: inherit;
 }
-pre:hover .mdstyled-copy-btn { opacity: 0.7; }
-pre:hover .mdstyled-copy-btn:hover { opacity: 1; border-color: currentColor; }
+.mdstyled-code-wrap:hover .mdstyled-copy-btn { opacity: 0.7; }
+.mdstyled-code-wrap:hover .mdstyled-copy-btn:hover { opacity: 1; border-color: currentColor; }
 .mdstyled-copy-btn.copied { opacity: 1 !important; }
 .mdstyled-copy-btn svg { width: 100%; height: 100%; display: block; }
 `;
@@ -31,7 +32,11 @@ var CLIPBOARD_ICON='<svg viewBox="0 0 24 24"><rect x="8" y="2" width="8" height=
 var CHECK_ICON='<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
 document.querySelectorAll('pre').forEach(function(pre){
   var code=pre.querySelector('code');
-  if(!code||pre.querySelector('.mdstyled-copy-btn'))return;
+  if(!code||pre.parentElement.classList.contains('mdstyled-code-wrap'))return;
+  var wrap=document.createElement('div');
+  wrap.className='mdstyled-code-wrap';
+  pre.parentNode.insertBefore(wrap,pre);
+  wrap.appendChild(pre);
   var btn=document.createElement('button');
   btn.className='mdstyled-copy-btn';
   btn.innerHTML=CLIPBOARD_ICON;
@@ -43,7 +48,7 @@ document.querySelectorAll('pre').forEach(function(pre){
       setTimeout(function(){btn.innerHTML=CLIPBOARD_ICON;btn.classList.remove('copied');},2000);
     });
   });
-  pre.appendChild(btn);
+  wrap.appendChild(btn);
 });
 })();
 `;
@@ -134,6 +139,17 @@ else loadMermaid();
 const HIGHLIGHT_CSS = `
 pre { position: relative; }
 code { font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace; }
+
+pre::-webkit-scrollbar { height: 6px; width: 6px; }
+pre::-webkit-scrollbar-track { background: transparent; }
+pre::-webkit-scrollbar-thumb {
+  background: var(--vscode-scrollbarSlider-background, rgba(128,128,128,0.35));
+  border-radius: 3px;
+}
+pre::-webkit-scrollbar-thumb:hover {
+  background: var(--vscode-scrollbarSlider-hoverBackground, rgba(128,128,128,0.6));
+}
+pre::-webkit-scrollbar-corner { background: transparent; }
 
 .hljs-keyword,
 .hljs-selector-tag,

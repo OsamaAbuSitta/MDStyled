@@ -22,6 +22,18 @@ const templates: MdStyledTemplate[] = [
     hasCSS: true,
     hasJS: true,
   },
+  {
+    name: 'interactive-light',
+    description: 'Light theme with interactive tables (sort, filter, search) and TOC sidebar',
+    hasCSS: true,
+    hasJS: true,
+  },
+  {
+    name: 'interactive-dark',
+    description: 'Dark theme with interactive tables (sort, filter, search) and TOC sidebar',
+    hasCSS: true,
+    hasJS: true,
+  },
 ];
 
 export function getTemplates(): MdStyledTemplate[] {

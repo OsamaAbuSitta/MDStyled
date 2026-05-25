@@ -230,6 +230,38 @@ img {
 }
 
 /* ═══════════════════════════════════════
+   Callout variants (.note .warning .danger .success)
+   ═══════════════════════════════════════ */
+
+.note, .warning, .danger, .success {
+  position: relative;
+  padding: 10px 16px 10px 44px;
+  margin: 12px 0 20px;
+  border-radius: 6px;
+  border-left: 4px solid;
+  font-size: 0.9rem;
+}
+
+.note p, .warning p, .danger p, .success p { margin: 3px 0; }
+
+.note::before, .warning::before, .danger::before, .success::before {
+  position: absolute; left: 14px; top: 11px;
+  font-size: 1rem; line-height: 1;
+}
+
+.note    { background: rgba(56,139,253,0.1); border-left-color: #58a6ff; color: #79c0ff; }
+.note::before { content: 'ℹ'; }
+
+.warning { background: rgba(210,153,34,0.1); border-left-color: #d29922; color: #e3b341; }
+.warning::before { content: '⚠'; }
+
+.danger  { background: rgba(248,81,73,0.1); border-left-color: #f85149; color: #ff7b72; }
+.danger::before  { content: '✕'; }
+
+.success { background: rgba(46,160,67,0.1); border-left-color: #3fb950; color: #7ee787; }
+.success::before { content: '✓'; }
+
+/* ═══════════════════════════════════════
    Doc card
    ═══════════════════════════════════════ */
 
@@ -254,6 +286,61 @@ img {
 
 .doc-card p:last-child {
   margin-bottom: 0;
+}
+
+/* ═══════════════════════════════════════
+   Cards list (.cards on a ul)
+   ═══════════════════════════════════════ */
+
+ul.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 20px;
+}
+
+ul.cards > li {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 16px 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: box-shadow 0.2s, border-color 0.2s, transform 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+ul.cards > li:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  border-color: #8b949e;
+  transform: translateY(-2px);
+}
+
+ul.cards > li > strong:first-child,
+ul.cards > li > p > strong:only-child {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #c9d1d9;
+  display: block;
+  margin-bottom: 2px;
+}
+
+ul.cards > li > p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #8b949e;
+  line-height: 1.5;
+}
+
+ul.cards > li > ul,
+ul.cards > li > ol {
+  margin: 4px 0 0;
+  padding-left: 16px;
+  font-size: 0.85rem;
+  color: #8b949e;
 }
 
 /* ═══════════════════════════════════════
@@ -404,7 +491,27 @@ img {
 
 .contains-task-list { list-style: none; padding-left: 0; }
 .task-list-item { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
-.task-list-item-checkbox { width: 16px; height: 16px; accent-color: #58a6ff; cursor: default; }
+.task-list-item-checkbox { width: 16px; height: 16px; accent-color: #58a6ff; cursor: pointer; }
+
+.task-progress {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 6px;
+}
+.task-progress-bar {
+  flex: 1; height: 6px; background: #30363d;
+  border-radius: 3px; overflow: hidden;
+}
+.task-progress-fill {
+  height: 100%; width: 0;
+  background: #58a6ff;
+  border-radius: 3px;
+  transition: width 0.3s ease, background 0.3s ease;
+}
+.task-progress-fill.done { background: #3fb950; }
+.task-progress-label {
+  font-size: 0.75rem; color: #8b949e;
+  white-space: nowrap; min-width: 60px;
+}
 
 /* ═══════════════════════════════════════
    Copy button for code blocks
@@ -481,3 +588,186 @@ pre { position: relative; }
 .mdstyled-mermaid .gantt .grid .tick text { fill: #8b949e; font-size: 10px; }
 
 .mdstyled-mermaid .gantt .task .task-progress { rx: 4; ry: 4; }
+
+/* ── Interactive Tables ── */
+
+.table-interactive-controls {
+  margin-bottom: 8px;
+  display: flex;
+}
+
+.table-search-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.table-search-input {
+  padding: 6px 12px;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.2s;
+  background: #0d1117;
+  color: #c9d1d9;
+  box-sizing: border-box;
+}
+
+.table-search-input:focus {
+  border-color: #58a6ff;
+}
+
+.table-search-autocomplete {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  z-index: 100;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+.table-search-autocomplete-item {
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: #c9d1d9;
+}
+
+.table-search-autocomplete-item:hover,
+.table-search-autocomplete-item.active {
+  background: #161b22;
+  color: #58a6ff;
+}
+
+th.sortable-header {
+  cursor: pointer;
+  position: relative;
+  padding-right: 24px !important;
+}
+
+th.sortable-header:hover {
+  background: #161b22;
+}
+
+th.sortable-header::after {
+  content: '↕';
+  position: absolute;
+  right: 8px;
+  color: #484f58;
+  font-size: 0.8em;
+}
+
+th.sortable-header.sort-asc::after {
+  content: '↑';
+  color: #58a6ff;
+}
+
+th.sortable-header.sort-desc::after {
+  content: '↓';
+  color: #58a6ff;
+}
+
+.table-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 0.85rem;
+}
+
+.table-pagination-info {
+  color: #8b949e;
+}
+
+.table-pagination-buttons {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.table-page-btn {
+  padding: 4px 10px;
+  border: 1px solid #30363d;
+  background: #0d1117;
+  color: #c9d1d9;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.table-page-btn:hover:not(:disabled) {
+  background: #161b22;
+  border-color: #8b949e;
+  color: #c9d1d9;
+}
+
+.table-page-btn.active {
+  background: #58a6ff;
+  border-color: #58a6ff;
+  color: #0d1117;
+}
+
+.table-page-btn:disabled,
+.table-page-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #161b22;
+}
+
+.table-page-ellipsis {
+  padding: 4px 6px;
+  color: #484f58;
+  font-size: 0.8rem;
+}
+
+/* ── Accordions ── */
+
+.accordion-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.accordion-toggle {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #484f58;
+  transition: background 0.15s, color 0.15s;
+}
+
+.accordion-toggle:hover {
+  background: #161b22;
+  color: #8b949e;
+}
+
+.accordion-chevron {
+  display: block;
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform 0.2s;
+  margin-top: -2px;
+}
+
+.accordion-toggle.collapsed .accordion-chevron {
+  transform: rotate(-45deg);
+}
