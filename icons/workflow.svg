@@ -1,0 +1,115 @@
+<svg viewBox="0 0 900 450" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f5f3ff;stop-opacity:1" />
+    </linearGradient>
+
+    <linearGradient id="themeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#a855f7;stop-opacity:1" />
+    </linearGradient>
+
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
+      <feOffset dx="2" dy="4" result="offsetblur" />
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.1" />
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <style>
+      .text-title { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-weight: 700; font-size: 22px; fill: #1e1b4b; }
+      .step-header { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-weight: 600; font-size: 16px; fill: #1e1b4b; }
+      .step-body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-weight: 400; font-size: 13px; fill: #475569; }
+      .code-text { font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 12px; fill: #6366f1; font-weight: 600; }
+      .connector { stroke: #e2e8f0; stroke-width: 2; fill: none; stroke-dasharray: 4 4; }
+      .icon-box { fill: #ffffff; stroke: #f1f5f9; stroke-width: 1; filter: url(#shadow); }
+      .stroke-icon { stroke: #6366f1; stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+  </defs>
+
+  <rect width="900" height="450" rx="24" fill="url(#bgGrad)" stroke="#f1f5f9" stroke-width="1"/>
+
+  <text x="450" y="50" text-anchor="middle" class="text-title">Processing Pipeline</text>
+  <rect x="420" y="62" width="60" height="4" rx="2" fill="#6366f1" opacity="0.3"/>
+
+  <!-- Step 1 -->
+  <g transform="translate(60, 120)">
+    <rect width="140" height="240" rx="16" class="icon-box" />
+    <text x="70" y="55" text-anchor="middle" class="step-header">Load Files</text>
+    <g transform="translate(45, 80)">
+      <path class="stroke-icon" d="M0 0 h35 l15 15 v45 h-50 z" />
+      <path class="stroke-icon" d="M35 0 v15 h15" />
+      <path class="stroke-icon" d="M10 25 h30 M10 35 h30 M10 45 h15" />
+    </g>
+    <text x="70" y="170" text-anchor="middle" class="step-body">Read markdown</text>
+    <text x="70" y="190" text-anchor="middle" class="step-body">and matching</text>
+    <text x="70" y="210" text-anchor="middle" class="step-body">.mdstyled configs</text>
+  </g>
+
+  <path d="M200 240 L225 240" class="connector" />
+
+  <!-- Step 2 -->
+  <g transform="translate(225, 120)">
+    <rect width="140" height="240" rx="16" class="icon-box" />
+    <text x="70" y="55" text-anchor="middle" class="step-header">Markdown</text>
+    <g transform="translate(38, 80) scale(4)">
+      <rect x="2" y="3" width="12" height="10" rx="1" fill="none" stroke="#6366f1" stroke-width="0.8"/>
+      <path d="M3.5 11V5L5.5 8L7.5 5V11" fill="none" stroke="#6366f1" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M11 11V5M11 5L9.5 6.5M11 5L12.5 6.5" fill="none" stroke="#6366f1" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <text x="70" y="170" text-anchor="middle" class="step-body">Tokens generated</text>
+    <text x="70" y="190" text-anchor="middle" class="step-body">via markdown-it</text>
+    <text x="70" y="210" text-anchor="middle" class="step-body">engine</text>
+  </g>
+
+  <path d="M365 240 L390 240" class="connector" />
+
+  <!-- Step 3 -->
+  <g transform="translate(390, 120)">
+    <rect width="140" height="240" rx="16" class="icon-box" />
+    <text x="70" y="55" text-anchor="middle" class="step-header">Directives</text>
+    <g transform="translate(25, 85)">
+      <rect x="0" y="0" width="90" height="40" rx="6" fill="#f8fafc" stroke="#f1f5f9" />
+      <text x="45" y="25" text-anchor="middle" class="code-text">&lt;!-- @ --&gt;</text>
+    </g>
+    <text x="70" y="170" text-anchor="middle" class="step-body">Scan for custom</text>
+    <text x="70" y="190" text-anchor="middle" class="step-body">@class and</text>
+    <text x="70" y="210" text-anchor="middle" class="step-body">@section tags</text>
+  </g>
+
+  <path d="M530 240 L555 240" class="connector" />
+
+  <!-- Step 4 -->
+  <g transform="translate(555, 120)">
+    <rect width="140" height="240" rx="16" class="icon-box" />
+    <text x="70" y="55" text-anchor="middle" class="step-header">Apply Rules</text>
+    <g transform="translate(45, 80)">
+      <rect class="stroke-icon" x="0" y="0" width="50" height="50" rx="10" stroke-dasharray="5 3" />
+      <path class="stroke-icon" d="M15 25 l5 5 l15 -15" />
+    </g>
+    <text x="70" y="170" text-anchor="middle" class="step-body">Inject classes,</text>
+    <text x="70" y="190" text-anchor="middle" class="step-body">wrap sections,</text>
+    <text x="70" y="210" text-anchor="middle" class="step-body">transform DOM</text>
+  </g>
+
+  <path d="M695 240 L720 240" class="connector" />
+
+  <!-- Step 5 -->
+  <g transform="translate(720, 120)">
+    <rect width="140" height="240" rx="16" class="icon-box" style="stroke: #a855f7; stroke-width: 2;"/>
+    <text x="70" y="55" text-anchor="middle" class="step-header">Final HTML</text>
+    <g transform="translate(40, 80)">
+      <rect x="0" y="0" width="60" height="50" rx="8" fill="url(#themeGrad)" />
+      <path d="M15 25 l-5 5 l5 5 M45 25 l5 5 l-5 5 M35 15 l-10 30" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round" />
+    </g>
+    <text x="70" y="170" text-anchor="middle" class="step-body">Clean semantic</text>
+    <text x="70" y="190" text-anchor="middle" class="step-body">HTML output</text>
+    <text x="70" y="210" text-anchor="middle" class="step-body">ready for preview</text>
+  </g>
+</svg>

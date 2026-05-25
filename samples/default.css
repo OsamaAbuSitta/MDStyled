@@ -1,0 +1,422 @@
+/* ── Docusaurus-style theme ── */
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 24px;
+  color: #1c1e21;
+  line-height: 1.6;
+  font-size: 15px;
+  background: #fff;
+  display: flex;
+  gap: 48px;
+}
+
+.mdcss-root {
+  flex: 1;
+  min-width: 0;
+  max-width: 780px;
+}
+
+/* ── headings ── */
+
+h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0 0 6px;
+  color: #1c1e21;
+}
+
+h2 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 32px 0 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #e3e8ee;
+  color: #1c1e21;
+}
+
+h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 24px 0 6px;
+  color: #1c1e21;
+}
+
+h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 20px 0 6px;
+  color: #444950;
+}
+
+/* ── links ── */
+
+a {
+  color: #3578e5;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* ── paragraphs ── */
+
+p {
+  margin: 0 0 12px;
+}
+
+/* ── inline code ── */
+
+code {
+  background: #f6f8fa;
+  border: 1px solid #e3e8ee;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.85em;
+  font-family: "SF Mono", "Fira Code", "Fira Mono", Menlo, Consolas, monospace;
+  color: #d63384;
+}
+
+/* ── code blocks ── */
+
+pre {
+  background: #1e1e2e;
+  border-radius: 8px;
+  padding: 16px 20px;
+  overflow-x: auto;
+  margin: 12px 0 20px;
+}
+
+pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.85rem;
+  color: #cdd6f4;
+  line-height: 1.5;
+}
+
+/* ── blockquotes ── */
+
+blockquote {
+  margin: 12px 0 20px;
+  padding: 4px 16px;
+  border-left: 4px solid #3578e5;
+  background: #f0f6ff;
+  border-radius: 0 6px 6px 0;
+  color: #444950;
+}
+
+blockquote p {
+  margin: 6px 0;
+}
+
+/* ── tables ── */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0 20px;
+  font-size: 0.9rem;
+}
+
+th {
+  background: #f6f8fa;
+  border: 1px solid #e3e8ee;
+  padding: 8px 12px;
+  font-weight: 600;
+  text-align: left;
+  color: #1c1e21;
+}
+
+td {
+  border: 1px solid #e3e8ee;
+  padding: 8px 12px;
+  color: #444950;
+}
+
+tr:nth-child(even) td {
+  background: #fafbfc;
+}
+
+/* ── horizontal rule ── */
+
+hr {
+  border: none;
+  border-top: 1px solid #e3e8ee;
+  margin: 24px 0;
+}
+
+/* ── lists ── */
+
+ul, ol {
+  margin: 0 0 12px;
+  padding-left: 24px;
+}
+
+li {
+  margin: 3px 0;
+}
+
+/* ── images ── */
+
+img {
+  max-width: 100%;
+  border-radius: 8px;
+  margin: 12px 0;
+}
+
+/* ═══════════════════════════════════════
+   Docusaurus-style admonitions
+   ═══════════════════════════════════════ */
+
+.admonition {
+  padding: 10px 16px;
+  margin: 12px 0 20px;
+  border-radius: 6px;
+  border-left: 4px solid;
+  font-size: 0.9rem;
+}
+
+.admonition p {
+  margin: 3px 0;
+}
+
+.admonition-note {
+  background: #f0f6ff;
+  border-left-color: #3578e5;
+  color: #1c4e9c;
+}
+
+.admonition-tip {
+  background: #f0faf0;
+  border-left-color: #2e8555;
+  color: #1a5632;
+}
+
+.admonition-warning {
+  background: #fff8f0;
+  border-left-color: #e8a838;
+  color: #8a6d1b;
+}
+
+.admonition-danger {
+  background: #fff0f0;
+  border-left-color: #e13238;
+  color: #8a1a1a;
+}
+
+.admonition-title {
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  margin-bottom: 3px;
+}
+
+/* ═══════════════════════════════════════
+   Doc card
+   ═══════════════════════════════════════ */
+
+.doc-card {
+  background: #fff;
+  border: 1px solid #e3e8ee;
+  border-radius: 10px;
+  padding: 20px;
+  margin: 12px 0 20px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.doc-card:hover {
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.07);
+  border-color: #c4cad4;
+}
+
+.doc-card h3 {
+  margin-top: 0;
+}
+
+.doc-card p:last-child {
+  margin-bottom: 0;
+}
+
+/* ═══════════════════════════════════════
+   Hero / page header
+   ═══════════════════════════════════════ */
+
+.doc-hero {
+  text-align: center;
+  padding: 32px 0 24px;
+  margin-bottom: 24px;
+}
+
+.doc-hero h1 {
+  font-size: 2.5rem;
+  margin-bottom: 8px;
+}
+
+.doc-hero p {
+  font-size: 1.1rem;
+  color: #606770;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+/* ═══════════════════════════════════════
+   Step / procedure list
+   ═══════════════════════════════════════ */
+
+.steps-list {
+  counter-reset: step-counter;
+}
+
+.step {
+  counter-increment: step-counter;
+  position: relative;
+  padding-left: 44px;
+  margin: 12px 0 20px;
+  min-height: 36px;
+}
+
+.step::before {
+  content: counter(step-counter);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 28px;
+  height: 28px;
+  background: #3578e5;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ═══════════════════════════════════════
+   API endpoint
+   ═══════════════════════════════════════ */
+
+.endpoint {
+  font-family: "SF Mono", "Fira Code", monospace;
+  background: #f6f8fa;
+  border: 1px solid #e3e8ee;
+  border-radius: 6px;
+  padding: 6px 12px;
+  display: inline-block;
+  margin: 3px 0 6px;
+  font-size: 0.85rem;
+  color: #d63384;
+}
+
+/* ═══════════════════════════════════════
+   Table of contents (right sidebar)
+   ═══════════════════════════════════════ */
+
+.mdcss-toc {
+  width: 200px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 32px;
+  align-self: flex-start;
+  max-height: calc(100vh - 64px);
+  overflow-y: auto;
+  padding: 0 0 24px;
+}
+
+.mdcss-toc-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #606770;
+  margin-bottom: 12px;
+}
+
+.mdcss-toc-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.mdcss-toc-item {
+  margin: 0;
+  padding: 2px 0;
+  border-left: 2px solid transparent;
+  transition: border-color 0.15s;
+}
+
+.mdcss-toc-item.active {
+  border-left-color: #3578e5;
+}
+
+.mdcss-toc-item a {
+  display: block;
+  color: #606770;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  padding: 2px 8px;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.mdcss-toc-item a:hover {
+  color: #3578e5;
+}
+
+.mdcss-toc-item.active a {
+  color: #1c1e21;
+  font-weight: 500;
+}
+
+.mdcss-toc-level-2 {
+  padding-left: 0;
+}
+
+.mdcss-toc-level-3 {
+  padding-left: 12px;
+}
+
+/* ═══════════════════════════════════════
+   Task list / checkboxes
+   ═══════════════════════════════════════ */
+
+.contains-task-list { list-style: none; padding-left: 0; }
+.task-list-item { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
+.task-list-item-checkbox { width: 16px; height: 16px; accent-color: #3578e5; cursor: default; }
+
+/* ═══════════════════════════════════════
+   Copy button for code blocks
+   ═══════════════════════════════════════ */
+
+pre { position: relative; }
+
+.mdcss-copy-btn {
+  position: absolute; top: 8px; right: 8px; z-index: 10;
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+  color: #8b949e; padding: 6px; border-radius: 4px;
+  cursor: pointer; opacity: 0; line-height: 0;
+  transition: opacity 0.2s, background 0.2s, border-color 0.2s;
+}
+.mdcss-copy-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; display: block; }
+pre:hover .mdcss-copy-btn { opacity: 1; }
+.mdcss-copy-btn:hover { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.3); color: #e6edf3; }
+.mdcss-copy-btn.copied { background: #1b4527; border-color: #2ea043; color: #7ee787; }
+
+/* ═══════════════════════════════════════
+   Mermaid diagrams
+   ═══════════════════════════════════════ */
+
+.mdcss-mermaid {
+  background: #f8f9fa; border-radius: 8px; padding: 16px;
+  margin: 12px 0 20px; text-align: center; min-height: 80px;
+  display: flex; align-items: center; justify-content: center;
+}
+.mdcss-mermaid svg { max-width: 100%; }

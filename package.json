@@ -1,0 +1,113 @@
+{
+  "name": "mdstyled",
+  "displayName": "MdStyled",
+  "description": "Style Markdown previews with external CSS/JS and comment selectors",
+  "version": "0.1.0",
+  "publisher": "Osama Abu-Sitta",
+  "author": "Osama Abu-Sitta",
+  "license": "MIT",
+  "icon": "icons/icon.png",
+  "categories": [
+    "Other",
+    "Visualization",
+    "Formatters"
+  ],
+  "keywords": [
+    "markdown",
+    "css",
+    "style",
+    "preview",
+    "mermaid"
+  ],
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "activationEvents": [
+    "onLanguage:markdown",
+    "*"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "configuration": {
+      "title": "MdStyled",
+      "properties": {
+        "mdstyled.extensions.enabled": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "mermaid",
+              "copy-code",
+              "highlight"
+            ]
+          },
+          "default": [
+            "mermaid",
+            "copy-code",
+            "highlight"
+          ],
+          "markdownDescription": "Built-in extensions to enable. Extensions add diagram rendering, copy buttons, and code styling."
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "mdstyled.openPreview",
+        "title": "MdStyled: Open Preview",
+        "icon": {
+          "light": "icons/mdstyled-dark.svg",
+          "dark": "icons/mdstyled-light.svg"
+        }
+      },
+      {
+        "command": "mdstyled.openPreviewToSide",
+        "title": "MdStyled: Open Preview to Side"
+      },
+      {
+        "command": "mdstyled.applyTemplate",
+        "title": "MdStyled: Apply Template"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "mdstyled.openPreview",
+          "when": "resourceLangId == markdown",
+          "group": "navigation"
+        }
+      ],
+      "editor/title/context": [
+        {
+          "when": "resourceLangId == markdown",
+          "command": "mdstyled.openPreview"
+        },
+        {
+          "when": "resourceLangId == markdown",
+          "command": "mdstyled.applyTemplate"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "test": "node ./out/test/runTest.js",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/markdown-it": "^14.1.2",
+    "@types/node": "^20.0.0",
+    "@types/sanitize-html": "^2.16.1",
+    "@types/vscode": "^1.85.0",
+    "@vscode/test-electron": "^2.4.0",
+    "typescript": "^5.4.0"
+  },
+  "dependencies": {
+    "gray-matter": "^4.0.3",
+    "markdown-it": "^14.1.0",
+    "markdown-it-task-lists": "^2.1.1",
+    "mermaid": "^11.15.0",
+    "sanitize-html": "^2.12.0"
+  }
+}
