@@ -1,5 +1,9 @@
 # MdStyled
 
+<p align="center">
+  <img src="img/Screenshot.png" alt="MdStyled Preview Screenshot" width="900" />
+</p>
+
 Style Markdown in VS Code with external CSS and JavaScript, without cluttering the Markdown itself.
 
 <p align="center">
@@ -142,8 +146,7 @@ The repository includes examples in [`samples/`](/Users/osama.abusitta/repositor
 
 - `basic.md`
 - `test-all.md`
-- `docusaurus.md`
-- `rcm-deployment.md`
+- `default.md`
 - `test-diagram.md`
 
 ## Development
