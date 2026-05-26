@@ -171,6 +171,11 @@
 
     var tables = root.querySelectorAll('table');
     tables.forEach(function (table) {
+      var wrapper = document.createElement('div');
+      wrapper.className = 'table-wrapper';
+      table.parentNode.insertBefore(wrapper, table);
+      wrapper.appendChild(table);
+
       var rowsPerPage = 10;
 
       var tbody = table.querySelector('tbody') || table;
@@ -205,14 +210,14 @@
       searchWrapper.appendChild(searchInput);
       searchWrapper.appendChild(autocompleteList);
       searchContainer.appendChild(searchWrapper);
-      table.parentNode.insertBefore(searchContainer, table);
+      wrapper.parentNode.insertBefore(searchContainer, wrapper);
 
       var filteredRows = dataRows.slice();
       var currentPage = 1;
 
       var paginationContainer = document.createElement('div');
       paginationContainer.className = 'table-pagination';
-      table.parentNode.insertBefore(paginationContainer, table.nextSibling);
+      wrapper.parentNode.insertBefore(paginationContainer, wrapper.nextSibling);
 
       var activeIndex = -1;
 

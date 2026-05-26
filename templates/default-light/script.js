@@ -1,6 +1,19 @@
 (function () {
   'use strict';
 
+  /* ── Responsive tables ── */
+
+  function wrapTables() {
+    var root = document.querySelector('.mdstyled-root');
+    if (!root) return;
+    root.querySelectorAll('table').forEach(function (table) {
+      var wrapper = document.createElement('div');
+      wrapper.className = 'table-wrapper';
+      table.parentNode.insertBefore(wrapper, table);
+      wrapper.appendChild(table);
+    });
+  }
+
   /* ── Table of contents ── */
 
   function buildTOC() {
@@ -81,6 +94,7 @@
   /* ── Init ── */
 
   function init() {
+    wrapTables();
     buildTOC();
   }
 
