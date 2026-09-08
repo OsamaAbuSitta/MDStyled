@@ -61,6 +61,11 @@
           "markdownDescription": "Template used in the preview when a Markdown file declares no `@style` / `@script` of its own. Applied straight from the extension - nothing is written to the Markdown file or the workspace. Leave empty to be asked once on the first preview.",
           "scope": "window"
         },
+        "mdstyled.editing.enabled": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Let templates edit the Markdown file from inside the preview. Turn this off to make previews read-only - the editing templates keep their styling but their editor is not offered."
+        },
         "mdstyled.extensions.enabled": {
           "type": "array",
           "items": {
@@ -126,7 +131,8 @@
     "vscode:prepublish": "node esbuild.js --production",
     "compile": "node esbuild.js",
     "watch": "node esbuild.js --watch",
-    "test": "node ./out/test/runTest.js",
+    "test": "node ./test/run.js",
+    "build:templates": "node ./scripts/build-editable-templates.js",
     "lint": "eslint src --ext ts"
   },
   "devDependencies": {
@@ -134,6 +140,7 @@
     "@types/node": "^20.19.41",
     "@types/sanitize-html": "^2.16.1",
     "@types/vscode": "^1.85.0",
+    "jsdom": "^29.1.1",
     "@vscode/test-electron": "^2.4.0",
     "esbuild": "^0.28.0",
     "typescript": "^5.4.0"

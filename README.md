@@ -160,7 +160,6 @@ The **editable-light** and **editable-dark** templates are the interactive templ
 | Button | What it does |
 |---|---|
 | **Edit** | Turns on edit mode - hover highlights every block, click one to edit it |
-| **Add block** | Appends a new block at the end of the document |
 | **Source** | Opens the whole Markdown file in one editor |
 
 #### Editing a block
@@ -176,15 +175,21 @@ Inside a list, `Tab` and `Shift`+`Tab` indent and outdent items.
 
 Tables and dividers open directly as Markdown, where they are easier to edit precisely - a table keeps its column alignment through an edit.
 
+A block also opens as Markdown when its source is written in a style the rich editor cannot reproduce exactly - a hard-wrapped paragraph, a setext heading, `_italic_`, `*` bullets. Editing it richly would silently restyle the source, so the editor keeps it as text and says so.
+
 #### Adding blocks
 
-In edit mode a **+** appears at the corner of the block you are hovering. It opens a menu of block types - Heading 1-3, Text, Bullet list, Numbered list, Checklist, Quote, Code block, Table, Divider - and inserts the chosen one right after that block, with blank lines around it so it never merges with its neighbours. The new block opens ready to edit.
+In edit mode every gap between two blocks becomes an insert line - hover it and a **+** appears on the line itself. It opens a menu of block types (Heading 1-3, Text, Bullet list, Numbered list, Checklist, Quote, Code block, Table, Divider) and puts the new block exactly at that point, with blank lines around it so it never merges with its neighbours. The new block opens ready to edit.
 
-**Add block** in the toolbar does the same at the end of the document.
+There is an insert line above the first block and below the last one, so a block can go anywhere including the very top or bottom of the file.
+
+#### Checklists
+
+Ticking a checkbox in the preview rewrites that one `- [ ]` to `- [x]` in the file - no edit mode needed, and nothing else about the list's source changes.
 
 #### How it behaves
 
-Saving writes the block's lines back to the `.md` file and saves it, then the preview re-renders from the file and restores your scroll position and edit mode. The template's own controls - accordion toggles, copy buttons, table search and pagination - keep working while edit mode is on. If the file changed on disk after the preview was rendered, the save is refused rather than overwriting the newer text.
+Saving writes the block's lines back to the `.md` file and saves it, then the preview re-renders from the file and restores your scroll position and edit mode. While an editor is open the preview will not re-render over it, even if the file changes elsewhere - it catches up once you save or cancel. The template's own controls - accordion toggles, copy buttons, table search and pagination - keep working while edit mode is on. If the file changed on disk after the preview was rendered, the save is refused rather than overwriting the newer text.
 
 ### Interactive templates
 
@@ -243,6 +248,9 @@ if (api.available) {
 | `getDocument()` | The whole file |
 | `render(markdown)` | Renders a snippet to HTML with the preview's pipeline |
 | `saveBlock(start, end, text, original)` | Replaces lines `[start, end)`; a zero-length range inserts, an empty `text` deletes. `original` is what you loaded - the save is refused if the file no longer matches |
+| `setEditorOpen(bool)` | Tells the preview not to re-render over an open editor |
+
+Writing is gated by `mdstyled.editing.enabled` (default `true`). Turn it off and the preview becomes read-only - `available` reports `false` and saves are refused - which is worth knowing if you run template JS you did not write.
 
 Every top-level block in the preview carries `data-mdstyled-line="start,end"` pointing at the lines it was rendered from, and links and images carry `data-mdstyled-uri` with their authored path. `window.mdstyled.getState()` / `setState()` persist small values (scroll position, UI state) across the re-render that follows a save.
 
@@ -270,9 +278,13 @@ The repository includes examples in [`samples/`](https://github.com/OsamaAbuSitt
 
 ```bash
 npm install
-npm run compile   # one-shot build
-npm run watch     # rebuild on change
+npm run compile          # one-shot build
+npm run watch            # rebuild on change
+npm test                 # serializer, write-back and editor UI suites
+npm run build:templates  # regenerate templates/editable-* 
 ```
+
+The `editable-*` templates are **generated** from `interactive-*` plus the shared editor in `scripts/editable-template/`. Edit those sources and run `npm run build:templates`; do not hand-edit `templates/editable-*`.
 
 Press `F5` in VS Code to launch the Extension Development Host. `.vscode/launch.json` provides:
 

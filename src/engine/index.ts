@@ -69,7 +69,7 @@ export function sanitizeHtml(dirty: string): string {
   });
 }
 
-export async function renderMdStyled(markdownFilePath: string, enabledExtensions?: string[], mermaidSrc?: string, fallback?: TemplateFallback): Promise<string> {
+export async function renderMdStyled(markdownFilePath: string, enabledExtensions?: string[], mermaidSrc?: string, fallback?: TemplateFallback, editable = true): Promise<string> {
   try {
     const markdownRaw = await fs.promises.readFile(markdownFilePath, 'utf-8');
     const parsed = matter(markdownRaw);
@@ -101,7 +101,7 @@ export async function renderMdStyled(markdownFilePath: string, enabledExtensions
     const extensionsJs = getExtensionJs(ext, { mermaidSrc });
 
     const showApplyTemplate = styleFiles.length === 0 && scriptFiles.length === 0;
-    return buildPreviewHtml({ html, css, scripts, mode: config.mode, extensionsCss, extensionsJs, showApplyTemplate, sourceLines });
+    return buildPreviewHtml({ html, css, scripts, mode: config.mode, extensionsCss, extensionsJs, showApplyTemplate, sourceLines: editable ? sourceLines : null });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     return buildPreviewHtml({

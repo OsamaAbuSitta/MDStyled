@@ -147,3 +147,6 @@ samples/.mdstyled/
 docs/.docusaurus/
 docs/build/
 docs/node_modules/
+
+# test scratch build
+test/helpers/.engine.build.js

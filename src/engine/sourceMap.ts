@@ -45,7 +45,11 @@ export function annotateSourceLines(tokens: any[], lineOffset = 0, sourceLines?:
     if (!token || token.level !== 0 || !Array.isArray(token.map)) continue;
     if (!ANNOTATABLE.has(token.type)) continue;
 
-    const start = token.map[0] + lineOffset;
+    // A `<!-- .class -->` comment in front of the block belongs to it.
+    const selectorLine = typeof token.mdstyledSelectorLine === 'number'
+      ? token.mdstyledSelectorLine + lineOffset
+      : null;
+    const start = selectorLine !== null ? Math.min(token.map[0] + lineOffset, selectorLine) : token.map[0] + lineOffset;
     let end = token.map[1] + lineOffset;
     if (sourceLines) {
       while (end > start + 1 && (sourceLines[end - 1] || '').trim() === '') end--;

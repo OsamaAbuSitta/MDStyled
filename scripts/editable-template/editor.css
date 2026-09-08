@@ -1,0 +1,565 @@
+
+/* ═══════════════════════════════════════
+   In-preview editing
+   ═══════════════════════════════════════ */
+
+.mdstyled-edit-bar [hidden],
+.mdstyled-block-editor [hidden],
+.mdstyled-insert-menu[hidden],
+.mdstyled-insert-line[hidden] {
+  display: none !important;
+}
+
+.mdstyled-edit-bar {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 40;
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 10px;
+  background: @@SURFACE@@;
+  border: 1px solid @@BORDER@@;
+  box-shadow: @@SHADOW@@;
+}
+
+.mdstyled-edit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+  color: @@BTN_FG@@;
+  background: @@BTN_BG@@;
+  border: 1px solid @@BORDER@@;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.mdstyled-edit-btn:hover:not(:disabled) {
+  background: @@BTN_HOVER_BG@@;
+  border-color: @@ACCENT@@;
+  color: @@ACCENT@@;
+}
+
+.mdstyled-edit-btn:focus-visible {
+  outline: 2px solid @@ACCENT@@;
+  outline-offset: 2px;
+}
+
+.mdstyled-edit-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.mdstyled-edit-btn.primary,
+.mdstyled-edit-btn.active {
+  color: @@ON_ACCENT@@;
+  background: @@ACCENT@@;
+  border-color: @@ACCENT@@;
+}
+
+.mdstyled-edit-btn.primary:hover:not(:disabled),
+.mdstyled-edit-btn.active:hover:not(:disabled) {
+  color: @@ON_ACCENT@@;
+  background: @@ACCENT_HOVER@@;
+  border-color: @@ACCENT_HOVER@@;
+}
+
+.mdstyled-edit-btn.danger {
+  color: @@DANGER@@;
+}
+
+.mdstyled-edit-btn.danger:hover:not(:disabled) {
+  color: @@ON_ACCENT@@;
+  background: @@DANGER@@;
+  border-color: @@DANGER@@;
+}
+
+.mdstyled-edit-icon {
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+/* ── Edit mode ── */
+
+body.mdstyled-edit-mode .mdstyled-editable {
+  cursor: text;
+  border-radius: 4px;
+  box-shadow: 0 0 0 1px @@OUTLINE_IDLE@@;
+  transition: box-shadow 0.15s ease, background 0.15s ease;
+}
+
+body.mdstyled-edit-mode .mdstyled-editable:hover {
+  background: @@EDIT_HOVER_BG@@;
+  box-shadow: 0 0 0 2px @@ACCENT@@;
+}
+
+.mdstyled-editable-hidden {
+  display: none !important;
+}
+
+/* ── Add block ── */
+
+.mdstyled-insert-line {
+  display: none;
+  position: relative;
+  height: 18px;
+  margin: -9px 0;
+  z-index: 5;
+}
+
+body.mdstyled-edit-mode .mdstyled-insert-line {
+  display: block;
+}
+
+.mdstyled-insert-line::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  border-radius: 2px;
+  background: @@ACCENT@@;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.mdstyled-insert-line:hover::before,
+.mdstyled-insert-line:focus-within::before {
+  opacity: 0.45;
+}
+
+.mdstyled-insert-plus {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 22px;
+  height: 22px;
+  min-width: 0;
+  padding: 0;
+  justify-content: center;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.mdstyled-insert-line:hover .mdstyled-insert-plus,
+.mdstyled-insert-plus:focus-visible {
+  opacity: 1;
+}
+
+.mdstyled-prefers-markdown .mdstyled-mode-toggle {
+  border-color: @@MUTED@@;
+}
+
+.mdstyled-insert-menu {
+  position: absolute;
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 180px;
+  padding: 6px;
+  border-radius: 10px;
+  background: @@SURFACE@@;
+  border: 1px solid @@BORDER@@;
+  box-shadow: @@SHADOW@@;
+}
+
+.mdstyled-insert-menu {
+  max-height: min(60vh, 420px);
+  overflow-y: auto;
+}
+
+.mdstyled-insert-title {
+  padding: 6px 8px 2px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: @@MUTED@@;
+}
+
+.mdstyled-insert-item {
+  justify-content: flex-start;
+  width: 100%;
+  height: 30px;
+  padding: 0 8px;
+  font-weight: 500;
+}
+
+.mdstyled-insert-item .mdstyled-tool-text {
+  font-weight: 500;
+}
+
+/* ── Block editor ── */
+
+.mdstyled-block-editor {
+  margin: 12px 0;
+  padding: 10px;
+  border-radius: 8px;
+  background: @@EDITOR_BG@@;
+  border: 1px solid @@ACCENT@@;
+}
+
+.mdstyled-editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 4px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  background: @@TOOLBAR_BG@@;
+  border: 1px solid @@BORDER@@;
+}
+
+.mdstyled-tool-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.mdstyled-toolbar-sep {
+  width: 1px;
+  align-self: stretch;
+  margin: 2px 4px;
+  background: @@BORDER@@;
+}
+
+.mdstyled-toolbar-spacer {
+  flex: 1;
+  min-width: 4px;
+}
+
+.mdstyled-tool {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 6px;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: @@BTN_FG@@;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+
+.mdstyled-tool:hover:not(:disabled) {
+  color: @@ACCENT@@;
+  background: @@BTN_HOVER_BG@@;
+}
+
+.mdstyled-tool:focus-visible {
+  outline: 2px solid @@ACCENT@@;
+  outline-offset: 1px;
+}
+
+.mdstyled-tool:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.mdstyled-tool.active {
+  color: @@ON_ACCENT@@;
+  background: @@ACCENT@@;
+}
+
+.mdstyled-tool.active:hover {
+  color: @@ON_ACCENT@@;
+  background: @@ACCENT_HOVER@@;
+}
+
+.mdstyled-icon {
+  display: block;
+  flex: none;
+}
+
+.mdstyled-tool-glyph {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.mdstyled-tool-text {
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.mdstyled-mode-toggle {
+  border-color: @@BORDER@@;
+  background: @@BTN_BG@@;
+}
+
+/* ── Colour picker ── */
+
+.mdstyled-color-popover {
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 8px;
+  background: @@SURFACE@@;
+  border: 1px solid @@BORDER@@;
+  box-shadow: @@SHADOW@@;
+}
+
+.mdstyled-color-title {
+  margin-bottom: 6px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: @@MUTED@@;
+}
+
+.mdstyled-color-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.mdstyled-swatch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  font-weight: 800;
+  border: 1px solid @@BORDER@@;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform 0.12s ease, border-color 0.12s ease;
+}
+
+.mdstyled-swatch:hover,
+.mdstyled-swatch:focus-visible {
+  transform: translateY(-1px);
+  border-color: @@ACCENT@@;
+  outline: none;
+}
+
+.mdstyled-swatch-letter {
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.mdstyled-color-clear {
+  width: 100%;
+  justify-content: center;
+}
+
+/* ── Rich surface ── */
+
+.mdstyled-rich {
+  padding: 12px 14px;
+  background: @@INPUT_BG@@;
+  border: 1px solid @@BORDER@@;
+  border-radius: 6px;
+}
+
+.mdstyled-rich:focus {
+  outline: none;
+  border-color: @@ACCENT@@;
+  box-shadow: 0 0 0 2px @@FOCUS_RING@@;
+}
+
+.mdstyled-rich > :first-child { margin-top: 0; }
+.mdstyled-rich > :last-child { margin-bottom: 0; }
+
+.mdstyled-rich h1,
+.mdstyled-rich h2,
+.mdstyled-rich h3,
+.mdstyled-rich h4,
+.mdstyled-rich h5,
+.mdstyled-rich h6 {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+/* ── Markdown surface ── */
+
+.mdstyled-edit-textarea {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 72px;
+  padding: 10px 12px;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  tab-size: 2;
+  color: @@TEXT@@;
+  background: @@INPUT_BG@@;
+  border: 1px solid @@BORDER@@;
+  border-radius: 6px;
+  resize: vertical;
+}
+
+.mdstyled-edit-textarea:focus {
+  outline: none;
+  border-color: @@ACCENT@@;
+  box-shadow: 0 0 0 2px @@FOCUS_RING@@;
+}
+
+/* ── Link row ── */
+
+.mdstyled-link-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.mdstyled-link-input {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 10px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  color: @@TEXT@@;
+  background: @@INPUT_BG@@;
+  border: 1px solid @@BORDER@@;
+  border-radius: 6px;
+}
+
+.mdstyled-link-input:focus {
+  outline: none;
+  border-color: @@ACCENT@@;
+  box-shadow: 0 0 0 2px @@FOCUS_RING@@;
+}
+
+/* ── Actions ── */
+
+.mdstyled-edit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.mdstyled-edit-status {
+  font-size: 0.75rem;
+  color: @@MUTED@@;
+}
+
+.mdstyled-edit-status.error {
+  color: @@DANGER@@;
+  font-weight: 600;
+}
+
+.mdstyled-edit-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 84px;
+  z-index: 80;
+  transform: translateX(-50%);
+  max-width: 480px;
+  padding: 10px 16px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: @@ON_ACCENT@@;
+  background: @@DANGER@@;
+  border-radius: 8px;
+  box-shadow: @@SHADOW@@;
+}
+
+/* ── Whole-file editor ── */
+
+.mdstyled-source-editor {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 24px;
+  background: @@SURFACE@@;
+}
+
+body.mdstyled-source-open .mdstyled-edit-bar,
+body.mdstyled-source-open .mdstyled-insert-line {
+  display: none;
+}
+
+.mdstyled-source-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: @@MUTED@@;
+}
+
+.mdstyled-source-textarea {
+  flex: 1;
+  min-height: 0;
+  resize: none;
+}
+
+/* ── Card component ── */
+
+.card {
+  margin: 16px 0;
+  padding: 16px 18px;
+  border: 1px solid @@BORDER@@;
+  border-left: 1px solid @@BORDER@@;
+  border-radius: 10px;
+  background: @@CARD_BG@@;
+  box-shadow: @@CARD_SHADOW@@;
+}
+
+.card > :first-child { margin-top: 0; }
+.card > :last-child { margin-bottom: 0; }
+
+.card h1, .card h2, .card h3, .card h4 {
+  margin-top: 0;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+/* Two half cards in a row read as a card grid, with no wrapper element. */
+.card.half {
+  display: inline-block;
+  width: calc(50% - 6px);
+  vertical-align: top;
+}
+
+.card.half + .card.half {
+  margin-left: 8px;
+}
+
+@media (max-width: 700px) {
+  .card.half {
+    display: block;
+    width: 100%;
+  }
+  .card.half + .card.half {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 800px) {
+  .mdstyled-edit-bar {
+    right: 12px;
+    bottom: 12px;
+    flex-wrap: wrap;
+    max-width: calc(100vw - 24px);
+  }
+}

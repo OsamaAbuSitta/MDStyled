@@ -26,6 +26,11 @@ async function writeSetting(value: string): Promise<void> {
   await vscode.workspace.getConfiguration(SETTING_SECTION).update(SETTING_KEY, value, vscode.ConfigurationTarget.Global);
 }
 
+/** True once a global default template has been chosen, whatever it is. */
+export function hasDefaultTemplate(): boolean {
+  return readSetting() !== '';
+}
+
 /** Called when the setting changes so a cancelled prompt can be offered again. */
 export function resetPromptState(): void {
   declinedThisSession = false;

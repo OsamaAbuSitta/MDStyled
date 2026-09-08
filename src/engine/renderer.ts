@@ -67,6 +67,10 @@ const MDSTYLED_RUNTIME = `
           original: (typeof original === 'string') ? original : undefined
         });
       },
+      /* Lets the extension know not to re-render over an editor that is open. */
+      setEditorOpen: function(isOpen) {
+        try { if (vscodeApi) vscodeApi.postMessage({ type: 'mdstyled.editorState', open: !!isOpen }); } catch (e) {}
+      },
       /* Renders a Markdown snippet with the preview's own pipeline. */
       render: function(markdown) {
         return request({ type: 'mdstyled.render', markdown: markdown }).then(function (res) {

@@ -536,6 +536,18 @@
      when you paste or format inside a contenteditable. */
   var KEEP_HTML = /^(KBD|SUP|SUB|MARK|ABBR|SMALL|U|VAR|SAMP|Q|CITE|TIME|INS|DFN|BDI|BDO|RUBY|RT|RP)$/;
 
+  /* A <span> is only worth keeping for the colour it carries - everything else in a
+     pasted style attribute is browser noise. */
+  function spanColors(el) {
+    var style = el.getAttribute('style') || '';
+    var keep = [];
+    var color = style.match(/(^|;)\s*color\s*:\s*([^;]+)/i);
+    var background = style.match(/(^|;)\s*background(-color)?\s*:\s*([^;]+)/i);
+    if (color) keep.push('color: ' + color[2].trim());
+    if (background) keep.push('background-color: ' + background[3].trim());
+    return keep.join('; ');
+  }
+
   function originalUri(el) {
     return el.getAttribute('data-mdstyled-uri') || el.getAttribute('href') || el.getAttribute('src') || '';
   }
@@ -593,6 +605,10 @@
         out += '![' + (child.getAttribute('alt') || '') + '](' + originalUri(child) + linkTitle(child) + ')';
       } else if (KEEP_HTML.test(tag)) {
         out += child.outerHTML;
+      } else if (tag === 'SPAN' || tag === 'FONT') {
+        var colors = spanColors(child);
+        var inner = serializeInline(child);
+        out += colors ? '<span style="' + colors + '">' + inner + '</span>' : inner;
       } else {
         out += serializeInline(child);
       }
@@ -726,6 +742,25 @@
     return true;
   }
 
+  /* Runtime classes the template adds are not part of the document. */
+  var RUNTIME_CLASS = /^(mdstyled-|accordion-|table-|task-|contains-task-list|hljs)/;
+
+  function selectorComment(el) {
+    var parts = [];
+
+    var id = el.getAttribute('id');
+    /* Headings get an id generated for the table of contents; that is not authored. */
+    if (id && !el.hasAttribute('data-mdstyled-generated-id') && !/^H[1-6]$/.test(el.tagName)) {
+      parts.push('#' + id);
+    }
+
+    (el.getAttribute('class') || '').split(/\s+/).forEach(function (name) {
+      if (name && !RUNTIME_CLASS.test(name)) parts.push('.' + name);
+    });
+
+    return parts.length ? '<!-- ' + parts.join(' ') + ' -->\n' : '';
+  }
+
   function serializeChildren(container, depth) {
     var blocks = [];
     var loose = [];
@@ -746,7 +781,7 @@
       if (BLOCK_TAGS.test(child.tagName)) {
         flushLoose();
         var block = serializeBlock(child, depth || 0);
-        if (block.trim()) blocks.push(block);
+        if (block.trim()) blocks.push(selectorComment(child) + block);
       } else {
         loose.push(serializeInline({ childNodes: [child] }));
       }
@@ -815,41 +850,162 @@
 
   var SCROLL_SAVE_MS = 250;
 
-  var BLOCK_TYPES = [
-    { value: 'p', label: 'Text' },
-    { value: 'h1', label: 'Heading 1' },
-    { value: 'h2', label: 'Heading 2' },
-    { value: 'h3', label: 'Heading 3' },
-    { value: 'h4', label: 'Heading 4' },
-    { value: 'ul', label: 'Bullet list' },
-    { value: 'ol', label: 'Numbered list' },
-    { value: 'task', label: 'Checklist' },
-    { value: 'quote', label: 'Quote' },
-    { value: 'code', label: 'Code block' }
+  var BLOCK_TOOLS = [
+    { type: 'p', icon: 'text', label: 'Text' },
+    { type: 'h1', glyph: 'H1', label: 'Heading 1' },
+    { type: 'h2', glyph: 'H2', label: 'Heading 2' },
+    { type: 'h3', glyph: 'H3', label: 'Heading 3' },
+    { type: 'ul', icon: 'bullet', label: 'Bullet list' },
+    { type: 'ol', icon: 'numbered', label: 'Numbered list' },
+    { type: 'task', icon: 'checklist', label: 'Checklist' },
+    { type: 'quote', icon: 'quote', label: 'Quote' },
+    { type: 'code', icon: 'code', label: 'Code block' }
   ];
 
-  /* Starting content for a block added from the + menu. */
-  var INSERTABLE = [
-    { label: 'Heading 1', markdown: '# Heading' },
-    { label: 'Heading 2', markdown: '## Heading' },
-    { label: 'Heading 3', markdown: '### Heading' },
-    { label: 'Text', markdown: 'Write something.' },
-    { label: 'Bullet list', markdown: '- First item\n- Second item' },
-    { label: 'Numbered list', markdown: '1. First item\n2. Second item' },
-    { label: 'Checklist', markdown: '- [ ] First task\n- [ ] Second task' },
-    { label: 'Quote', markdown: '> Quoted text' },
-    { label: 'Code block', markdown: '```js\nconsole.log("hello");\n```' },
-    { label: 'Table', markdown: '| Column | Column |\n| --- | --- |\n| Cell | Cell |' },
-    { label: 'Divider', markdown: '---' }
+  var INLINE_TOOLS = [
+    { action: 'bold', command: 'bold', marker: '**', icon: 'bold', label: 'Bold', shortcut: 'Ctrl/Cmd+B' },
+    { action: 'italic', command: 'italic', marker: '*', icon: 'italic', label: 'Italic', shortcut: 'Ctrl/Cmd+I' },
+    { action: 'strike', command: 'strikeThrough', marker: '~~', icon: 'strike', label: 'Strikethrough' },
+    { action: 'code', marker: '`', icon: 'code', label: 'Inline code' },
+    { action: 'link', icon: 'link', label: 'Link' },
+    { action: 'color', icon: 'color', label: 'Colour' },
+    { action: 'clear', icon: 'clear', label: 'Clear formatting' }
   ];
 
-  var INLINE_ACTIONS = [
-    { cmd: 'bold', label: 'B', title: 'Bold (Ctrl/Cmd+B)', wrap: '**' },
-    { cmd: 'italic', label: 'I', title: 'Italic (Ctrl/Cmd+I)', wrap: '*' },
-    { cmd: 'strikeThrough', label: 'S', title: 'Strikethrough', wrap: '~~' },
-    { cmd: 'code', label: '</>', title: 'Inline code', wrap: '`' },
-    { cmd: 'link', label: 'Link', title: 'Insert link' }
+  var SWATCH_GROUPS = [
+    {
+      title: 'Text',
+      property: 'color',
+      colors: [
+        { label: 'Red', value: '#e11d48' },
+        { label: 'Orange', value: '#ea580c' },
+        { label: 'Green', value: '#15803d' },
+        { label: 'Blue', value: '#2563eb' },
+        { label: 'Purple', value: '#7c3aed' },
+        { label: 'Grey', value: '#64748b' }
+      ]
+    },
+    {
+      title: 'Highlight',
+      property: 'background-color',
+      colors: [
+        { label: 'Yellow', value: '#fef08a' },
+        { label: 'Green', value: '#bbf7d0' },
+        { label: 'Blue', value: '#bfdbfe' },
+        { label: 'Pink', value: '#fbcfe8' },
+        { label: 'Orange', value: '#fed7aa' },
+        { label: 'Grey', value: '#e2e8f0' }
+      ]
+    }
   ];
+
+  /* Starting content for a block added from a + menu. */
+  var INSERT_GROUPS = [
+    {
+      title: 'Text',
+      items: [
+        { label: 'Text', icon: 'text', markdown: 'Write something.' },
+        { label: 'Heading 1', glyph: 'H1', markdown: '# Heading' },
+        { label: 'Heading 2', glyph: 'H2', markdown: '## Heading' },
+        { label: 'Heading 3', glyph: 'H3', markdown: '### Heading' }
+      ]
+    },
+    {
+      title: 'Lists',
+      items: [
+        { label: 'Bullet list', icon: 'bullet', markdown: '- First item\n- Second item' },
+        { label: 'Numbered list', icon: 'numbered', markdown: '1. First item\n2. Second item' },
+        { label: 'Checklist', icon: 'checklist', markdown: '- [ ] First task\n- [ ] Second task' }
+      ]
+    },
+    {
+      title: 'Callouts',
+      items: [
+        { label: 'Note', icon: 'callout', markdown: '<!-- .note -->\n> **Note** - something worth knowing.' },
+        { label: 'Success', icon: 'check', markdown: '<!-- .success -->\n> **Done** - this worked.' },
+        { label: 'Warning', icon: 'callout', markdown: '<!-- .warning -->\n> **Careful** - read this first.' },
+        { label: 'Danger', icon: 'close', markdown: '<!-- .danger -->\n> **Stop** - this will break something.' }
+      ]
+    },
+    {
+      title: 'Blocks',
+      items: [
+        { label: 'Quote', icon: 'quote', markdown: '> Quoted text' },
+        { label: 'Card', icon: 'card', markdown: '<!-- .card -->\n> ### Card title\n>\n> What this card is about.' },
+        { label: 'Half card', icon: 'card', markdown: '<!-- .card .half -->\n> ### Card title\n>\n> Two of these sit side by side.' },
+        { label: 'Code block', icon: 'code', markdown: '```js\nconsole.log("hello");\n```' },
+        { label: 'Table', icon: 'table', markdown: '| Column | Column |\n| --- | --- |\n| Cell | Cell |' },
+        { label: 'Divider', icon: 'divider', markdown: '---' }
+      ]
+    }
+  ];
+
+
+  /* ═══════════════════════════════════════
+     Icons
+     ═══════════════════════════════════════ */
+
+  var ICONS = {
+    text: 'M13 4v16M17 4H9.5a4 4 0 0 0 0 8H13M17 4v16',
+    bullet: 'M9 6h12M9 12h12M9 18h12M4 6h.01M4 12h.01M4 18h.01',
+    numbered: 'M10 6h11M10 12h11M10 18h11M4 4h1v4M4 8h2M6 14H4v2h2v2H4',
+    checklist: 'M3 7l1.8 1.8L8 5.5M3 17l1.8 1.8L8 15.5M12 6.5h9M12 17.5h9',
+    quote: 'M7 15H4.5A1.5 1.5 0 0 1 3 13.5V11a4 4 0 0 1 4-4M17 15h-2.5a1.5 1.5 0 0 1-1.5-1.5V11a4 4 0 0 1 4-4M7 15l-2 5M17 15l-2 5',
+    code: 'M16 18l6-6-6-6M8 6l-6 6 6 6',
+    braces: 'M8 3H7a2 2 0 0 0-2 2v4a2 2 0 0 1-2 2 2 2 0 0 1 2 2v4a2 2 0 0 0 2 2h1M16 3h1a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2 2 2 0 0 0-2 2v4a2 2 0 0 1-2 2h-1',
+    bold: 'M7 4h7a4 4 0 0 1 0 8H7zM7 12h8a4 4 0 0 1 0 8H7z',
+    italic: 'M19 4h-8M13 20H5M15 4L9 20',
+    strike: 'M4 12h16M16.5 7A4 4 0 0 0 13 5h-2a3 3 0 0 0-1.2 5.7M8 16a4 4 0 0 0 3.5 2h1.5a3 3 0 0 0 2.2-5',
+    link: 'M10 13a5 5 0 0 0 7.1 0l3-3a5 5 0 0 0-7.1-7.1L11.4 4.6M14 11a5 5 0 0 0-7.1 0l-3 3a5 5 0 0 0 7.1 7.1l1.5-1.5',
+    color: 'M5 18l6-13 6 13M8 13h6',
+    clear: 'M8 6h13M11 6l-2 12M4 20h8M17 13l5 5M22 13l-5 5',
+    callout: 'M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18zM12 8h.01M11.5 12h.5v4h.5',
+    card: 'M4 5h16v14H4zM4 9.5h16',
+    table: 'M3 5h18v14H3zM3 10h18M9.5 5v14',
+    divider: 'M3 12h18',
+    plus: 'M12 5v14M5 12h14',
+    pencil: 'M12 20h9M16.4 3.6a2.1 2.1 0 0 1 3 3L7.5 18.5 3.5 20l1.5-4z',
+    trash: 'M4 6h16M9 6V4h6v2M6 6l1 14h10l1-14',
+    check: 'M4 12l5 5L20 6',
+    close: 'M6 6l12 12M18 6L6 18'
+  };
+
+  var SVG_NS = 'http://www.w3.org/2000/svg';
+
+  function icon(name) {
+    var svg = document.createElementNS(SVG_NS, 'svg');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('width', '16');
+    svg.setAttribute('height', '16');
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('stroke', 'currentColor');
+    svg.setAttribute('stroke-width', '1.9');
+    svg.setAttribute('stroke-linecap', 'round');
+    svg.setAttribute('stroke-linejoin', 'round');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.setAttribute('class', 'mdstyled-icon');
+
+    var path = document.createElementNS(SVG_NS, 'path');
+    path.setAttribute('d', ICONS[name] || '');
+    svg.appendChild(path);
+    return svg;
+  }
+
+  /* A button that shows an icon (or a short glyph like H1) and reads as its label. */
+  function toolButton(config) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'mdstyled-tool' + (config.className ? ' ' + config.className : '');
+    b.title = config.label + (config.shortcut ? ' (' + config.shortcut + ')' : '');
+    b.setAttribute('aria-label', config.label);
+
+    if (config.icon) {
+      b.appendChild(icon(config.icon));
+    } else {
+      b.appendChild(el('span', 'mdstyled-tool-glyph', config.glyph));
+    }
+    return b;
+  }
 
   function patchState(patch) {
     if (!window.mdstyled || !window.mdstyled.setState) return;
@@ -938,7 +1094,11 @@
 
     /* Controls the interactive template adds around a block belong to it while editing. */
     function groupFor(host) {
-      var group = [host];
+      /* The interactive template moves headings into a flex `.accordion-header` row.
+         Editing one has to replace that whole row, not just the heading inside it. */
+      var header = host.closest ? host.closest('.accordion-header') : null;
+      var group = [header || host];
+      host = header || host;
       var prev = host.previousElementSibling;
       if (prev && (prev.classList.contains('table-interactive-controls') || prev.classList.contains('task-progress'))) {
         group.unshift(prev);
@@ -947,6 +1107,8 @@
       if (next && next.classList.contains('table-pagination')) group.push(next);
       return group;
     }
+
+    buildInsertLines();
 
     /* ── Toolbar ── */
 
@@ -958,19 +1120,13 @@
     pencil.setAttribute('aria-hidden', 'true');
     toggleBtn.insertBefore(pencil, toggleBtn.firstChild);
 
-    var appendBtn = button('Add block', 'mdstyled-edit-append', 'Add a block at the end of the document');
     var sourceBtn = button('Source', 'mdstyled-edit-source', 'Edit the whole Markdown file');
 
     bar.appendChild(toggleBtn);
-    bar.appendChild(appendBtn);
     bar.appendChild(sourceBtn);
     document.body.appendChild(bar);
 
     /* ── Insert menu ── */
-
-    var addFloat = button('+', 'mdstyled-add-float', 'Add a block below');
-    addFloat.hidden = true;
-    document.body.appendChild(addFloat);
 
     var menu = el('div', 'mdstyled-insert-menu');
     menu.hidden = true;
@@ -979,16 +1135,21 @@
 
     var menuTargetLine = null;
 
-    INSERTABLE.forEach(function (item) {
-      var b = button(item.label, 'mdstyled-insert-item');
-      b.setAttribute('role', 'menuitem');
-      b.addEventListener('click', function () {
-        var line = menuTargetLine;
-        hideMenu();
-        if (line == null) return;
-        insertBlock(line, item.markdown);
+    INSERT_GROUPS.forEach(function (group) {
+      menu.appendChild(el('div', 'mdstyled-insert-title', group.title));
+
+      group.items.forEach(function (item) {
+        var b = toolButton({ icon: item.icon, glyph: item.glyph, label: item.label, className: 'mdstyled-insert-item' });
+        b.appendChild(el('span', 'mdstyled-tool-text', item.label));
+        b.setAttribute('role', 'menuitem');
+        b.addEventListener('click', function () {
+          var line = menuTargetLine;
+          hideMenu();
+          if (line == null) return;
+          insertBlock(line, item.markdown);
+        });
+        menu.appendChild(b);
       });
-      menu.appendChild(b);
     });
 
     function showMenu(anchor, line) {
@@ -1012,45 +1173,80 @@
 
     document.addEventListener('click', function (e) {
       if (menu.hidden) return;
-      if (e.target.closest('.mdstyled-insert-menu, .mdstyled-add-float, .mdstyled-edit-append')) return;
+      if (e.target.closest('.mdstyled-insert-menu, .mdstyled-insert-line')) return;
       hideMenu();
     });
 
-    /* The floating + follows whichever block is hovered while edit mode is on. */
-    var hoveredHost = null;
-    root.addEventListener('mouseover', function (e) {
-      if (!editing || open) return;
-      var host = e.target.closest('.mdstyled-editable');
-      if (!host || host === hoveredHost) return;
-      hoveredHost = host;
-      var rect = host.getBoundingClientRect();
-      addFloat.hidden = false;
-      addFloat.style.top = (rect.top + window.scrollY - 10) + 'px';
-      addFloat.style.left = (rect.right + window.scrollX - 12) + 'px';
-    });
+    /* An insert line sits in the gap above and below every block, so a new block can
+       go exactly where it is wanted. They are laid out with negative margins, so
+       showing them does not move the document. */
+    function buildInsertLines() {
+      var points = [];
 
-    addFloat.addEventListener('click', function (e) {
-      e.stopPropagation();
-      if (!hoveredHost) return;
-      showMenu(addFloat, parseInt(hoveredHost.getAttribute('data-mdstyled-end'), 10));
-    });
+      if (hosts.length === 0) {
+        points.push({ line: 0, anchor: root, position: 'append' });
+      } else {
+        var firstGroup = groupFor(hosts[0]);
+        points.push({
+          line: parseInt(hosts[0].getAttribute('data-mdstyled-start'), 10),
+          anchor: firstGroup[0],
+          position: 'before'
+        });
 
-    appendBtn.addEventListener('click', function (e) {
-      e.stopPropagation();
-      if (!editing) setEditing(true);
-      showMenu(appendBtn, api.lineCount);
-    });
+        hosts.forEach(function (host) {
+          var group = groupFor(host);
+          points.push({
+            line: parseInt(host.getAttribute('data-mdstyled-end'), 10),
+            anchor: group[group.length - 1],
+            position: 'after'
+          });
+        });
+      }
 
+      points.forEach(function (point) {
+        if (isNaN(point.line)) return;
+
+        var strip = el('div', 'mdstyled-insert-line');
+        var plus = button('+', 'mdstyled-insert-plus');
+        plus.setAttribute('aria-label', 'Insert a block here');
+        plus.title = 'Insert a block here';
+        strip.appendChild(plus);
+
+        plus.addEventListener('click', function (e) {
+          e.stopPropagation();
+          showMenu(plus, point.line);
+        });
+
+        if (point.position === 'append') {
+          point.anchor.appendChild(strip);
+        } else if (point.position === 'before') {
+          point.anchor.parentNode.insertBefore(strip, point.anchor);
+        } else {
+          point.anchor.parentNode.insertBefore(strip, point.anchor.nextSibling);
+        }
+      });
+    }
+
+    /* Text goes in at the start of `line`, so it needs a blank line on whichever side
+       does not already have one - otherwise the new block merges with its neighbour. */
     function insertBlock(line, markdown) {
-      var atEnd = line >= api.lineCount;
-      var fileEndsBlank = api.lineCount > 0 && api.getSource(api.lineCount - 1, api.lineCount).trim() === '';
-      var nextLineBlank = atEnd || api.getSource(line, line + 1).trim() === '';
+      var lineCount = api.lineCount;
+      var prefix, suffix, focusLine;
 
-      /* Blank lines around the new block, so it never merges with its neighbours.
-         Appending to a file with no trailing newline needs one more. */
-      var prefix = (atEnd && !fileEndsBlank) ? '\n\n' : '\n';
-      var suffix = nextLineBlank ? '' : '\n\n';
-      var focusLine = (atEnd && fileEndsBlank) ? line : line + 1;
+      if (line >= lineCount) {
+        /* Straight onto the end of the file. Its final empty line, if it has one, is
+           the trailing newline rather than a blank separator. */
+        var fileEndsBlank = lineCount > 0 && api.getSource(lineCount - 1, lineCount).trim() === '';
+        prefix = fileEndsBlank ? '\n' : '\n\n';
+        suffix = '';
+        focusLine = fileEndsBlank ? line : line + 1;
+      } else {
+        var prevBlank = line <= 0 || api.getSource(line - 1, line).trim() === '';
+        var nextBlank = api.getSource(line, line + 1).trim() === '';
+        prefix = prevBlank ? '' : '\n';
+        suffix = nextBlank ? '' : '\n\n';
+        focusLine = prevBlank ? line : line + 1;
+      }
 
       api.saveBlock(line, line, prefix + markdown + suffix, '').then(function () {
         patchState({ focusLine: focusLine, editMode: true, scrollY: window.scrollY });
@@ -1066,6 +1262,43 @@
       setTimeout(function () { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 5000);
     }
 
+    /* ── Task checkboxes ── */
+
+    /* Rewrite just the one marker so nothing else about the list's source changes. */
+    var TASK_MARKER = /^(\s*(?:[-*+]|\d+[.)])\s+\[)([ xX])(\].*)$/;
+
+    root.addEventListener('change', function (e) {
+      var box = e.target;
+      if (!box || box.type !== 'checkbox' || !box.closest) return;
+
+      var list = box.closest('[data-mdstyled-start]');
+      if (!list) return;
+
+      var start = parseInt(list.getAttribute('data-mdstyled-start'), 10);
+      var end = parseInt(list.getAttribute('data-mdstyled-end'), 10);
+      if (isNaN(start) || isNaN(end)) return;
+
+      var boxes = Array.prototype.slice.call(list.querySelectorAll('input[type="checkbox"]'));
+      var index = boxes.indexOf(box);
+      if (index < 0) return;
+
+      var original = api.getSource(start, end);
+      var lines = original.split('\n');
+      var seen = -1;
+
+      for (var i = 0; i < lines.length; i++) {
+        var parts = lines[i].match(TASK_MARKER);
+        if (!parts) continue;
+        seen++;
+        if (seen !== index) continue;
+
+        lines[i] = parts[1] + (box.checked ? 'x' : ' ') + parts[3];
+        patchState({ scrollY: window.scrollY });
+        api.saveBlock(start, end, lines.join('\n'), original).catch(reportError);
+        return;
+      }
+    });
+
     /* ── Block editor ── */
 
     var editing = false;
@@ -1076,6 +1309,7 @@
       open.group.forEach(function (node) { node.classList.remove('mdstyled-editable-hidden'); });
       if (open.wrap.parentNode) open.wrap.parentNode.removeChild(open.wrap);
       open = null;
+      api.setEditorOpen(false);
     }
 
     function setEditing(on) {
@@ -1087,8 +1321,6 @@
       if (!on) {
         closeBlockEditor();
         hideMenu();
-        addFloat.hidden = true;
-        hoveredHost = null;
       }
       patchState({ editMode: on });
     }
@@ -1110,7 +1342,7 @@
     function openBlockEditor(host) {
       if (open && open.host === host) return;
       closeBlockEditor();
-      addFloat.hidden = true;
+      hideMenu();
 
       var start = parseInt(host.getAttribute('data-mdstyled-start'), 10);
       var end = parseInt(host.getAttribute('data-mdstyled-end'), 10);
@@ -1122,31 +1354,79 @@
       /* toolbar */
       var toolbar = el('div', 'mdstyled-editor-toolbar');
 
-      var typeSelect = document.createElement('select');
-      typeSelect.className = 'mdstyled-block-type';
-      typeSelect.title = 'Block type';
-      BLOCK_TYPES.forEach(function (t) {
-        var option = document.createElement('option');
-        option.value = t.value;
-        option.textContent = t.label;
-        typeSelect.appendChild(option);
+      var typeGroup = el('div', 'mdstyled-tool-group');
+      typeGroup.setAttribute('role', 'group');
+      typeGroup.setAttribute('aria-label', 'Block type');
+
+      var typeButtons = BLOCK_TOOLS.map(function (tool) {
+        var b = toolButton(tool);
+        b.setAttribute('aria-pressed', 'false');
+        b.addEventListener('mousedown', function (e) { e.preventDefault(); });
+        b.addEventListener('click', function () { changeType(tool.type); });
+        typeGroup.appendChild(b);
+        return { button: b, type: tool.type };
       });
-      toolbar.appendChild(typeSelect);
+      toolbar.appendChild(typeGroup);
       toolbar.appendChild(el('span', 'mdstyled-toolbar-sep'));
 
-      var inlineButtons = INLINE_ACTIONS.map(function (action) {
-        var b = button(action.label, 'mdstyled-format-btn mdstyled-format-' + action.cmd, action.title);
-        b.addEventListener('mousedown', function (e) { e.preventDefault(); });
-        b.addEventListener('click', function () { applyInline(action); });
-        toolbar.appendChild(b);
-        return b;
-      });
+      var formatGroup = el('div', 'mdstyled-tool-group');
+      formatGroup.setAttribute('role', 'group');
+      formatGroup.setAttribute('aria-label', 'Formatting');
 
+      var formatButtons = INLINE_TOOLS.map(function (tool) {
+        var b = toolButton(tool);
+        if (tool.command) b.setAttribute('aria-pressed', 'false');
+        b.addEventListener('mousedown', function (e) { e.preventDefault(); });
+        b.addEventListener('click', function () { applyInline(tool); });
+        formatGroup.appendChild(b);
+        return { button: b, tool: tool };
+      });
+      toolbar.appendChild(formatGroup);
       toolbar.appendChild(el('span', 'mdstyled-toolbar-spacer'));
 
-      var modeBtn = button('Markdown', 'mdstyled-mode-toggle', 'Switch between rich text and Markdown source');
+      var modeBtn = toolButton({ icon: 'braces', label: 'Edit as Markdown', className: 'mdstyled-mode-toggle' });
+      var modeLabel = el('span', 'mdstyled-tool-text', 'Markdown');
+      modeBtn.appendChild(modeLabel);
       toolbar.appendChild(modeBtn);
       wrap.appendChild(toolbar);
+
+      /* colour swatches */
+      var colorPopover = el('div', 'mdstyled-color-popover');
+      colorPopover.hidden = true;
+
+      SWATCH_GROUPS.forEach(function (group) {
+        colorPopover.appendChild(el('div', 'mdstyled-color-title', group.title));
+        var row = el('div', 'mdstyled-color-row');
+        group.colors.forEach(function (color) {
+          var swatch = document.createElement('button');
+          swatch.type = 'button';
+          swatch.className = 'mdstyled-swatch';
+          swatch.title = color.label;
+          swatch.setAttribute('aria-label', group.title + ': ' + color.label);
+          swatch.style.background = group.property === 'color' ? color.value : color.value;
+          if (group.property === 'color') {
+            swatch.style.background = 'transparent';
+            swatch.style.color = color.value;
+            swatch.appendChild(el('span', 'mdstyled-swatch-letter', 'A'));
+          }
+          swatch.addEventListener('mousedown', function (e) { e.preventDefault(); });
+          swatch.addEventListener('click', function () {
+            applyColor(group.property, color.value);
+            colorPopover.hidden = true;
+          });
+          row.appendChild(swatch);
+        });
+        colorPopover.appendChild(row);
+      });
+
+      var clearColor = button('Remove colour', 'mdstyled-color-clear');
+      clearColor.addEventListener('mousedown', function (e) { e.preventDefault(); });
+      clearColor.addEventListener('click', function () {
+        applyColor(null, null);
+        colorPopover.hidden = true;
+      });
+      colorPopover.appendChild(clearColor);
+      wrap.appendChild(colorPopover);
 
       /* link input */
       var linkRow = el('div', 'mdstyled-link-row');
@@ -1193,6 +1473,7 @@
       group[0].parentNode.insertBefore(wrap, group[0]);
       group.forEach(function (node) { node.classList.add('mdstyled-editable-hidden'); });
       open = { host: host, group: group, wrap: wrap };
+      api.setEditorOpen(true);
 
       /* ── modes ── */
 
@@ -1202,107 +1483,284 @@
       /* Tables, dividers and anything unusual are clearer as Markdown. */
       var richSupported = ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'task', 'quote'].indexOf(blockType) !== -1;
 
-      typeSelect.value = BLOCK_TYPES.some(function (t) { return t.value === blockType; }) ? blockType : 'p';
-      typeSelect.disabled = !richSupported && blockType !== 'code';
-
       function currentMarkdown() {
         return mode === 'rich' ? htmlToMarkdown(rich) : ta.value;
       }
 
-      function setMode(next, markdown) {
+      function changeType(type) {
+        var next = retypeMarkdown(currentMarkdown(), type);
+        if (mode === 'markdown') {
+          ta.value = next;
+          autosize(ta);
+          syncToolbar();
+        } else {
+          setMode('rich', next).then(syncToolbar, reportError);
+        }
+      }
+
+      function setMode(next, markdown, prerendered) {
         if (next === 'markdown') {
           ta.value = markdown != null ? markdown : currentMarkdown();
           mode = 'markdown';
           rich.hidden = true;
           ta.hidden = false;
           autosize(ta);
-          modeBtn.textContent = 'Rich text';
-          inlineButtons.forEach(function (b) { b.disabled = false; });
+          modeLabel.textContent = 'Rich text';
+          modeBtn.setAttribute('aria-label', 'Edit as rich text');
           ta.focus();
+          syncToolbar();
           return Promise.resolve();
         }
 
-        var source = markdown != null ? markdown : ta.value;
-        return api.render(source).then(function (html) {
+        function show(html) {
           rich.innerHTML = html;
           mode = 'rich';
           ta.hidden = true;
           rich.hidden = false;
-          modeBtn.textContent = 'Markdown';
-          inlineButtons.forEach(function (b) { b.disabled = false; });
+          modeLabel.textContent = 'Markdown';
+          modeBtn.setAttribute('aria-label', 'Edit as Markdown');
           rich.focus();
-        });
+          syncToolbar();
+        }
+
+        if (prerendered != null) {
+          show(prerendered);
+          return Promise.resolve();
+        }
+        return api.render(markdown != null ? markdown : ta.value).then(show);
       }
 
       modeBtn.addEventListener('click', function () {
         setMode(mode === 'rich' ? 'markdown' : 'rich').catch(reportError);
       });
 
-      typeSelect.addEventListener('change', function () {
-        var next = retypeMarkdown(currentMarkdown(), typeSelect.value);
-        if (mode === 'markdown') {
-          ta.value = next;
-          autosize(ta);
-        } else {
-          setMode('rich', next).catch(reportError);
-        }
-      });
-
       /* ── inline formatting ── */
 
-      function wrapSelectionInTextarea(marker) {
-        var startPos = ta.selectionStart;
-        var endPos = ta.selectionEnd;
-        var selected = ta.value.slice(startPos, endPos) || 'text';
-        ta.value = ta.value.slice(0, startPos) + marker + selected + marker + ta.value.slice(endPos);
-        ta.focus();
-        ta.setSelectionRange(startPos + marker.length, startPos + marker.length + selected.length);
-        autosize(ta);
+      /* Only take focus if we do not already have it - focusing an element that already
+         holds the selection can collapse it. */
+      function focusRich() {
+        if (document.activeElement !== rich) rich.focus();
       }
 
-      function wrapSelectionInCode() {
-        var selection = window.getSelection();
-        if (!selection.rangeCount || selection.isCollapsed) return;
-        var range = selection.getRangeAt(0);
-        var code = document.createElement('code');
-        try {
-          range.surroundContents(code);
-        } catch (err) {
-          code.appendChild(range.extractContents());
-          range.insertNode(code);
+      function setSelection(from, to) {
+        ta.focus();
+        ta.setSelectionRange(from, to);
+      }
+
+      /* A real toggle: markers already around the selection come off again, whether
+         they are inside it or just outside it. */
+      function toggleMarkers(marker) {
+        var from = ta.selectionStart;
+        var to = ta.selectionEnd;
+        var value = ta.value;
+        var selected = value.slice(from, to);
+        var width = marker.length;
+
+        if (selected.length >= width * 2 &&
+            selected.slice(0, width) === marker &&
+            selected.slice(-width) === marker) {
+          var unwrapped = selected.slice(width, -width);
+          ta.value = value.slice(0, from) + unwrapped + value.slice(to);
+          setSelection(from, from + unwrapped.length);
+        } else if (from >= width &&
+                   value.slice(from - width, from) === marker &&
+                   value.slice(to, to + width) === marker) {
+          ta.value = value.slice(0, from - width) + selected + value.slice(to + width);
+          setSelection(from - width, from - width + selected.length);
+        } else {
+          ta.value = value.slice(0, from) + marker + selected + marker + value.slice(to);
+          setSelection(from + width, from + width + selected.length);
         }
+
+        autosize(ta);
+        syncToolbar();
+      }
+
+      function markersActive(marker) {
+        var from = ta.selectionStart;
+        var to = ta.selectionEnd;
+        var value = ta.value;
+        var width = marker.length;
+        var selected = value.slice(from, to);
+
+        if (selected.length >= width * 2 &&
+            selected.slice(0, width) === marker &&
+            selected.slice(-width) === marker) return true;
+
+        return from >= width &&
+          value.slice(from - width, from) === marker &&
+          value.slice(to, to + width) === marker;
+      }
+
+      /* Wraps the rich-text selection in one element - used for code and colour,
+         neither of which execCommand does usefully. */
+      function wrapSelection(tagName, style) {
+        var selection = window.getSelection();
+        if (!selection || !selection.rangeCount || selection.isCollapsed) return false;
+
+        var range = selection.getRangeAt(0);
+        var node = document.createElement(tagName);
+        if (style) node.setAttribute('style', style);
+
+        try {
+          range.surroundContents(node);
+        } catch (err) {
+          node.appendChild(range.extractContents());
+          range.insertNode(node);
+        }
+
         selection.removeAllRanges();
         var after = document.createRange();
-        after.selectNodeContents(code);
+        after.selectNodeContents(node);
         selection.addRange(after);
+        return true;
       }
 
-      function applyInline(action) {
-        if (action.cmd === 'link') {
-          openLinkRow();
-          return;
-        }
-        if (mode === 'markdown') {
-          wrapSelectionInTextarea(action.wrap);
-          return;
-        }
-        rich.focus();
-        if (action.cmd === 'code') {
-          wrapSelectionInCode();
-          return;
-        }
-        exec(action.cmd);
+      function selectionElement(match) {
+        var selection = window.getSelection();
+        if (!selection || !selection.rangeCount) return null;
+        var node = selection.getRangeAt(0).commonAncestorContainer;
+        var element = node.nodeType === 1 ? node : node.parentElement;
+        if (!element || !element.closest || !rich.contains(element)) return null;
+        return element.closest(match);
       }
+
+      function unwrap(element) {
+        if (!element || !element.parentNode) return;
+        while (element.firstChild) element.parentNode.insertBefore(element.firstChild, element);
+        element.parentNode.removeChild(element);
+      }
+
+      function applyColor(property, value) {
+        if (mode === 'markdown') {
+          var from = ta.selectionStart;
+          var to = ta.selectionEnd;
+          var selected = ta.value.slice(from, to) || 'text';
+          var replacement = property
+            ? '<span style="' + property + ': ' + value + '">' + selected + '</span>'
+            : selected;
+          ta.value = ta.value.slice(0, from) + replacement + ta.value.slice(to);
+          setSelection(from, from + replacement.length);
+          autosize(ta);
+          return;
+        }
+
+        focusRich();
+        var existing = selectionElement('span[style]');
+        if (existing) unwrap(existing);
+        if (property) wrapSelection('span', property + ': ' + value);
+        syncToolbar();
+      }
+
+      function applyInline(tool) {
+        if (tool.action === 'link') { openLinkRow(); return; }
+
+        if (tool.action === 'color') {
+          colorPopover.hidden = !colorPopover.hidden;
+          return;
+        }
+
+        if (tool.action === 'clear') {
+          if (mode === 'markdown') {
+            var from = ta.selectionStart;
+            var to = ta.selectionEnd;
+            var plain = ta.value.slice(from, to).replace(/(\*\*|~~|[*`])/g, '');
+            ta.value = ta.value.slice(0, from) + plain + ta.value.slice(to);
+            setSelection(from, from + plain.length);
+            autosize(ta);
+          } else {
+            focusRich();
+            exec('removeFormat');
+            unwrap(selectionElement('span[style]'));
+            unwrap(selectionElement('code'));
+          }
+          syncToolbar();
+          return;
+        }
+
+        if (mode === 'markdown') {
+          if (tool.marker) toggleMarkers(tool.marker);
+          return;
+        }
+
+        focusRich();
+
+        if (tool.action === 'code') {
+          var inCode = selectionElement('code');
+          if (inCode) unwrap(inCode);
+          else wrapSelection('code');
+          syncToolbar();
+          return;
+        }
+
+        exec(tool.command);
+        syncToolbar();
+      }
+
+      /* ── toolbar state ── */
+
+      var RICH_TYPE_TAGS = {
+        P: 'p', H1: 'h1', H2: 'h2', H3: 'h3', H4: 'h4', H5: 'h5', H6: 'h6',
+        BLOCKQUOTE: 'quote', PRE: 'code', OL: 'ol'
+      };
+
+      function currentType() {
+        if (mode === 'markdown') return detectBlockType(ta.value);
+
+        var first = rich.firstElementChild;
+        if (!first) return 'p';
+        if (first.tagName === 'UL') {
+          return first.querySelector('input[type="checkbox"]') ? 'task' : 'ul';
+        }
+        return RICH_TYPE_TAGS[first.tagName] || 'p';
+      }
+
+      function syncToolbar() {
+        var type = currentType();
+        typeButtons.forEach(function (entry) {
+          var active = entry.type === type;
+          entry.button.classList.toggle('active', active);
+          entry.button.setAttribute('aria-pressed', String(active));
+        });
+
+        formatButtons.forEach(function (entry) {
+          var tool = entry.tool;
+          var active = false;
+
+          if (mode === 'markdown') {
+            if (tool.marker) active = markersActive(tool.marker);
+          } else if (tool.action === 'code') {
+            active = !!selectionElement('code');
+          } else if (tool.action === 'color') {
+            active = !!selectionElement('span[style]');
+          } else if (tool.command) {
+            try { active = document.queryCommandState(tool.command); } catch (err) { active = false; }
+          }
+
+          if (tool.command || tool.action === 'code' || tool.action === 'color') {
+            entry.button.classList.toggle('active', active);
+            entry.button.setAttribute('aria-pressed', String(active));
+          }
+        });
+      }
+
+      ['keyup', 'mouseup', 'input', 'focus'].forEach(function (event) {
+        rich.addEventListener(event, syncToolbar);
+        ta.addEventListener(event, syncToolbar);
+      });
 
       var savedRange = null;
 
       function openLinkRow() {
         if (mode === 'rich') {
           var selection = window.getSelection();
-          savedRange = selection.rangeCount ? selection.getRangeAt(0).cloneRange() : null;
+          savedRange = (selection && selection.rangeCount) ? selection.getRangeAt(0).cloneRange() : null;
         }
+        colorPopover.hidden = true;
         linkRow.hidden = false;
         linkInput.value = '';
+        var existingLink = mode === 'rich' ? selectionElement('a') : null;
+        if (existingLink) linkInput.value = existingLink.getAttribute('data-mdstyled-uri') || existingLink.getAttribute('href') || '';
         linkInput.focus();
       }
 
@@ -1316,20 +1774,22 @@
         if (!href) { closeLinkRow(); return; }
 
         if (mode === 'markdown') {
-          var startPos = ta.selectionStart;
-          var endPos = ta.selectionEnd;
-          var label = ta.value.slice(startPos, endPos) || 'link';
-          ta.value = ta.value.slice(0, startPos) + '[' + label + '](' + href + ')' + ta.value.slice(endPos);
+          var from = ta.selectionStart;
+          var to = ta.selectionEnd;
+          var label = ta.value.slice(from, to) || 'link';
+          var markdown = '[' + label + '](' + href + ')';
+          ta.value = ta.value.slice(0, from) + markdown + ta.value.slice(to);
+          setSelection(from, from + markdown.length);
           autosize(ta);
         } else {
-          rich.focus();
+          focusRich();
           if (savedRange) {
             var selection = window.getSelection();
             selection.removeAllRanges();
             selection.addRange(savedRange);
           }
           var current = window.getSelection();
-          if (current.isCollapsed) {
+          if (!current || current.isCollapsed) {
             exec('insertHTML', '<a href="' + href.replace(/"/g, '&quot;') + '">' + href + '</a>');
           } else {
             exec('createLink', href);
@@ -1427,7 +1887,25 @@
       exec('defaultParagraphSeparator', 'p');
 
       if (richSupported) {
-        setMode('rich', original).catch(function () { setMode('markdown', original); });
+        /* Rich text can only round-trip Markdown written the way we emit it. When this
+           block is written some other way - hard wrapped, setext heading, `_italic_`,
+           `*` bullets - editing it richly would silently restyle the source, so it
+           opens as Markdown instead and the toggle says why. */
+        api.render(original).then(function (html) {
+          var probe = document.createElement('div');
+          probe.innerHTML = html;
+
+          if (htmlToMarkdown(probe) === original.trim()) {
+            setMode('rich', original, html);
+          } else {
+            setMode('markdown', original);
+            modeBtn.title = 'Rich text editing would restyle this block\u2019s Markdown';
+            wrap.classList.add('mdstyled-prefers-markdown');
+            status.textContent = 'Opened as Markdown to keep this block\u2019s formatting.';
+          }
+        }, function () {
+          setMode('markdown', original);
+        });
       } else {
         setMode('markdown', original);
         modeBtn.disabled = blockType === 'table' || blockType === 'hr';
@@ -1464,11 +1942,13 @@
 
       document.body.classList.add('mdstyled-source-open');
       document.body.appendChild(overlay);
+      api.setEditorOpen(true);
       ta.focus();
 
       function close() {
         document.body.classList.remove('mdstyled-source-open');
         if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+        api.setEditorOpen(false);
       }
 
       function commit() {

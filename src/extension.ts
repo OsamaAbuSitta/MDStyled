@@ -2,9 +2,14 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import { MdStyledPreviewProvider } from './previewProvider';
 import { applyTemplate } from './templates';
-import { promptForDefaultTemplate, resetPromptState } from './defaultTemplate';
+import { promptForDefaultTemplate, resetPromptState, hasDefaultTemplate, NO_TEMPLATE } from './defaultTemplate';
 
 function isMdStyledFile(filePath: string): boolean {
+  // A global default template makes every Markdown file previewable, whether or not
+  // it declares anything itself.
+  if (hasDefaultTemplate() && vscode.workspace.getConfiguration('mdstyled').get<string>('defaultTemplate') !== NO_TEMPLATE) {
+    return true;
+  }
   try {
     const content = fs.readFileSync(filePath, 'utf-8').slice(0, 2000);
     return /---\s*\n\s*mdstyled\s*:/i.test(content)
@@ -72,6 +77,10 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.workspace.onDidChangeConfiguration(e => {
       if (e.affectsConfiguration('mdstyled.defaultTemplate')) {
         resetPromptState();
+        updateStatusBar();
+        MdStyledPreviewProvider.refreshAll();
+      }
+      if (e.affectsConfiguration('mdstyled.editing.enabled')) {
         MdStyledPreviewProvider.refreshAll();
       }
     }),

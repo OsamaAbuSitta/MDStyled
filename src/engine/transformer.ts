@@ -18,6 +18,18 @@ function isRenderableOpenToken(token: any): boolean {
   return RENDERABLE_TYPES.has(token.type);
 }
 
+/**
+ * Remembers which line the `<!-- .class -->` comment was on, so the block it decorates
+ * can be edited and deleted as one unit instead of leaving the comment behind.
+ */
+function rememberSelectorLine(token: any, commentToken: any): void {
+  if (!commentToken || !Array.isArray(commentToken.map)) return;
+  const line = commentToken.map[0];
+  if (token.mdstyledSelectorLine === undefined || line < token.mdstyledSelectorLine) {
+    token.mdstyledSelectorLine = line;
+  }
+}
+
 function applySelectorToToken(token: any, selector: SelectorResult): void {
   if (!token.attrs) token.attrs = [];
   if (selector.id) {
@@ -120,6 +132,7 @@ export function applyMdStyledDirectives(tokens: any[]): any[] {
                 for (let j = i + 1; j < tokens.length; j++) {
                   if (isRenderableOpenToken(tokens[j])) {
                     applySelectorToToken(tokens[j], selector);
+                    rememberSelectorLine(tokens[j], t);
                     break;
                   }
                 }
@@ -148,6 +161,7 @@ export function applyMdStyledDirectives(tokens: any[]): any[] {
         for (let j = i + 1; j < tokens.length; j++) {
           if (isRenderableOpenToken(tokens[j])) {
             applySelectorToToken(tokens[j], selector);
+            rememberSelectorLine(tokens[j], token);
             break;
           }
         }

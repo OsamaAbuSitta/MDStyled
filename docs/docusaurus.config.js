@@ -61,6 +61,7 @@ const config = {
         logo: {
           alt: 'MdStyled Logo',
           src: 'img/logo.svg',
+          srcDark: 'img/logo-dark.svg',
         },
         items: [
           { to: '/docs/intro', label: 'Docs', position: 'left' },

@@ -54,6 +54,9 @@ export class MdStyledPreviewProvider {
   private disposables: vscode.Disposable[] = [];
   private debounceTimer: ReturnType<typeof setTimeout> | undefined;
   private extensionUri: vscode.Uri;
+  /** An editor is open inside the preview - re-rendering now would discard it. */
+  private editorOpen = false;
+  private refreshPending = false;
 
   public static createOrShow(extensionUri: vscode.Uri, column: vscode.ViewColumn, documentUri: vscode.Uri): void {
     const key = documentUri.toString();
@@ -180,6 +183,15 @@ export class MdStyledPreviewProvider {
     const reply = (ok: boolean, error?: string, extra?: Record<string, unknown>) =>
       this.panel.webview.postMessage({ type: 'mdstyled.result', id: msg.id, ok, error, ...extra });
 
+    if (msg.type === 'mdstyled.editorState') {
+      this.editorOpen = !!msg.open;
+      if (!this.editorOpen && this.refreshPending) {
+        this.refreshPending = false;
+        this.refresh();
+      }
+      return;
+    }
+
     if (msg.type === 'mdstyled.render') {
       try {
         const markdown = typeof msg.markdown === 'string' ? msg.markdown : '';
@@ -193,6 +205,11 @@ export class MdStyledPreviewProvider {
     }
 
     if (msg.type !== 'mdstyled.saveBlock') return;
+
+    if (!vscode.workspace.getConfiguration('mdstyled').get<boolean>('editing.enabled', true)) {
+      await reply(false, 'Editing from the preview is turned off (mdstyled.editing.enabled).');
+      return;
+    }
 
     try {
       const startLine = Number(msg.startLine);
@@ -281,6 +298,12 @@ export class MdStyledPreviewProvider {
   }
 
   private async updateWebview(): Promise<void> {
+    // Never replace the page under someone who is mid-edit; catch up when they finish.
+    if (this.editorOpen) {
+      this.refreshPending = true;
+      return;
+    }
+
     try {
       const extConfig = vscode.workspace.getConfiguration('mdstyled.extensions');
       const enabledExtensions = extConfig.get<string[]>('enabled', ['mermaid', 'copy-code', 'highlight']);
@@ -288,11 +311,13 @@ export class MdStyledPreviewProvider {
         vscode.Uri.joinPath(this.extensionUri, 'node_modules', 'mermaid', 'dist', 'mermaid.min.js')
       );
       // The file declares no styles or scripts of its own -> use the global default template.
+      const editingEnabled = vscode.workspace.getConfiguration('mdstyled').get<boolean>('editing.enabled', true);
+
       let fallback: TemplateFallback | undefined;
       if (!(await hasFileLevelStyling(this.documentUri.fsPath))) {
         fallback = await resolveDefaultTemplateAssets(this.extensionUri.fsPath, { prompt: true });
       }
-      const rawHtml = await renderMdStyled(this.documentUri.fsPath, enabledExtensions, mermaidUri.toString(), fallback);
+      const rawHtml = await renderMdStyled(this.documentUri.fsPath, enabledExtensions, mermaidUri.toString(), fallback, editingEnabled);
       const sanitized = sanitizeHtml(rawHtml, SANITIZE_OPTIONS);
       const styleMatch = sanitized.match(/<style>([\s\S]*?)<\/style>/i);
       const cssLen = styleMatch ? styleMatch[1].trim().length : 0;

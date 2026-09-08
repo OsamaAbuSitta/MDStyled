@@ -13,3 +13,5 @@ spec/**
 **/*.ts
 **/*.map
 out/**/*.d.ts
+test/**
+scripts/**

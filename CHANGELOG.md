@@ -9,9 +9,17 @@ All notable changes to the "MdStyled" extension will be documented in this file.
 - Added the `MdStyled: Set Default Template` command to change the default later.
 - Added the `editable-light` and `editable-dark` templates: the interactive templates plus a full in-preview editor.
 - Block editing with a rich text surface, a block-type dropdown (text, headings, bullet/numbered/check lists, quote, code), bold / italic / strikethrough / inline code / link buttons, and a toggle to the block's raw Markdown.
-- A **+** menu inserts new blocks - headings, text, lists, checklists, quotes, code, tables, dividers - before or after any block, and **Add block** appends at the end of the file.
+- Insert lines in every gap between blocks: hover a gap, click the **+**, and the new block goes exactly there. Works above the first block and below the last one.
 - Blocks can be deleted from the editor, and a **Source** button still edits the whole file as Markdown.
+- Ticking a checkbox in the preview writes `- [x]` back to the file, rewriting only that marker.
+- Blocks whose Markdown is written in a style the rich editor cannot reproduce exactly (hard-wrapped paragraphs, setext headings, `_italic_`, `*` bullets) open as Markdown, so editing never silently restyles the source.
+- Rich text editing no longer drops inline HTML, backticks inside code spans, or link and image titles.
+- Editing a heading now replaces the whole accordion header row instead of being squeezed into it.
+- The preview no longer re-renders over an open editor, discarding unsaved text.
+- Added `mdstyled.editing.enabled` (default `true`) to make previews read-only.
+- The status bar item now appears for any Markdown file once a global default template is set.
 - Preview blocks now carry `data-mdstyled-line`, and `window.mdstyled.editor` lets any template read, render, and write the Markdown behind the preview.
+- Added a test suite (`npm test`) and a generator for the editable templates (`npm run build:templates`).
 - Fixed relative `src` / `href` values inside preview scripts being rewritten as webview URIs.
 
 ## [0.1.2] - 2026-05-26
