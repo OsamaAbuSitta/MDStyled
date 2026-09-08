@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { renderMdStyled } from './engine';
+import { renderMdStyled, hasFileLevelStyling, TemplateFallback } from './engine';
+import { resolveDefaultTemplateAssets } from './defaultTemplate';
 import sanitizeHtml from 'sanitize-html';
 
 export class MdStyledPreviewProvider {
@@ -39,6 +40,12 @@ export class MdStyledPreviewProvider {
 
     const provider = new MdStyledPreviewProvider(panel, extensionUri, documentUri);
     MdStyledPreviewProvider.panels.set(key, provider);
+  }
+
+  public static refreshAll(): void {
+    for (const provider of MdStyledPreviewProvider.panels.values()) {
+      provider.refresh();
+    }
   }
 
   public static getActiveDocumentUri(): vscode.Uri | undefined {
@@ -147,7 +154,12 @@ export class MdStyledPreviewProvider {
       const mermaidUri = this.panel.webview.asWebviewUri(
         vscode.Uri.joinPath(this.extensionUri, 'node_modules', 'mermaid', 'dist', 'mermaid.min.js')
       );
-      const rawHtml = await renderMdStyled(this.documentUri.fsPath, enabledExtensions, mermaidUri.toString());
+      // The file declares no styles or scripts of its own -> use the global default template.
+      let fallback: TemplateFallback | undefined;
+      if (!(await hasFileLevelStyling(this.documentUri.fsPath))) {
+        fallback = await resolveDefaultTemplateAssets(this.extensionUri.fsPath, { prompt: true });
+      }
+      const rawHtml = await renderMdStyled(this.documentUri.fsPath, enabledExtensions, mermaidUri.toString(), fallback);
       const sanitized = sanitizeHtml(rawHtml, {
         allowedTags: sanitizeHtml.defaults.allowedTags.concat([
           'html', 'head', 'body', 'meta', 'style', 'script', 'section',

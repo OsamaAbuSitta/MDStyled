@@ -2,6 +2,12 @@
 
 All notable changes to the "MdStyled" extension will be documented in this file.
 
+## [Unreleased]
+
+- Added a global default template: Markdown files with no `@style` / `@script` of their own now preview with a template chosen once and stored in user settings (`mdstyled.defaultTemplate`), without writing anything to the Markdown file or the workspace.
+- MdStyled asks which template to use as the default on the first preview of an unstyled file; `none` keeps such files unstyled.
+- Added the `MdStyled: Set Default Template` command to change the default later.
+
 ## [0.1.2] - 2026-05-26
 
 - Fixed dark scrollbar appearing in the interactive-light template.

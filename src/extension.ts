@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import { MdStyledPreviewProvider } from './previewProvider';
 import { applyTemplate } from './templates';
+import { promptForDefaultTemplate, resetPromptState } from './defaultTemplate';
 
 function isMdStyledFile(filePath: string): boolean {
   try {
@@ -60,6 +61,19 @@ export function activate(context: vscode.ExtensionContext) {
         return;
       }
       await applyTemplate(editor, context.extensionPath);
+    }),
+    vscode.commands.registerCommand('mdstyled.setDefaultTemplate', async () => {
+      const chosen = await promptForDefaultTemplate();
+      if (chosen) {
+        vscode.window.showInformationMessage(`MdStyled default template set to "${chosen}".`);
+        MdStyledPreviewProvider.refreshAll();
+      }
+    }),
+    vscode.workspace.onDidChangeConfiguration(e => {
+      if (e.affectsConfiguration('mdstyled.defaultTemplate')) {
+        resetPromptState();
+        MdStyledPreviewProvider.refreshAll();
+      }
     }),
     vscode.commands.registerCommand(MDSTYLED_PREVIEW_CMD, () => {
       const editor = vscode.window.activeTextEditor;

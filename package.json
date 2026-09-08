@@ -35,6 +35,28 @@
     "configuration": {
       "title": "MdStyled",
       "properties": {
+        "mdstyled.defaultTemplate": {
+          "type": "string",
+          "enum": [
+            "",
+            "none",
+            "default-light",
+            "default-dark",
+            "interactive-light",
+            "interactive-dark"
+          ],
+          "enumDescriptions": [
+            "Not chosen yet - MdStyled asks once on the first preview of an unstyled file",
+            "No default template - preview unstyled Markdown",
+            "Light documentation theme",
+            "Dark documentation theme",
+            "Light theme with interactive tables",
+            "Dark theme with interactive tables"
+          ],
+          "default": "",
+          "markdownDescription": "Template used in the preview when a Markdown file declares no `@style` / `@script` of its own. Applied straight from the extension - nothing is written to the Markdown file or the workspace. Leave empty to be asked once on the first preview.",
+          "scope": "window"
+        },
         "mdstyled.extensions.enabled": {
           "type": "array",
           "items": {
@@ -66,6 +88,10 @@
       {
         "command": "mdstyled.openPreviewToSide",
         "title": "MdStyled: Open Preview to Side"
+      },
+      {
+        "command": "mdstyled.setDefaultTemplate",
+        "title": "MdStyled: Set Default Template"
       },
       {
         "command": "mdstyled.applyTemplate",

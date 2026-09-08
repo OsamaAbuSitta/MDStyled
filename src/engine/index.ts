@@ -18,6 +18,22 @@ export { buildPreviewHtml, loadCssFiles, loadJsFiles } from './renderer';
 export { BUILTIN_EXTENSIONS, getExtensionCss, getExtensionJs } from './extensions';
 export type { MdStyledExtensionDef, ExtensionJsOptions } from './extensions';
 
+export interface TemplateFallback {
+  styles: string[];
+  scripts: string[];
+}
+
+/** True when the Markdown file itself resolves to any style or script (directive, frontmatter, config, or auto-discovered sibling). */
+export async function hasFileLevelStyling(markdownFilePath: string): Promise<boolean> {
+  try {
+    const markdownRaw = await fs.promises.readFile(markdownFilePath, 'utf-8');
+    const config = await resolveConfig(markdownFilePath, markdownRaw);
+    return config.styles.length > 0 || config.scripts.length > 0;
+  } catch {
+    return false;
+  }
+}
+
 export function sanitizeHtml(dirty: string): string {
   return sanitizeHtmlLib(dirty, {
     allowedTags: [],
@@ -25,7 +41,7 @@ export function sanitizeHtml(dirty: string): string {
   });
 }
 
-export async function renderMdStyled(markdownFilePath: string, enabledExtensions?: string[], mermaidSrc?: string): Promise<string> {
+export async function renderMdStyled(markdownFilePath: string, enabledExtensions?: string[], mermaidSrc?: string, fallback?: TemplateFallback): Promise<string> {
   try {
     const markdownRaw = await fs.promises.readFile(markdownFilePath, 'utf-8');
     const parsed = matter(markdownRaw);
@@ -47,11 +63,16 @@ export async function renderMdStyled(markdownFilePath: string, enabledExtensions
     const transformedTokens = applyMdStyledDirectives(tokens);
     const html = md.renderer.render(transformedTokens, md.options, {});
 
-    const css = await loadCssFiles(config.styles);
+    // Nothing declared in the file itself: fall back to the globally configured template.
+    const useFallback = !!fallback && config.styles.length === 0 && config.scripts.length === 0;
+    const styleFiles = useFallback ? fallback!.styles : config.styles;
+    const scriptFiles = useFallback ? fallback!.scripts : config.scripts;
+
+    const css = await loadCssFiles(styleFiles);
 
     let scripts: string[] = [];
-    if (config.scripts.length > 0) {
-      const js = await loadJsFiles(config.scripts);
+    if (scriptFiles.length > 0) {
+      const js = await loadJsFiles(scriptFiles);
       if (js.trim().length > 0) scripts.push(js);
     }
 
@@ -59,7 +80,7 @@ export async function renderMdStyled(markdownFilePath: string, enabledExtensions
     const extensionsCss = getExtensionCss(ext);
     const extensionsJs = getExtensionJs(ext, { mermaidSrc });
 
-    const showApplyTemplate = config.styles.length === 0 && config.scripts.length === 0;
+    const showApplyTemplate = styleFiles.length === 0 && scriptFiles.length === 0;
     return buildPreviewHtml({ html, css, scripts, mode: config.mode, extensionsCss, extensionsJs, showApplyTemplate });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

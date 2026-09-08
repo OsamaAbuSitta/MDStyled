@@ -123,7 +123,26 @@ Enable or disable them in VS Code settings:
 
 ## Templates
 
-Apply any template with **MdStyled: Apply Template** and choose a theme from the list.
+There are two ways to use a template:
+
+- **Global default** — set once and used by every Markdown file that has no styling of its own. Nothing is written to your files.
+- **Per file** — run **MdStyled: Apply Template** to copy the theme into `.mdstyled/` and insert `@style` / `@script` directives into that Markdown file.
+
+### Global default template
+
+The first time you preview a Markdown file that declares no `@style` or `@script`, MdStyled asks which template should be the default and remembers the answer in your user settings. From then on every unstyled Markdown file previews with that template — no directives, no `.mdstyled/` folder, no edits to the Markdown.
+
+A file that declares its own styles or scripts always wins: the global default only applies when the file (and its frontmatter, `mdstyled.config.json`, and auto-discovered companion files) resolves to nothing.
+
+Change it any time with **MdStyled: Set Default Template**, or in settings:
+
+```json
+{
+  "mdstyled.defaultTemplate": "default-dark"
+}
+```
+
+Pick `none` to keep unstyled files unstyled.
 
 ### Default templates
 
@@ -161,6 +180,7 @@ The right sidebar shows all heading levels (H1–H6) with hierarchical indentati
 | `MdStyled: Open Preview` | Open the styled preview in the current editor area |
 | `MdStyled: Open Preview to Side` | Open the styled preview beside the current editor |
 | `MdStyled: Apply Template` | Create a starter `.mdstyled/` folder and insert directives |
+| `MdStyled: Set Default Template` | Choose the global default template used by files with no styling |
 
 ## Auto-discovery
 
