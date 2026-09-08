@@ -153,6 +153,39 @@ The **default-light** and **default-dark** templates provide a clean documentati
 - **Syntax highlighting** — code block styling with theme-appropriate colors
 - **Mermaid diagrams** — renders ` ```mermaid ` blocks inline
 
+### Editable templates
+
+The **editable-light** and **editable-dark** templates are the interactive templates plus a full editor. A floating toolbar sits in the bottom-right corner of the preview:
+
+| Button | What it does |
+|---|---|
+| **Edit** | Turns on edit mode - hover highlights every block, click one to edit it |
+| **Add block** | Appends a new block at the end of the document |
+| **Source** | Opens the whole Markdown file in one editor |
+
+#### Editing a block
+
+Clicking a block opens it in a rich text editor holding exactly the content that block was rendered from:
+
+- **Block type** - a dropdown converts the block between Text, Heading 1-4, Bullet list, Numbered list, Checklist, Quote, and Code block
+- **Formatting** - **B**, *I*, ~~S~~, inline code, and link buttons apply to the selection
+- **Markdown** - a toggle swaps the rich surface for the raw Markdown of that same block, and back
+- **Save** (`Ctrl`/`Cmd`+`Enter`), **Cancel** (`Esc`), and **Delete** (click twice to confirm)
+
+Inside a list, `Tab` and `Shift`+`Tab` indent and outdent items.
+
+Tables and dividers open directly as Markdown, where they are easier to edit precisely - a table keeps its column alignment through an edit.
+
+#### Adding blocks
+
+In edit mode a **+** appears at the corner of the block you are hovering. It opens a menu of block types - Heading 1-3, Text, Bullet list, Numbered list, Checklist, Quote, Code block, Table, Divider - and inserts the chosen one right after that block, with blank lines around it so it never merges with its neighbours. The new block opens ready to edit.
+
+**Add block** in the toolbar does the same at the end of the document.
+
+#### How it behaves
+
+Saving writes the block's lines back to the `.md` file and saves it, then the preview re-renders from the file and restores your scroll position and edit mode. The template's own controls - accordion toggles, copy buttons, table search and pagination - keep working while edit mode is on. If the file changed on disk after the preview was rendered, the save is refused rather than overwriting the newer text.
+
 ### Interactive templates
 
 The **interactive-light** and **interactive-dark** templates include everything in the default templates, plus client-side interactivity:
@@ -182,6 +215,37 @@ The right sidebar shows all heading levels (H1–H6) with hierarchical indentati
 | `MdStyled: Apply Template` | Create a starter `.mdstyled/` folder and insert directives |
 | `MdStyled: Set Default Template` | Choose the global default template used by files with no styling |
 
+## Writing your own editable template
+
+Every preview exposes `window.mdstyled`, and any template can use it to offer editing:
+
+```js
+var api = window.mdstyled.editor;
+
+if (api.available) {
+  // Markdown source for lines [start, end) of the file
+  var text = api.getSource(4, 7);
+
+  // render a snippet with the preview's own pipeline
+  api.render('## A heading').then(function (html) { /* ... */ });
+
+  // write it back and save the file
+  api.saveBlock(4, 7, text + '\n\nAdded from the preview.', text)
+    .then(function () { /* the preview re-renders */ });
+}
+```
+
+| Member | Purpose |
+|---|---|
+| `available` | Whether this preview can write to the file |
+| `lineCount` | Lines in the Markdown file |
+| `getSource(start, end)` | The file's lines `[start, end)` |
+| `getDocument()` | The whole file |
+| `render(markdown)` | Renders a snippet to HTML with the preview's pipeline |
+| `saveBlock(start, end, text, original)` | Replaces lines `[start, end)`; a zero-length range inserts, an empty `text` deletes. `original` is what you loaded - the save is refused if the file no longer matches |
+
+Every top-level block in the preview carries `data-mdstyled-line="start,end"` pointing at the lines it was rendered from, and links and images carry `data-mdstyled-uri` with their authored path. `window.mdstyled.getState()` / `setState()` persist small values (scroll position, UI state) across the re-render that follows a save.
+
 ## Auto-discovery
 
 If a Markdown file has matching companion files, MdStyled can load them automatically:
@@ -205,11 +269,20 @@ The repository includes examples in [`samples/`](https://github.com/OsamaAbuSitt
 ## Development
 
 ```bash
-npm run compile
-npm run watch
+npm install
+npm run compile   # one-shot build
+npm run watch     # rebuild on change
 ```
 
-Press `F5` in VS Code to launch an Extension Host for local testing.
+Press `F5` in VS Code to launch the Extension Development Host. `.vscode/launch.json` provides:
+
+| Configuration | What it does |
+|---|---|
+| **Run Extension** | Builds once, then opens a development host on the current folder |
+| **Run Extension (open samples)** | Same, with `samples/` already open so there is Markdown to preview |
+| **Run Extension (watch)** | Starts the esbuild watcher first, so edits rebuild while the host runs |
+
+Debugging must go through one of these (`type: extensionHost`). Running `out/extension.js` with the plain Node debugger fails with `Cannot find module 'vscode'` - that module only exists inside the Extension Host.
 
 ## License
 

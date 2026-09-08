@@ -8,6 +8,10 @@ title: Interactive Templates
 
 The **interactive-light** and **interactive-dark** templates extend the default layout with client-side interactivity. Apply either one with **MdStyled: Apply Template**.
 
+:::tip
+Want editing too? The **[editable templates](./editing)** layer in-preview Markdown editing on top of everything on this page — the most complete MdStyled template.
+:::
+
 ## Callout blocks
 
 Apply a callout class to the next block using a comment selector:

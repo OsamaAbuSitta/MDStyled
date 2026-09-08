@@ -1,5 +1,5 @@
 ---
-sidebar_position: 6
+sidebar_position: 7
 slug: /commands
 title: Commands
 ---
@@ -30,11 +30,11 @@ When you have a Markdown file open, the **MdStyled: Open Preview** button appear
 
 ```json
 {
-  "mdstyled.defaultTemplate": "interactive-dark"
+  "mdstyled.defaultTemplate": "editable-dark"
 }
 ```
 
-Valid values: `none`, `default-light`, `default-dark`, `interactive-light`, `interactive-dark`.
+Valid values: `none`, `default-light`, `default-dark`, `interactive-light`, `interactive-dark`, `editable-light`, `editable-dark`.
 
 Leaving it empty makes MdStyled ask once on the first preview of an unstyled file.
 

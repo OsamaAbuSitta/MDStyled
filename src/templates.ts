@@ -34,6 +34,18 @@ const templates: MdStyledTemplate[] = [
     hasCSS: true,
     hasJS: true,
   },
+  {
+    name: 'editable-light',
+    description: 'Interactive light theme plus an Edit button for editing the Markdown in the preview',
+    hasCSS: true,
+    hasJS: true,
+  },
+  {
+    name: 'editable-dark',
+    description: 'Interactive dark theme plus an Edit button for editing the Markdown in the preview',
+    hasCSS: true,
+    hasJS: true,
+  },
 ];
 
 export function getTemplates(): MdStyledTemplate[] {

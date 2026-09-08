@@ -6,7 +6,7 @@ import { themes as prismThemes } from 'prism-react-renderer';
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'MdStyled',
-  tagline: 'Style Markdown in VS Code with real CSS & JavaScript',
+  tagline: 'Refined Markdown previews, styled with real CSS & JavaScript',
   favicon: 'img/favicon.svg',
 
   // Set the production url of your site here
@@ -66,7 +66,7 @@ const config = {
           { to: '/docs/intro', label: 'Docs', position: 'left' },
           { to: '/docs/syntax', label: 'Syntax', position: 'left' },
           { to: '/docs/templates', label: 'Templates', position: 'left' },
-          { to: '/docs/interactive', label: 'Interactivity', position: 'left' },
+          { to: '/docs/editing', label: 'Editing', position: 'left' },
           {
             href: 'https://github.com/OsamaAbuSitta/MDStyled',
             label: 'GitHub',
@@ -90,6 +90,7 @@ const config = {
             title: 'Features',
             items: [
               { label: 'Interactive Templates', to: '/docs/interactive' },
+              { label: 'In-Preview Editing', to: '/docs/editing' },
               { label: 'Commands', to: '/docs/commands' },
               { label: 'Auto-discovery', to: '/docs/auto-discovery' },
               { label: 'Built-in Extras', to: '/docs/extras' },

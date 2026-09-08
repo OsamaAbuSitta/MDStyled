@@ -7,13 +7,18 @@ import Heading from '@theme/Heading';
 const features = [
   {
     icon: '🎨',
-    title: 'Real CSS, real freedom',
-    body: 'Design your Markdown preview with actual CSS and JavaScript files — not cramped preview markup. Your vision, your style.',
+    title: 'From Markdown to masterpiece',
+    body: 'MdStyled compiles Markdown into polished, real HTML — then hands you the reins. Shape every detail with the web technologies you already know.',
   },
   {
-    icon: '⬜',
-    title: 'Clean source, portable & AI-friendly',
-    body: 'Every style lives in external assets. Your Markdown stays lean, clean, and perfect for AI assistants and version control.',
+    icon: '💅',
+    title: 'CSS & JavaScript at full power',
+    body: 'Attach .css and .js via directives or frontmatter. Layouts, themes, charts, interactions, animations — no limits, no preview markup.',
+  },
+  {
+    icon: '🤖',
+    title: 'Built for the AI generation',
+    body: 'Clean, portable Markdown stays the source of truth — the format AI agents read, write, and version best. Styling never bleeds into content.',
   },
   {
     icon: '✨',
@@ -21,9 +26,9 @@ const features = [
     body: 'Apply classes, IDs, and attributes with HTML comments that vanish in the preview — pure intent, zero clutter.',
   },
   {
-    icon: '📊',
-    title: 'Interactive tables',
-    body: 'Automatic search, column filtering, sorting, and pagination on every Markdown table. Data that works for you.',
+    icon: '🧭',
+    title: 'Auto-discovery',
+    body: 'Companion .css and .js files are loaded automatically. Match filenames and MdStyled wires everything up for you.',
   },
   {
     icon: '🧩',
@@ -31,9 +36,14 @@ const features = [
     body: 'Render flowcharts, sequence diagrams, and more straight from fenced code blocks. No plugins, no setup.',
   },
   {
-    icon: '🧭',
-    title: 'Auto-discovery',
-    body: 'Companion .css and .js files are loaded automatically. Match filenames and MdStyled wires everything up for you.',
+    icon: '📊',
+    title: 'Interactive tables',
+    body: 'Search, sort, and paginate Markdown tables out of the box — proof of what the engine enables.',
+  },
+  {
+    icon: '✏️',
+    title: 'Edit in the preview',
+    body: 'Editable templates refine Markdown blocks right in the styled, live view — save, and it re-renders instantly.',
   },
 ];
 
@@ -63,7 +73,7 @@ export default function Home() {
   }, []);
 
   return (
-    <Layout title={siteConfig.tagline} description="Style Markdown in VS Code with external CSS and JavaScript — without cluttering the Markdown itself.">
+    <Layout title={siteConfig.tagline} description="Turn Markdown into refined HTML experiences styled with real CSS & JavaScript — live in VS Code, with clean and portable source.">
       <main>
         {/* HERO */}
         <section className="hero">
@@ -74,13 +84,14 @@ export default function Home() {
             }}
           />
           <div className="hero__inner">
-            <span className="hero__eyebrow">✦ VS Code Extension</span>
+            <span className="hero__eyebrow">✦ VS Code extension</span>
             <h1 className="hero__title">
               Markdown, <br /> magnificently styled.
             </h1>
             <p className="hero__subtitle">
-              Style Markdown previews in VS Code with real CSS and JavaScript —
-              while keeping your source files clean, portable, and AI-friendly.
+              MdStyled turns Markdown into a refined HTML experience you shape
+              with real CSS and JavaScript — rendered live in VS Code while your
+              source stays clean, portable, and AI-friendly.
             </p>
             <div className="hero__actions">
               <Link className="button button--primary button--lg" to="/docs/intro">
@@ -110,7 +121,9 @@ export default function Home() {
 
 <span class="tok-cm">&lt;!-- .hero --&gt;</span>
 Build polished Markdown documents with
-normal web tools. <span class="tok-k">→</span> styled, live, in VS Code`}
+normal web tools.
+
+<span class="tok-k">⟶ HTML + your CSS/JS, live in VS Code</span>`}
                 </pre>
               </div>
             </div>
@@ -119,10 +132,11 @@ normal web tools. <span class="tok-k">→</span> styled, live, in VS Code`}
 
         {/* FEATURES */}
         <section className="features">
-          <h2 className="features__heading">Why MdStyled?</h2>
+          <h2 className="features__heading">One tool, unlimited polish</h2>
           <p className="features__sub">
-            Bring designer-grade styling to the humble Markdown file — with the
-            tools and workflows you already know and love.
+            MdStyled compiles Markdown to refined HTML powered by the web's own
+            technologies. Interactive tables, editing, diagrams — just a preview
+            of what's possible.
           </p>
           <div className="feature-grid">
             {features.map((f) => (
@@ -138,10 +152,10 @@ normal web tools. <span class="tok-k">→</span> styled, live, in VS Code`}
         {/* CTA */}
         <section className="cta-banner">
           <div className="cta-box">
-            <Heading as="h2">Ready to level up your Markdown?</Heading>
+            <Heading as="h2">From plain text to pixel-perfect</Heading>
             <p>
-              Install MdStyled, apply a template, and open a live preview —
-              all inside VS Code.
+              Install MdStyled, open a preview, and shape it with real CSS and
+              JavaScript — all inside VS Code.
             </p>
             <Link className="button button--primary button--lg" to="/docs/install">
               Install MdStyled

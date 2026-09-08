@@ -7,6 +7,12 @@ All notable changes to the "MdStyled" extension will be documented in this file.
 - Added a global default template: Markdown files with no `@style` / `@script` of their own now preview with a template chosen once and stored in user settings (`mdstyled.defaultTemplate`), without writing anything to the Markdown file or the workspace.
 - MdStyled asks which template to use as the default on the first preview of an unstyled file; `none` keeps such files unstyled.
 - Added the `MdStyled: Set Default Template` command to change the default later.
+- Added the `editable-light` and `editable-dark` templates: the interactive templates plus a full in-preview editor.
+- Block editing with a rich text surface, a block-type dropdown (text, headings, bullet/numbered/check lists, quote, code), bold / italic / strikethrough / inline code / link buttons, and a toggle to the block's raw Markdown.
+- A **+** menu inserts new blocks - headings, text, lists, checklists, quotes, code, tables, dividers - before or after any block, and **Add block** appends at the end of the file.
+- Blocks can be deleted from the editor, and a **Source** button still edits the whole file as Markdown.
+- Preview blocks now carry `data-mdstyled-line`, and `window.mdstyled.editor` lets any template read, render, and write the Markdown behind the preview.
+- Fixed relative `src` / `href` values inside preview scripts being rewritten as webview URIs.
 
 ## [0.1.2] - 2026-05-26
 

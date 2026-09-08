@@ -6,7 +6,7 @@ title: Core Syntax
 
 # Core Syntax
 
-MdStyled gives you two ways to attach styling to your Markdown: **directives** (load external assets) and **selectors** (style the next block). Both use invisible HTML comments, so they never appear in the final preview.
+This is the control language for the [MdStyled engine](./how-it-works): how you attach CSS and JavaScript to your polished HTML output, and how you target blocks with classes, IDs, and attributes — all from invisible comments that never appear in the result.
 
 ## Directives — attach styles and scripts
 

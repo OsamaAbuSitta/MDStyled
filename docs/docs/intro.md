@@ -6,7 +6,9 @@ title: Introduction
 
 # Introduction
 
-**MdStyled** is a VS Code extension that lets you style Markdown previews with real CSS and JavaScript — all while keeping your source files clean, portable, and AI-friendly.
+**MdStyled** is a VS Code extension that turns Markdown into a **fully styled HTML document** you control end to end — shaped with real external CSS and JavaScript — all while keeping your source files clean, portable, and AI-friendly.
+
+Interactive tables, editing, and diagrams are just examples. The engine underneath is a conversion: **Markdown → HTML + your own CSS/JS**, and any web technique you know works there.
 
 ## The idea
 
@@ -15,7 +17,7 @@ Markdown is the perfect format for portable, version-controlled documents. But w
 - Students of **cramming** — inline HTML, inline styles, and noisy markup inside the Markdown.
 - Or students of **leaving** — exporting to another tool entirely, and losing portability.
 
-MdStyled gives you a third option: *keep writing clean Markdown, and move your styling to external assets.*
+MdStyled gives you a third option: *keep writing clean Markdown, and move all of the presentation to external CSS and JavaScript.*
 
 ```md title="your-document.md"
 <!-- @style: ./theme.css -->
@@ -36,7 +38,7 @@ Build polished Markdown documents with normal web tools.
 }
 ```
 
-Open the preview with **MdStyled: Open Preview** and the paragraph under `# Product Brief` renders with the `hero` class applied — no markup pollution in your document.
+Open the preview with **MdStyled: Open Preview** and the paragraph under `# Product Brief` renders with the `hero` class applied — no markup pollution in your document. Whatever you can do in a web page — layouts, themes, charts, animations, interactions — you can do here.
 
 ## What you can build
 
@@ -47,17 +49,19 @@ Open the preview with **MdStyled: Open Preview** and the paragraph under `# Prod
 | **Reports** | Data-heavy pages with styled tables and diagrams |
 | **Interactive notes** | Live, searchable, sortable note-taking |
 | **Internal wikis** | Consistent visual identity across many files |
+| **Custom anything** | Your own CSS and JS define the rules |
 
 ## Philosophy
 
 - **Keep Markdown clean** — style the preview, not the document.
-- **Use real web tools** — CSS and JS you already know.
-- **Stay portable & AI-friendly** — source files remain simple and tool-agnostic.
+- **Use real web tools** — CSS and JS you already know, running on a real HTML document.
+- **Stay portable & AI-friendly** — source files remain simple and tool-agnostic, which matters more than ever in the AI-agent age: clean Markdown is what agents read, write, and version best.
 - **Preview in VS Code** — no context switching, live refresh.
 
 ## Next steps
 
 - [Install MdStyled](./install) and open your first preview.
 - Learn the [core syntax](./syntax) — selectors and directives.
-- Explore [templates](./templates) for instant documentation layouts.
-- See the [interactive templates](./interactive) in action.
+- Explore how the [conversion works](./how-it-works).
+- See [templates](./templates) as a starting point for your own design.
+- Try [in-preview editing](./editing) with the editable templates.

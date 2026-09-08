@@ -6,9 +6,15 @@ title: Templates
 
 # Templates
 
-Templates give you an instant, polished documentation layout — without writing a single line of CSS.
+Templates give you an instant, polished documentation layout — without writing a single line of CSS. They're ready-made examples of the [MdStyled engine](./how-it-works): the output is real HTML you can override, extend, or throw away in favor of your own CSS and JS.
+
+MdStyled ships with three families: **default**, **interactive**, and **editable**. The **editable** templates are the headline option — they combine everything from the interactive templates with in-preview Markdown editing.
 
 ## Two ways to use a template
+
+### Two ways to use a template
+
+Templates are just CSS/JS files — applying one is the same as writing your own. You can start from a template, then edit freely or replace it entirely with your own styles and scripts.
 
 ### Global default
 
@@ -34,7 +40,7 @@ Run **MdStyled: Apply Template** to copy the theme into `.mdstyled/` and insert 
 
 ## Available templates
 
-MdStyled ships with four templates:
+MdStyled ships with six templates:
 
 | Template | Style | Extras |
 |---|---|---|
@@ -42,6 +48,8 @@ MdStyled ships with four templates:
 | `default-dark` | Dark | TOC, copy buttons, syntax highlighting, Mermaid |
 | `interactive-light` | Light | All defaults + interactive tables, collapsible sections, callouts, task progress |
 | `interactive-dark` | Dark | All defaults + interactive tables, collapsible sections, callouts, task progress |
+| `editable-light` | Light | Everything in interactive + in-preview Markdown editing |
+| `editable-dark` | Dark | Everything in interactive + in-preview Markdown editing |
 
 ### What the default templates include
 
@@ -61,6 +69,17 @@ The **interactive-light** and **interactive-dark** templates add client-side int
 - **Cards** — turn lists into a responsive card grid.
 
 Dive into the details on the [Interactivity](./interactive) page.
+
+### Editable templates (the main option)
+
+The **editable-light** and **editable-dark** templates are the most complete offering. They include everything from the interactive templates — interactive tables, collapsible sections, callouts, task progress, cards — **plus in-preview Markdown editing**:
+
+- Click **Edit** (the floating button in the corner) to enter edit mode.
+- Click any block — paragraph, heading, list, code fence, or table — to edit its Markdown source right in the preview.
+- Use **Source** to open the whole Markdown file in a full-window editor.
+- Save your changes and the preview re-renders instantly, keeping your scroll position.
+
+Everything is documented on the [Editing](./editing) page. To try it, apply `editable-dark` (or `editable-light`) as your default template, or per file.
 
 ## Set a default template in settings
 

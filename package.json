@@ -43,7 +43,9 @@
             "default-light",
             "default-dark",
             "interactive-light",
-            "interactive-dark"
+            "interactive-dark",
+            "editable-light",
+            "editable-dark"
           ],
           "enumDescriptions": [
             "Not chosen yet - MdStyled asks once on the first preview of an unstyled file",
@@ -51,7 +53,9 @@
             "Light documentation theme",
             "Dark documentation theme",
             "Light theme with interactive tables",
-            "Dark theme with interactive tables"
+            "Dark theme with interactive tables",
+            "Interactive light theme with in-preview Markdown editing",
+            "Interactive dark theme with in-preview Markdown editing"
           ],
           "default": "",
           "markdownDescription": "Template used in the preview when a Markdown file declares no `@style` / `@script` of its own. Applied straight from the extension - nothing is written to the Markdown file or the workspace. Leave empty to be asked once on the first preview.",

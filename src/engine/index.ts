@@ -9,6 +9,7 @@ import { resolveConfig } from './config';
 import { applyMdStyledDirectives } from './transformer';
 import { buildPreviewHtml, loadCssFiles, loadJsFiles } from './renderer';
 import { getExtensionCss, getExtensionJs } from './extensions';
+import { annotateSourceLines, computeLineOffset, splitSourceLines } from './sourceMap';
 
 export { MdStyledConfig, SelectorResult, ParseResult } from './types';
 export { resolveConfig } from './config';
@@ -16,6 +17,7 @@ export { isMdStyledComment, parseSelectorComment, parseDirectiveComment } from '
 export { applyMdStyledDirectives } from './transformer';
 export { buildPreviewHtml, loadCssFiles, loadJsFiles } from './renderer';
 export { BUILTIN_EXTENSIONS, getExtensionCss, getExtensionJs } from './extensions';
+export { SOURCE_LINE_ATTR, annotateSourceLines, computeLineOffset, splitSourceLines } from './sourceMap';
 export type { MdStyledExtensionDef, ExtensionJsOptions } from './extensions';
 
 export interface TemplateFallback {
@@ -34,6 +36,32 @@ export async function hasFileLevelStyling(markdownFilePath: string): Promise<boo
   }
 }
 
+function createMarkdownIt(): MarkdownIt {
+  const md = new MarkdownIt({
+    html: true,
+    highlight: (str, lang) => {
+      if (lang && hljs.getLanguage(lang)) {
+        try {
+          return hljs.highlight(str, { language: lang, ignoreIllegals: true }).value;
+        } catch (__) {}
+      }
+      return '';
+    }
+  });
+  md.use(taskLists);
+  return md;
+}
+
+/**
+ * Renders a snippet of Markdown with the same pipeline as the preview.
+ * The in-preview editor uses it to show a rich surface for a block it is editing.
+ */
+export function renderMarkdownFragment(markdown: string): string {
+  const md = createMarkdownIt();
+  const tokens = md.parse(markdown, {});
+  return md.renderer.render(applyMdStyledDirectives(tokens), md.options, {});
+}
+
 export function sanitizeHtml(dirty: string): string {
   return sanitizeHtmlLib(dirty, {
     allowedTags: [],
@@ -47,20 +75,12 @@ export async function renderMdStyled(markdownFilePath: string, enabledExtensions
     const parsed = matter(markdownRaw);
     const config = await resolveConfig(markdownFilePath, markdownRaw);
 
-    const md = new MarkdownIt({
-      html: true,
-      highlight: (str, lang) => {
-        if (lang && hljs.getLanguage(lang)) {
-          try {
-            return hljs.highlight(str, { language: lang, ignoreIllegals: true }).value;
-          } catch (__) {}
-        }
-        return '';
-      }
-    });
-    md.use(taskLists);
+    const md = createMarkdownIt();
     const tokens = md.parse(parsed.content, {});
     const transformedTokens = applyMdStyledDirectives(tokens);
+    // Tag blocks with their source lines so the preview can edit the file in place.
+    const sourceLines = splitSourceLines(markdownRaw);
+    annotateSourceLines(transformedTokens, computeLineOffset(markdownRaw, parsed.content), sourceLines);
     const html = md.renderer.render(transformedTokens, md.options, {});
 
     // Nothing declared in the file itself: fall back to the globally configured template.
@@ -81,7 +101,7 @@ export async function renderMdStyled(markdownFilePath: string, enabledExtensions
     const extensionsJs = getExtensionJs(ext, { mermaidSrc });
 
     const showApplyTemplate = styleFiles.length === 0 && scriptFiles.length === 0;
-    return buildPreviewHtml({ html, css, scripts, mode: config.mode, extensionsCss, extensionsJs, showApplyTemplate });
+    return buildPreviewHtml({ html, css, scripts, mode: config.mode, extensionsCss, extensionsJs, showApplyTemplate, sourceLines });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     return buildPreviewHtml({

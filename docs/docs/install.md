@@ -29,7 +29,11 @@ code --install-extension mdstyled-0.1.5.vsix
 1. Open any Markdown file.
 2. Run **MdStyled: Open Preview** from the command palette (`Cmd`+`Shift`+`P`).
 
-If your file has no styling of its own, MdStyled will ask you to choose a **default template** the first time. Pick `default-light`, `default-dark`, or one of the interactive variants — and from then on, unstyled Markdown previews beautifully with that theme.
+If your file has no styling of its own, MdStyled will ask you to choose a **default template** the first time. Pick `default-light`, `default-dark`, one of the interactive variants, or the **editable** templates — and from then on, unstyled Markdown previews beautifully with that theme.
+
+:::tip
+Choose an **editable** template (`editable-dark` or `editable-light`) and your preview becomes editable too — click **Edit** to change blocks right in the styled view. See [In-Preview Editing](./editing).
+:::
 
 ## Try the starter
 

@@ -1,5 +1,3 @@
-<!-- @style: ./.mdstyled/interactive-light.css -->
-<!-- @script: ./.mdstyled/interactive-light.js -->
 
 # Interactive Template Demo
 
@@ -310,3 +308,5 @@ Checkboxes in the preview are interactive but changes are not written back to th
 
 <!-- .danger -->
 Do not load untrusted external scripts via `@script:` directives. The preview runs in a VS Code webview with `unsafe-inline` scripts enabled.
+
+# Heading
