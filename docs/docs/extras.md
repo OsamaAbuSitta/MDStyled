@@ -34,7 +34,7 @@ For example, to disable Mermaid rendering but keep copy buttons and highlighting
 
 ## Mermaid
 
-Renders ` ```mermaid ` fenced blocks as inline diagrams — flowcharts, sequence, Gantt, pie, class, and more.
+Renders ` ```mermaid ` fenced blocks as inline diagrams: flowcharts, sequence, Gantt, pie, class, and more.
 
 ## Copy code
 

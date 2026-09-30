@@ -62,7 +62,7 @@ export async function promptForDefaultTemplate(): Promise<string | undefined> {
   }));
   picks.push({
     label: NO_TEMPLATE,
-    description: 'No default template — preview unstyled Markdown',
+    description: 'No default template, preview unstyled Markdown',
     detail: current === NO_TEMPLATE ? 'Current default' : undefined,
   });
 

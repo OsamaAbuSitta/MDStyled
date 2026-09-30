@@ -68,7 +68,7 @@ Subscript: H~2~O, Superscript: X^2^ (requires plugin).
 
 <dl>
   <dt>MdStyled</dt>
-  <dd>Markdown + CSS/JS — style previews without polluting source.</dd>
+  <dd>Markdown + CSS/JS: style previews without polluting source.</dd>
   <dt>Comment Selector</dt>
   <dd>An HTML comment like <code>&lt;!-- .foo --&gt;</code> that applies a class to the next block.</dd>
 </dl>
@@ -246,4 +246,4 @@ on the same paragraph.
 ---
 
 <!-- .page-footer -->
-*End of test page — all elements rendered successfully.*
+*End of test page: all elements rendered successfully.*

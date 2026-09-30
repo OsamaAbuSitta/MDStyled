@@ -15,7 +15,7 @@ MdStyled can load companion files automatically when they share a name with your
 | `example.md` → `example.mdstyled` | Legacy companion styles |
 | `example.md` → `example.mdjs` | Legacy companion scripts |
 
-No directives, no frontmatter — just match the filename and MdStyled wires it up.
+No directives, no frontmatter. Just match the filename and MdStyled wires it up.
 
 ## Example
 

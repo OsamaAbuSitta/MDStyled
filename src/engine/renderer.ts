@@ -1,6 +1,8 @@
 import * as fs from 'fs';
 
 const SOURCE_PLACEHOLDER = '__MDSTYLED_SOURCE__';
+const BACK_PLACEHOLDER = '__MDSTYLED_CAN_GO_BACK__';
+const START_EDITING_PLACEHOLDER = '__MDSTYLED_START_EDITING__';
 
 const MDSTYLED_RUNTIME = `
 (function () {
@@ -12,6 +14,8 @@ const MDSTYLED_RUNTIME = `
   }
 
   var source = ${SOURCE_PLACEHOLDER};
+  var canGoBack = ${BACK_PLACEHOLDER};
+  var startEditing = ${START_EDITING_PLACEHOLDER};
   var pending = {};
   var seq = 0;
 
@@ -67,6 +71,18 @@ const MDSTYLED_RUNTIME = `
           original: (typeof original === 'string') ? original : undefined
         });
       },
+      /* Following a link to another Markdown file, and stepping back out again. */
+      canGoBack: canGoBack,
+      openDocument: function(href) {
+        return request({ type: 'mdstyled.navigate', href: href });
+      },
+      goBack: function() {
+        return request({ type: 'mdstyled.back' });
+      },
+      exportDocument: function() {
+        return request({ type: 'mdstyled.export' });
+      },
+
       /* Lets the extension know not to re-render over an editor that is open. */
       setEditorOpen: function(isOpen) {
         try { if (vscodeApi) vscodeApi.postMessage({ type: 'mdstyled.editorState', open: !!isOpen }); } catch (e) {}
@@ -79,6 +95,13 @@ const MDSTYLED_RUNTIME = `
       }
     }
   };
+
+  /* Asked to open straight into editing: the editor reads this state as it starts. */
+  if (startEditing) {
+    var initial = window.mdstyled.getState();
+    initial.editMode = true;
+    window.mdstyled.setState(initial);
+  }
 
   window.addEventListener('message', function (event) {
     var msg = event.data;
@@ -105,7 +128,7 @@ function encodeSource(lines?: string[] | null): string {
     .replace(/\u2029/g, '\\u2029');
 }
 
-export function buildPreviewHtml(params: { html: string; css: string; scripts: string[]; mode: string; extensionsCss?: string; extensionsJs?: string; mermaidSrc?: string; showApplyTemplate?: boolean; sourceLines?: string[] | null }): string {
+export function buildPreviewHtml(params: { html: string; css: string; scripts: string[]; mode: string; extensionsCss?: string; extensionsJs?: string; mermaidSrc?: string; showApplyTemplate?: boolean; sourceLines?: string[] | null; canGoBack?: boolean; startEditing?: boolean }): string {
   const allCss = [params.css, params.extensionsCss].filter(Boolean).join('\n\n');
   const allScripts = [
     ...(params.extensionsJs ? [params.extensionsJs] : []),
@@ -131,7 +154,10 @@ export function buildPreviewHtml(params: { html: string; css: string; scripts: s
     + '</head>\n<body>\n'
     + applyTemplateBanner
     + `<div class="mdstyled-root">\n${params.html}\n</div>\n`
-    + `<script>\n${MDSTYLED_RUNTIME.replace(SOURCE_PLACEHOLDER, () => encodeSource(params.sourceLines))}\n</script>\n`
+    + `<script>\n${MDSTYLED_RUNTIME
+        .replace(SOURCE_PLACEHOLDER, () => encodeSource(params.sourceLines))
+        .replace(BACK_PLACEHOLDER, () => (params.canGoBack ? 'true' : 'false'))
+        .replace(START_EDITING_PLACEHOLDER, () => (params.startEditing ? 'true' : 'false'))}\n</script>\n`
     + (scriptTags ? scriptTags + '\n' : '')
     + '</body>\n</html>';
 }

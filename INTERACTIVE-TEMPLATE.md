@@ -10,9 +10,9 @@ The **interactive-light** and **interactive-dark** templates extend the default 
 |---|---|
 | Callout blocks | `<!-- .note -->`, `<!-- .warning -->`, `<!-- .danger -->`, `<!-- .success -->` |
 | Task progress bar | Any `- [ ]` / `- [x]` checkbox list |
-| Collapsible sections | Automatic — every heading becomes an accordion |
-| Table of contents | Automatic — right sidebar, all heading levels |
-| Interactive tables | Automatic — every Markdown table gets search, sort, and pagination |
+| Collapsible sections | Automatic: every heading becomes an accordion |
+| Table of contents | Automatic: right sidebar, all heading levels |
+| Interactive tables | Automatic: every Markdown table gets search, sort, and pagination |
 | Cards | `<!-- .cards -->` before any unordered list |
 | Mermaid diagrams | ` ```mermaid ` code blocks |
 
@@ -45,13 +45,13 @@ Each variant renders with a colored left border, tinted background, and a lead i
 | `.danger` | ✕ | Destructive or irreversible actions |
 | `.success` | ✓ | Confirmations, positive outcomes |
 
-Callouts work on any block — paragraphs, lists, blockquotes, code blocks.
+Callouts work on any block: paragraphs, lists, blockquotes, code blocks.
 
 ---
 
 ## Task progress bar
 
-A progress bar is injected automatically above every checkbox list. Checkboxes are interactive — check and uncheck them and the bar updates live.
+A progress bar is injected automatically above every checkbox list. Checkboxes are interactive: check and uncheck them and the bar updates live.
 
 ```md
 - [x] Step one
@@ -68,11 +68,11 @@ Multiple independent lists on the same page each get their own progress bar.
 
 ## Collapsible sections
 
-Every heading (`h1`–`h6`) becomes an accordion automatically. A chevron toggle button appears to the left of each heading.
+Every heading (`h1` to `h6`) becomes an accordion automatically. A chevron toggle button appears to the left of each heading.
 
 - Click the toggle to collapse the section and hide its content
 - Click again to expand
-- Nested headings collapse independently — collapsing a parent hides all children; collapsing a child keeps the parent open
+- Nested headings collapse independently: collapsing a parent hides all children; collapsing a child keeps the parent open
 - Hover over a toggle to see a subtle rounded background
 
 No markup changes are needed. The accordion is applied to the rendered HTML by the template script.
@@ -83,7 +83,7 @@ No markup changes are needed. The accordion is applied to the rendered HTML by t
 
 A sticky right sidebar is generated from all headings in the document. It:
 
-- Shows H1–H6 with hierarchical indentation (H1 bold, deeper levels indented 12 px per step)
+- Shows H1-H6 with hierarchical indentation (H1 bold, deeper levels indented 12 px per step)
 - Highlights the currently visible section as you scroll
 - Immediately activates the correct entry when you click a TOC link
 
@@ -134,7 +134,7 @@ Supported diagram types include flowcharts, sequence diagrams, Gantt charts, pie
 
 ## Switching between light and dark
 
-Both variants are functionally identical — only colors differ. To switch:
+Both variants are functionally identical. Only colors differ. To switch:
 
 1. Run **MdStyled: Apply Template**
 2. Choose `interactive-dark` (or `interactive-light`)
@@ -160,7 +160,7 @@ Apply `<!-- .cards -->` to an unordered list to render each item as a card in a 
 
 - **Templates**
 
-  Choose from default or interactive themes — light and dark variants available.
+  Choose from default or interactive themes, in light and dark variants.
 ```
 
 Each `- **Bold title**` becomes the card heading. Any following text becomes the card body. Nested lists inside a card item are also supported for bullet details.

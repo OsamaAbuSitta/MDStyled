@@ -9,7 +9,7 @@ title: Interactive Templates
 The **interactive-light** and **interactive-dark** templates extend the default layout with client-side interactivity. Apply either one with **MdStyled: Apply Template**.
 
 :::tip
-Want editing too? The **[editable templates](./editing)** layer in-preview Markdown editing on top of everything on this page — the most complete MdStyled template.
+Want editing too? The **[editable templates](./editing)** layer in-preview Markdown editing on top of everything on this page. It is the most complete MdStyled template.
 :::
 
 ## Callout blocks
@@ -37,7 +37,7 @@ This is a success block. Use it for confirmations and positive outcomes.
 | `.danger` | ✕ | Destructive or irreversible actions |
 | `.success` | ✓ | Confirmations, positive outcomes |
 
-Callouts work on any block — paragraphs, lists, blockquotes, and code blocks.
+Callouts work on any block: paragraphs, lists, blockquotes, and code blocks.
 
 ## Task progress bar
 
@@ -54,10 +54,10 @@ The bar fills as tasks are checked and turns green when everything is done. Mult
 
 ## Collapsible sections
 
-Every heading (`h1`–`h6`) becomes an accordion automatically. Click the chevron to collapse or expand a section.
+Every heading (`h1` to `h6`) becomes an accordion automatically. Click the chevron to collapse or expand a section.
 
-- Nested headings collapse independently — collapse a parent and all children hide.
-- No markup changes needed — it's applied to the rendered HTML by the template script.
+- Nested headings collapse independently: collapse a parent and all children hide.
+- No markup changes needed; it's applied to the rendered HTML by the template script.
 
 ## Interactive tables
 
@@ -72,7 +72,7 @@ Every Markdown table automatically gets:
 
 ## Table of contents
 
-The right sidebar shows all heading levels (H1–H6) with hierarchical indentation and scroll-aware active highlighting. Clicking an entry scrolls to the heading and highlights it.
+The right sidebar shows all heading levels (H1-H6) with hierarchical indentation and scroll-aware active highlighting. Clicking an entry scrolls to the heading and highlights it.
 
 ## Mermaid diagrams
 
@@ -105,14 +105,14 @@ Apply `<!-- .cards -->` to an unordered list to render each item as a card in a 
 
 - **Templates**
 
-  Choose from default or interactive themes — light and dark variants available.
+  Choose from default or interactive themes, in light and dark variants.
 ```
 
 Each `- **Bold title**` becomes the card heading, with the following text as the card body.
 
 ## Switching between light and dark
 
-Both variants are functionally identical — only colors differ. Run **MdStyled: Apply Template**, choose the other variant, and select **Overwrite** or **New name**.
+Both variants are functionally identical. Only colors differ. Run **MdStyled: Apply Template**, choose the other variant, and select **Overwrite** or **New name**.
 
 ## Customizing further
 

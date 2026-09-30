@@ -69,7 +69,14 @@ export function sanitizeHtml(dirty: string): string {
   });
 }
 
-export async function renderMdStyled(markdownFilePath: string, enabledExtensions?: string[], mermaidSrc?: string, fallback?: TemplateFallback, editable = true): Promise<string> {
+export interface RenderOptions {
+  /** Used instead of whatever the file declares - a template chosen for this preview only. */
+  templateOverride?: TemplateFallback;
+  /** Open the page with its in-preview editor already on. */
+  startEditing?: boolean;
+}
+
+export async function renderMdStyled(markdownFilePath: string, enabledExtensions?: string[], mermaidSrc?: string, fallback?: TemplateFallback, editable = true, canGoBack = false, options: RenderOptions = {}): Promise<string> {
   try {
     const markdownRaw = await fs.promises.readFile(markdownFilePath, 'utf-8');
     const parsed = matter(markdownRaw);
@@ -85,8 +92,9 @@ export async function renderMdStyled(markdownFilePath: string, enabledExtensions
 
     // Nothing declared in the file itself: fall back to the globally configured template.
     const useFallback = !!fallback && config.styles.length === 0 && config.scripts.length === 0;
-    const styleFiles = useFallback ? fallback!.styles : config.styles;
-    const scriptFiles = useFallback ? fallback!.scripts : config.scripts;
+    const chosen = options.templateOverride || (useFallback ? fallback : undefined);
+    const styleFiles = chosen ? chosen.styles : config.styles;
+    const scriptFiles = chosen ? chosen.scripts : config.scripts;
 
     const css = await loadCssFiles(styleFiles);
 
@@ -101,7 +109,7 @@ export async function renderMdStyled(markdownFilePath: string, enabledExtensions
     const extensionsJs = getExtensionJs(ext, { mermaidSrc });
 
     const showApplyTemplate = styleFiles.length === 0 && scriptFiles.length === 0;
-    return buildPreviewHtml({ html, css, scripts, mode: config.mode, extensionsCss, extensionsJs, showApplyTemplate, sourceLines: editable ? sourceLines : null });
+    return buildPreviewHtml({ html, css, scripts, mode: config.mode, extensionsCss, extensionsJs, showApplyTemplate, sourceLines: editable ? sourceLines : null, canGoBack, startEditing: editable && !!options.startEditing });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     return buildPreviewHtml({

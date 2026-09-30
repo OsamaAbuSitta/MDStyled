@@ -19,6 +19,9 @@ const PALETTES = {
     OUTLINE_IDLE: 'rgba(53,120,229,0.28)', EDIT_HOVER_BG: 'rgba(53,120,229,0.06)',
     EDITOR_BG: '#f6f9fe', INPUT_BG: '#ffffff', TEXT: '#1c1e21',
     FOCUS_RING: 'rgba(53,120,229,0.25)', MUTED: '#6b7280', DANGER: '#b91c1c',
+    BAR_BG: 'rgba(255,255,255,0.78)', BAR_BORDER: 'rgba(28,30,33,0.10)',
+    BAR_SHADOW: '0 1px 2px rgba(28,30,33,0.05)', SEGMENT_BG: 'rgba(28,30,33,0.04)',
+    DANGER_SOFT: 'rgba(185,28,28,0.10)',
     TOOLBAR_BG: '#eef3fb', CARD_BG: '#ffffff', CARD_SHADOW: '0 1px 3px rgba(28,30,33,0.08)',
   },
   dark: {
@@ -28,6 +31,9 @@ const PALETTES = {
     OUTLINE_IDLE: 'rgba(88,166,255,0.28)', EDIT_HOVER_BG: 'rgba(88,166,255,0.07)',
     EDITOR_BG: '#0d1117', INPUT_BG: '#0d1117', TEXT: '#c9d1d9',
     FOCUS_RING: 'rgba(56,139,253,0.35)', MUTED: '#8b949e', DANGER: '#f85149',
+    BAR_BG: 'rgba(22,27,34,0.78)', BAR_BORDER: 'rgba(240,246,252,0.10)',
+    BAR_SHADOW: '0 1px 2px rgba(1,4,9,0.4)', SEGMENT_BG: 'rgba(240,246,252,0.05)',
+    DANGER_SOFT: 'rgba(248,81,73,0.16)',
     TOOLBAR_BG: '#161b22', CARD_BG: '#161b22', CARD_SHADOW: '0 1px 3px rgba(1,4,9,0.5)',
   },
 };
@@ -35,8 +41,9 @@ const PALETTES = {
 const INIT_MARKER = '  /* ── Init ── */';
 const INIT_CALL = '    initTaskProgress();\n';
 
-const editorJs = fs.readFileSync(path.join(SRC, 'serializer.js'), 'utf8').replace(/\n+$/, '')
-  + '\n' + fs.readFileSync(path.join(SRC, 'editor.js'), 'utf8').replace(/\n+$/, '');
+const editorJs = ['emoji.js', 'serializer.js', 'cards.js', 'tables.js', 'editor.js']
+  .map(file => fs.readFileSync(path.join(SRC, file), 'utf8').replace(/\n+$/, ''))
+  .join('\n');
 const editorCss = fs.readFileSync(path.join(SRC, 'editor.css'), 'utf8');
 
 for (const theme of ['light', 'dark']) {

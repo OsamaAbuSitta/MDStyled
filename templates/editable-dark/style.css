@@ -1378,3 +1378,1093 @@ body.mdstyled-source-open .mdstyled-insert-line {
     max-width: calc(100vw - 24px);
   }
 }
+
+/* ── Zoom, navigation and export controls ── */
+
+.mdstyled-edit-bar [hidden] {
+  display: none !important;
+}
+
+.mdstyled-zoom {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+}
+
+.mdstyled-zoom .mdstyled-tool {
+  width: 24px;
+  height: 24px;
+}
+
+.mdstyled-zoom-level {
+  min-width: 46px;
+  padding: 4px 2px;
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  color: #c9d1d9;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.mdstyled-zoom-level:hover {
+  color: #1f6feb;
+  background: #30363d;
+}
+
+.mdstyled-zoom-level:focus-visible {
+  outline: 2px solid #1f6feb;
+  outline-offset: 1px;
+}
+
+/* A link to another Markdown file reads as navigation, not a plain reference. */
+body:not(.mdstyled-edit-mode) .mdstyled-root a[href$=".md"],
+body:not(.mdstyled-edit-mode) .mdstyled-root a[data-mdstyled-uri$=".md"] {
+  cursor: pointer;
+  text-decoration-style: dotted;
+  text-underline-offset: 3px;
+}
+
+@media (max-width: 800px) {
+  .mdstyled-edit-bar .mdstyled-edit-export .mdstyled-btn-text,
+  .mdstyled-edit-bar .mdstyled-edit-back .mdstyled-btn-text {
+    display: none;
+  }
+}
+
+/* ── Block type dropdown ── */
+
+.mdstyled-type-group {
+  position: relative;
+}
+
+.mdstyled-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 6px 0 8px;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #c9d1d9;
+  background: #21262d;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+
+.mdstyled-select:hover {
+  color: #1f6feb;
+  border-color: #1f6feb;
+}
+
+.mdstyled-select:focus-visible {
+  outline: 2px solid #1f6feb;
+  outline-offset: 1px;
+}
+
+.mdstyled-select[aria-expanded="true"] {
+  color: #1f6feb;
+  border-color: #1f6feb;
+  background: #30363d;
+}
+
+.mdstyled-select-icon {
+  display: inline-flex;
+  align-items: center;
+}
+
+.mdstyled-select-label {
+  min-width: 74px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.mdstyled-select-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 66;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 180px;
+  margin-top: 6px;
+  padding: 6px;
+  border-radius: 10px;
+  background: #161b22;
+  border: 1px solid #30363d;
+  box-shadow: 0 6px 20px rgba(1,4,9,0.7);
+}
+
+.mdstyled-select-menu[hidden] {
+  display: none !important;
+}
+
+.mdstyled-select-item {
+  justify-content: flex-start;
+  gap: 8px;
+  width: 100%;
+  font-weight: 500;
+  background: transparent;
+  border-color: transparent;
+}
+
+.mdstyled-select-item .mdstyled-icon,
+.mdstyled-select-item .mdstyled-tool-glyph {
+  color: #8b949e;
+}
+
+.mdstyled-select-item:hover .mdstyled-icon,
+.mdstyled-select-item:hover .mdstyled-tool-glyph {
+  color: #1f6feb;
+}
+
+.mdstyled-select-item.active {
+  color: #ffffff;
+  background: #1f6feb;
+  border-color: #1f6feb;
+}
+
+.mdstyled-select-item.active .mdstyled-icon,
+.mdstyled-select-item.active .mdstyled-tool-glyph {
+  color: #ffffff;
+}
+
+@media (max-width: 800px) {
+  .mdstyled-select-label {
+    min-width: 0;
+  }
+}
+
+.mdstyled-select-menu {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.mdstyled-select-title {
+  padding: 6px 8px 3px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #8b949e;
+}
+
+.mdstyled-select-title:not(:first-child) {
+  margin-top: 4px;
+  border-top: 1px solid #30363d;
+}
+
+.mdstyled-select-item:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.mdstyled-select-clear {
+  font-style: italic;
+}
+
+/* ── Task checkboxes ── */
+
+/* Read-only until Edit is on, and it should look that way. */
+.mdstyled-root input[type="checkbox"]:disabled {
+  cursor: default;
+  opacity: 0.65;
+}
+
+body.mdstyled-edit-mode .mdstyled-root input[type="checkbox"]:not(:disabled),
+.mdstyled-rich input[type="checkbox"] {
+  cursor: pointer;
+  opacity: 1;
+}
+
+body.mdstyled-edit-mode .mdstyled-root input[type="checkbox"]:not(:disabled):hover,
+.mdstyled-rich input[type="checkbox"]:hover {
+  outline: 2px solid #1f6feb;
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* ═══════════════════════════════════════
+   Top toolbar
+   ═══════════════════════════════════════ */
+
+.mdstyled-edit-bar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: auto;
+  left: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 48px;
+  padding: 0 14px;
+  border: none;
+  border-bottom: 1px solid rgba(240,246,252,0.10);
+  border-radius: 0;
+  /* Frosted, so the document reads through it as you scroll. */
+  background: rgba(22,27,34,0.78);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  backdrop-filter: saturate(180%) blur(14px);
+  box-shadow: 0 1px 2px rgba(1,4,9,0.4);
+}
+
+body {
+  padding-top: 48px;
+}
+
+.mdstyled-toc {
+  top: 64px;
+  max-height: calc(100vh - 96px);
+}
+
+.mdstyled-bar-spacer {
+  flex: 1;
+}
+
+.mdstyled-bar-divider {
+  width: 1px;
+  height: 20px;
+  margin: 0 6px;
+  background: rgba(240,246,252,0.10);
+}
+
+/* ── Bar buttons ── */
+
+.mdstyled-edit-bar .mdstyled-edit-btn {
+  height: 32px;
+  gap: 7px;
+  padding: 0 11px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  color: #8b949e;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  transition: color 0.14s ease, background 0.14s ease, border-color 0.14s ease;
+}
+
+.mdstyled-edit-bar .mdstyled-edit-btn:hover:not(:disabled) {
+  color: #c9d1d9;
+  background: rgba(240,246,252,0.05);
+  border-color: transparent;
+}
+
+.mdstyled-edit-bar .mdstyled-edit-btn:active:not(:disabled) {
+  transform: translateY(0.5px);
+}
+
+.mdstyled-edit-bar .mdstyled-edit-btn:focus-visible {
+  outline: 2px solid #1f6feb;
+  outline-offset: 1px;
+}
+
+.mdstyled-edit-bar .mdstyled-icon {
+  opacity: 0.85;
+}
+
+.mdstyled-edit-bar .mdstyled-edit-btn:hover .mdstyled-icon {
+  opacity: 1;
+}
+
+/* Edit is the one action that changes what the page is for, so it carries weight. */
+.mdstyled-edit-bar .mdstyled-edit-toggle {
+  color: #c9d1d9;
+  border-color: #30363d;
+  background: #161b22;
+}
+
+.mdstyled-edit-bar .mdstyled-edit-toggle:hover:not(:disabled) {
+  border-color: #1f6feb;
+  color: #1f6feb;
+  background: #161b22;
+}
+
+.mdstyled-edit-bar .mdstyled-edit-toggle.active,
+.mdstyled-edit-bar .mdstyled-edit-toggle.active:hover {
+  color: #ffffff;
+  background: #1f6feb;
+  border-color: #1f6feb;
+}
+
+.mdstyled-edit-bar .mdstyled-edit-toggle.active .mdstyled-icon {
+  opacity: 1;
+}
+
+.mdstyled-edit-bar .mdstyled-edit-back {
+  margin-right: 2px;
+}
+
+/* ── Zoom, as one segmented control ── */
+
+.mdstyled-edit-bar .mdstyled-zoom {
+  height: 32px;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  background: rgba(240,246,252,0.05);
+  border: 1px solid rgba(240,246,252,0.10);
+  border-radius: 8px;
+}
+
+.mdstyled-edit-bar .mdstyled-zoom .mdstyled-tool {
+  width: 30px;
+  height: 30px;
+  color: #8b949e;
+  border: none;
+  border-radius: 0;
+}
+
+.mdstyled-edit-bar .mdstyled-zoom .mdstyled-tool:hover:not(:disabled) {
+  color: #c9d1d9;
+  background: #30363d;
+}
+
+.mdstyled-edit-bar .mdstyled-zoom .mdstyled-tool:disabled {
+  opacity: 0.35;
+}
+
+.mdstyled-zoom-level {
+  min-width: 50px;
+  height: 30px;
+  padding: 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #c9d1d9;
+  border-right: 1px solid rgba(240,246,252,0.10);
+  border-left: 1px solid rgba(240,246,252,0.10);
+  border-radius: 0;
+  transition: background 0.14s ease;
+}
+
+.mdstyled-zoom-level:hover {
+  color: #1f6feb;
+  background: #30363d;
+}
+
+/* ── Narrow previews keep the icons and drop the words ── */
+
+@media (max-width: 760px) {
+  .mdstyled-edit-bar {
+    gap: 2px;
+    padding: 0 10px;
+  }
+
+  .mdstyled-edit-bar .mdstyled-edit-btn {
+    padding: 0 8px;
+  }
+
+  .mdstyled-edit-bar .mdstyled-btn-label {
+    display: none;
+  }
+
+  .mdstyled-edit-bar .mdstyled-edit-toggle .mdstyled-btn-label {
+    display: inline;
+  }
+}
+
+/* ── Empty document ── */
+
+/* Nothing to hover between, so the one insert line stands open instead of waiting. */
+.mdstyled-insert-line-empty {
+  display: block;
+  height: 72px;
+  margin: 24px 0;
+}
+
+.mdstyled-insert-line-empty::before {
+  opacity: 0.3;
+}
+
+.mdstyled-insert-line-empty .mdstyled-insert-plus {
+  opacity: 1;
+}
+
+/* ── Clickable editor space ── */
+
+.mdstyled-rich {
+  min-height: 88px;
+  cursor: text;
+}
+
+/* ═══════════════════════════════════════
+   Card grids
+   ═══════════════════════════════════════ */
+
+.mdstyled-cards {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 16px 0 24px;
+}
+
+.mdstyled-cards.cols-1 { grid-template-columns: minmax(0, 1fr); }
+.mdstyled-cards.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.mdstyled-cards.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.mdstyled-cards.cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+/* A card in a grid fills its cell rather than carrying its own spacing. */
+.mdstyled-cards > .card {
+  width: auto;
+  margin: 0;
+  display: block;
+}
+
+/* Insert lines are never built inside a grid - each would take a grid cell. This
+   is the backstop, and has to outrank the edit-mode rule that shows them. */
+.mdstyled-cards > .mdstyled-insert-line,
+body.mdstyled-edit-mode .mdstyled-cards > .mdstyled-insert-line {
+  display: none;
+}
+
+/* An editor opened on a card takes the whole row, not one cell. */
+.mdstyled-cards > .mdstyled-block-editor {
+  grid-column: 1 / -1;
+}
+
+/* A `.cards` list takes a column count the same way. Without one it fits as many
+   as it can. */
+ul.cards.cols-1, ol.cards.cols-1 { grid-template-columns: minmax(0, 1fr); }
+ul.cards.cols-2, ol.cards.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+ul.cards.cols-3, ol.cards.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+ul.cards.cols-4, ol.cards.cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+@media (max-width: 760px) {
+  .mdstyled-cards,
+  .mdstyled-cards.cols-2,
+  .mdstyled-cards.cols-3,
+  .mdstyled-cards.cols-4,
+  ul.cards.cols-2, ul.cards.cols-3, ul.cards.cols-4,
+  ol.cards.cols-2, ol.cards.cols-3, ol.cards.cols-4 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ── Card controls in the editor ── */
+
+.mdstyled-card-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #30363d;
+}
+
+.mdstyled-card-spacer {
+  flex: 1;
+}
+
+.mdstyled-card-count,
+.mdstyled-card-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #8b949e;
+}
+
+.mdstyled-card-add {
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  font-size: 0.72rem;
+}
+
+.mdstyled-col-group {
+  display: flex;
+  overflow: hidden;
+  background: rgba(240,246,252,0.05);
+  border: 1px solid #30363d;
+  border-radius: 7px;
+}
+
+.mdstyled-col-btn {
+  width: 28px;
+  height: 26px;
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: #c9d1d9;
+  background: transparent;
+  border: none;
+  border-left: 1px solid #30363d;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.mdstyled-col-btn:first-child {
+  border-left: none;
+}
+
+.mdstyled-col-btn:hover {
+  color: #1f6feb;
+  background: #30363d;
+}
+
+.mdstyled-col-btn:focus-visible {
+  outline: 2px solid #1f6feb;
+  outline-offset: -2px;
+}
+
+.mdstyled-col-btn.active {
+  color: #ffffff;
+  background: #1f6feb;
+}
+
+/* ── Card designer ── */
+
+.mdstyled-designer-bar {
+  gap: 10px;
+  padding: 6px 8px;
+}
+
+.mdstyled-designer-heading {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #c9d1d9;
+}
+
+.mdstyled-designer-heading .mdstyled-icon {
+  color: #1f6feb;
+}
+
+.mdstyled-designer-count {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #8b949e;
+  font-variant-numeric: tabular-nums;
+}
+
+.mdstyled-designer-layout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.mdstyled-designer-layout[hidden] {
+  display: none;
+}
+
+.mdstyled-col-btn.mdstyled-col-auto {
+  width: auto;
+  padding: 0 8px;
+}
+
+.mdstyled-stepper {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  background: rgba(240,246,252,0.05);
+  border: 1px solid #30363d;
+  border-radius: 7px;
+}
+
+.mdstyled-stepper .mdstyled-stepper-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 0;
+}
+
+.mdstyled-stepper-value {
+  min-width: 24px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  color: #c9d1d9;
+}
+
+.mdstyled-designer-grid {
+  display: grid;
+  gap: 12px;
+  padding: 2px;
+}
+
+.mdstyled-designer-grid[hidden] {
+  display: none;
+}
+
+.mdstyled-designer-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  padding: 8px 10px 10px;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(1,4,9,0.5);
+  transition: border-color 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
+}
+
+.mdstyled-designer-card:focus-within {
+  border-color: #1f6feb;
+  box-shadow: 0 0 0 2px rgba(56,139,253,0.35);
+}
+
+.mdstyled-designer-card.mdstyled-dragging {
+  opacity: 0.45;
+}
+
+.mdstyled-designer-card.mdstyled-drop-target {
+  border-color: #1f6feb;
+  border-style: dashed;
+}
+
+.mdstyled-designer-card-head {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.mdstyled-designer-grip {
+  display: inline-flex;
+  padding: 2px;
+  color: #8b949e;
+  cursor: grab;
+}
+
+.mdstyled-designer-card-index {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #8b949e;
+  font-variant-numeric: tabular-nums;
+}
+
+.mdstyled-designer-card .mdstyled-designer-card-btn {
+  width: 24px;
+  height: 24px;
+  opacity: 0.55;
+}
+
+.mdstyled-designer-card:hover .mdstyled-designer-card-btn,
+.mdstyled-designer-card:focus-within .mdstyled-designer-card-btn {
+  opacity: 1;
+}
+
+.mdstyled-designer-card .mdstyled-designer-card-btn:disabled {
+  opacity: 0.25;
+}
+
+.mdstyled-designer-card .mdstyled-designer-remove:hover:not(:disabled) {
+  color: #f85149;
+  background: rgba(248,81,73,0.16);
+}
+
+.mdstyled-designer-title-input,
+.mdstyled-designer-body {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+  color: #c9d1d9;
+  background: #0d1117;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 5px 7px;
+}
+
+.mdstyled-designer-title-input {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.mdstyled-designer-body {
+  min-height: 72px;
+  resize: vertical;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.mdstyled-designer-title-input:hover,
+.mdstyled-designer-body:hover {
+  border-color: #30363d;
+}
+
+.mdstyled-designer-title-input:focus,
+.mdstyled-designer-body:focus {
+  outline: none;
+  border-color: #1f6feb;
+}
+
+.mdstyled-designer-add {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 120px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #8b949e;
+  background: transparent;
+  border: 1.5px dashed #30363d;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: color 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+}
+
+.mdstyled-designer-add:hover,
+.mdstyled-designer-add:focus-visible {
+  color: #1f6feb;
+  border-color: #1f6feb;
+  background: rgba(88,166,255,0.07);
+  outline: none;
+}
+
+@media (max-width: 760px) {
+  .mdstyled-designer-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+/* ── Table designer ── */
+
+.mdstyled-tdesign-scroll {
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.mdstyled-tdesign-scroll[hidden] {
+  display: none;
+}
+
+.mdstyled-tdesign {
+  width: 100%;
+  margin: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.85rem;
+  background: transparent;
+  box-shadow: none;
+}
+
+.mdstyled-tdesign th,
+.mdstyled-tdesign td {
+  padding: 0;
+  background: #161b22;
+  border: none;
+  border-right: 1px solid #30363d;
+  border-bottom: 1px solid #30363d;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.mdstyled-tdesign tr > :first-child {
+  border-left: 1px solid #30363d;
+}
+
+.mdstyled-tdesign .mdstyled-tdesign-tools th {
+  background: transparent;
+  border: none;
+  padding: 0 2px 4px;
+}
+
+.mdstyled-tdesign .mdstyled-tdesign-header th {
+  border-top: 1px solid #30363d;
+  background: #161b22;
+}
+
+.mdstyled-tdesign-coltools {
+  min-width: 150px;
+}
+
+.mdstyled-tdesign-coltools,
+.mdstyled-tdesign-rowtools {
+  white-space: nowrap;
+}
+
+.mdstyled-tdesign-coltools > * {
+  vertical-align: middle;
+}
+
+.mdstyled-tdesign-align {
+  display: inline-flex;
+  margin-right: 4px;
+  overflow: hidden;
+  background: rgba(240,246,252,0.05);
+  border: 1px solid #30363d;
+  border-radius: 6px;
+}
+
+.mdstyled-tdesign .mdstyled-tdesign-btn {
+  width: 22px;
+  height: 22px;
+  opacity: 0.6;
+}
+
+.mdstyled-tdesign-align .mdstyled-tdesign-btn {
+  border-radius: 0;
+}
+
+.mdstyled-tdesign .mdstyled-tdesign-btn:hover:not(:disabled),
+.mdstyled-tdesign .mdstyled-tdesign-btn.active {
+  opacity: 1;
+}
+
+.mdstyled-tdesign .mdstyled-tdesign-btn.active {
+  color: #ffffff;
+  background: #1f6feb;
+}
+
+.mdstyled-tdesign .mdstyled-tdesign-btn:disabled {
+  opacity: 0.2;
+}
+
+.mdstyled-tdesign .mdstyled-designer-remove:hover:not(:disabled) {
+  color: #f85149;
+  background: rgba(248,81,73,0.16);
+}
+
+.mdstyled-tdesign .mdstyled-tdesign-rowtools {
+  width: 1%;
+  padding: 0 4px;
+  background: rgba(240,246,252,0.05);
+}
+
+.mdstyled-tdesign .mdstyled-tdesign-corner {
+  width: 1%;
+}
+
+.mdstyled-tdesign-rownum {
+  display: inline-block;
+  min-width: 18px;
+  margin-right: 2px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #8b949e;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  vertical-align: middle;
+}
+
+/* Row tools stay quiet until you are on the row. */
+.mdstyled-tdesign tbody .mdstyled-tdesign-rowtools .mdstyled-tdesign-btn {
+  visibility: hidden;
+}
+
+.mdstyled-tdesign tbody tr:hover .mdstyled-tdesign-rowtools .mdstyled-tdesign-btn,
+.mdstyled-tdesign tbody tr:focus-within .mdstyled-tdesign-rowtools .mdstyled-tdesign-btn {
+  visibility: visible;
+}
+
+.mdstyled-tdesign-input {
+  display: block;
+  width: 100%;
+  min-width: 120px;
+  box-sizing: border-box;
+  padding: 7px 9px;
+  font-family: inherit;
+  font-size: inherit;
+  color: #c9d1d9;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+}
+
+.mdstyled-tdesign-input.mdstyled-tdesign-head {
+  font-weight: 700;
+}
+
+.mdstyled-tdesign-input:focus {
+  outline: 2px solid #1f6feb;
+  outline-offset: -2px;
+  background: #0d1117;
+}
+
+.mdstyled-tdesign tbody tr:focus-within td:not(.mdstyled-tdesign-rowtools) {
+  background: rgba(88,166,255,0.07);
+}
+
+/* ── Delete ── */
+
+.mdstyled-actions-spacer {
+  flex: 1;
+}
+
+/* Quiet and icon-only at rest: it is the one action here you cannot undo from the
+   preview, so it does not compete with Save. */
+.mdstyled-delete {
+  gap: 0;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  overflow: hidden;
+  color: #8b949e;
+  background: transparent;
+  border-color: transparent;
+  transition: width 0.16s ease, padding 0.16s ease, color 0.14s ease,
+              background 0.14s ease, border-color 0.14s ease;
+}
+
+.mdstyled-delete .mdstyled-btn-label {
+  display: none;
+  white-space: nowrap;
+}
+
+.mdstyled-delete:hover:not(:disabled),
+.mdstyled-delete:focus-visible {
+  color: #f85149;
+  background: rgba(248,81,73,0.16);
+  border-color: transparent;
+}
+
+/* Armed: it says what the next click does, and looks like it means it. */
+.mdstyled-delete.armed,
+.mdstyled-delete.armed:hover:not(:disabled) {
+  gap: 7px;
+  width: auto;
+  padding: 0 12px;
+  color: #fff;
+  background: #f85149;
+  border-color: #f85149;
+}
+
+.mdstyled-delete.armed .mdstyled-btn-label {
+  display: inline;
+}
+
+.mdstyled-delete:disabled {
+  opacity: 0.4;
+}
+
+/* ── Emoji ── */
+
+.mdstyled-emoji-popover {
+  width: 320px;
+  padding: 10px;
+}
+
+.mdstyled-emoji-search {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  font-family: inherit;
+  font-size: 0.78rem;
+  color: #c9d1d9;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+}
+
+.mdstyled-emoji-search:focus {
+  outline: none;
+  border-color: #1f6feb;
+  box-shadow: 0 0 0 2px rgba(56,139,253,0.35);
+}
+
+.mdstyled-emoji-body {
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.mdstyled-emoji-title {
+  padding: 6px 2px 4px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #8b949e;
+}
+
+.mdstyled-emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 2px;
+}
+
+.mdstyled-emoji {
+  width: 100%;
+  height: 30px;
+  padding: 0;
+  font-size: 1.05rem;
+  line-height: 1;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.1s ease, transform 0.1s ease;
+}
+
+.mdstyled-emoji:hover,
+.mdstyled-emoji:focus-visible {
+  background: #30363d;
+  transform: scale(1.15);
+  outline: none;
+}
+
+.mdstyled-emoji-none {
+  margin: 8px 2px;
+  font-size: 0.75rem;
+  color: #8b949e;
+}
+
+/* ── `:shortcode` suggestions ── */
+
+.mdstyled-emoji-suggest {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+  padding: 6px;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(1,4,9,0.7);
+}
+
+.mdstyled-emoji-suggest[hidden] {
+  display: none !important;
+}
+
+.mdstyled-emoji-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  font-family: inherit;
+  font-size: 0.72rem;
+  color: #c9d1d9;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.mdstyled-emoji-option:hover {
+  background: #30363d;
+}
+
+.mdstyled-emoji-option.active {
+  color: #ffffff;
+  background: #1f6feb;
+}
+
+.mdstyled-emoji-glyph {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.mdstyled-emoji-name {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+}

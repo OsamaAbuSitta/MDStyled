@@ -6,41 +6,27 @@ title: Installation
 
 # Installation
 
-## Install the extension
+MdStyled installs exactly like any other VS Code extension: no special steps, no build tools, no configuration.
 
-1. Open **VS Code**.
-2. Go to the **Extensions** view (`Cmd`+`Shift`+`X` on macOS, `Ctrl`+`Shift`+`X` on Windows/Linux).
-3. Search for **MdStyled**.
-4. Click **Install**.
+## From VS Code
 
-If you have the `.vsix` file from the repository, you can install it manually:
+1. Open the **Extensions** view (`Cmd`+`Shift`+`X` on macOS, `Ctrl`+`Shift`+`X` on Windows/Linux).
+2. Search for **MdStyled**.
+3. Click **Install**.
 
-```bash
-code --install-extension mdstyled-0.1.5.vsix
-```
+## From the marketplace
 
-## Requirements
+Open the MdStyled page in the **VS Code Marketplace** from your browser and click **Install**, and VS Code will handle the rest.
 
-- VS Code `1.85.0` or newer.
-- Node.js `18+` only needed for building from source (see [Development](./development)).
+## After installing
 
-## Your first preview
+Launch or reload VS Code, then you're ready to go:
 
-1. Open any Markdown file.
-2. Run **MdStyled: Open Preview** from the command palette (`Cmd`+`Shift`+`P`).
-
-If your file has no styling of its own, MdStyled will ask you to choose a **default template** the first time. Pick `default-light`, `default-dark`, one of the interactive variants, or the **editable** templates — and from then on, unstyled Markdown previews beautifully with that theme.
-
-:::tip
-Choose an **editable** template (`editable-dark` or `editable-light`) and your preview becomes editable too — click **Edit** to change blocks right in the styled view. See [In-Preview Editing](./editing).
-:::
-
-## Try the starter
-
-Run **MdStyled: Apply Template** to scaffold a starter theme into `.mdstyled/` and insert the `@style` / `@script` directives into your document. Now edit your CSS and watch the preview refresh live.
+- Open a Markdown file and run **MdStyled: Open Preview** to see the styled result.
+- Get a starter theme with **MdStyled: Apply Template**.
+- On the first preview of an unstyled file, MdStyled asks which [template](./templates) should be the default. Pick one and unstyled Markdown previews beautifully from then on.
 
 ## What's next?
 
-- Learn how to apply [classes, IDs, and attributes](./syntax) with comment selectors.
-- Explore the [built-in templates](./templates).
-- Enable the [interactive features](./interactive) for data-heavy documents.
+- Explore the [core syntax](./syntax).
+- See the [templates](./templates) and [in-preview editing](./editing).

@@ -11,14 +11,14 @@ export interface MdStyledTemplate {
 
 const templates: MdStyledTemplate[] = [
   {
-    name: 'default-light',
-    description: 'Light documentation theme with TOC sidebar, copy buttons, and mermaid support',
+    name: 'editable-light',
+    description: 'Interactive light theme plus an Edit button for editing the Markdown in the preview',
     hasCSS: true,
     hasJS: true,
   },
   {
-    name: 'default-dark',
-    description: 'Dark documentation theme with TOC sidebar, copy buttons, and mermaid support',
+    name: 'editable-dark',
+    description: 'Interactive dark theme plus an Edit button for editing the Markdown in the preview',
     hasCSS: true,
     hasJS: true,
   },
@@ -35,18 +35,25 @@ const templates: MdStyledTemplate[] = [
     hasJS: true,
   },
   {
-    name: 'editable-light',
-    description: 'Interactive light theme plus an Edit button for editing the Markdown in the preview',
+    name: 'default-light',
+    description: 'Light documentation theme with TOC sidebar, copy buttons, and mermaid support',
     hasCSS: true,
     hasJS: true,
   },
   {
-    name: 'editable-dark',
-    description: 'Interactive dark theme plus an Edit button for editing the Markdown in the preview',
+    name: 'default-dark',
+    description: 'Dark documentation theme with TOC sidebar, copy buttons, and mermaid support',
     hasCSS: true,
     hasJS: true,
   },
 ];
+
+/** The editable template that matches the current VS Code theme, light or dark. */
+export function editableForTheme(): string {
+  const kind = vscode.window.activeColorTheme?.kind;
+  const dark = kind === vscode.ColorThemeKind.Dark || kind === vscode.ColorThemeKind.HighContrast;
+  return dark ? 'editable-dark' : 'editable-light';
+}
 
 export function getTemplates(): MdStyledTemplate[] {
   return templates;
@@ -113,10 +120,18 @@ export async function applyTemplate(editor: vscode.TextEditor, extensionPath: st
   });
   if (!chosen) return;
 
-  const tmpl = templates.find(t => t.name === chosen.label);
-  if (!tmpl) return;
+  await applyTemplateByName(editor.document.uri, extensionPath, chosen.label);
+}
 
-  const mdDir = path.dirname(editor.document.uri.fsPath);
+/**
+ * Copies a template into `.mdstyled/` next to the file and points the file at it.
+ * Works from a URI, so the context menus can apply it to a file that is not open.
+ */
+export async function applyTemplateByName(uri: vscode.Uri, extensionPath: string, name: string): Promise<boolean> {
+  const tmpl = templates.find(t => t.name === name);
+  if (!tmpl) return false;
+
+  const mdDir = path.dirname(uri.fsPath);
 
   const { used } = await copyWithConflictCheck(extensionPath, tmpl, mdDir);
 
@@ -127,7 +142,7 @@ export async function applyTemplate(editor: vscode.TextEditor, extensionPath: st
   });
 
   // Remove any existing @style / @script directives that point into .mdstyled/
-  const doc = editor.document;
+  const doc = await vscode.workspace.openTextDocument(uri);
   const text = doc.getText();
   const cleaned = text.replace(/<!--\s*@(style|script):\s*\.\/\.mdstyled\/\S+\s*-->\s*\n?/g, '');
 
@@ -146,8 +161,10 @@ export async function applyTemplate(editor: vscode.TextEditor, extensionPath: st
 
   const edit = new vscode.WorkspaceEdit();
   // Full replacement since we already stripped old directives
-  const fullReplacement = insertText + cleaned.slice(insertPos);
+  const head = frontmatterMatch ? cleaned.slice(0, insertPos) : '';
+  const fullReplacement = head + insertText + cleaned.slice(insertPos);
   edit.replace(doc.uri, new vscode.Range(0, 0, doc.lineCount, 0), fullReplacement);
   await vscode.workspace.applyEdit(edit);
   await doc.save();
+  return true;
 }

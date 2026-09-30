@@ -6,15 +6,15 @@ title: Templates
 
 # Templates
 
-Templates give you an instant, polished documentation layout — without writing a single line of CSS. They're ready-made examples of the [MdStyled engine](./how-it-works): the output is real HTML you can override, extend, or throw away in favor of your own CSS and JS.
+Templates give you an instant, polished documentation layout without writing a single line of CSS. They're ready-made examples of the [MdStyled engine](./how-it-works): the output is real HTML you can override, extend, or throw away in favor of your own CSS and JS.
 
-MdStyled ships with three families: **default**, **interactive**, and **editable**. The **editable** templates are the headline option — they combine everything from the interactive templates with in-preview Markdown editing.
+MdStyled ships with three families: **default**, **interactive**, and **editable**. The **editable** templates are the headline option: they combine everything from the interactive templates with in-preview Markdown editing.
 
 ## Two ways to use a template
 
 ### Two ways to use a template
 
-Templates are just CSS/JS files — applying one is the same as writing your own. You can start from a template, then edit freely or replace it entirely with your own styles and scripts.
+Templates are just CSS/JS files; applying one is the same as writing your own. You can start from a template, then edit freely or replace it entirely with your own styles and scripts.
 
 ### Global default
 
@@ -31,7 +31,7 @@ The first time you preview an unstyled Markdown file, MdStyled asks which templa
 Pick `none` to keep unstyled files unstyled.
 
 :::note
-A file that declares its own styles or scripts always wins — the global default only applies when nothing else resolves.
+A file that declares its own styles or scripts always wins; the global default only applies when nothing else resolves.
 :::
 
 ### Per-file
@@ -53,29 +53,29 @@ MdStyled ships with six templates:
 
 ### What the default templates include
 
-- **TOC sidebar** — all heading levels (H1–H6) with hierarchical indentation and scroll-aware active highlighting.
-- **Copy buttons** — fixed-position copy button on every code block that stays put while scrolling horizontally.
-- **Syntax highlighting** — code block styling with theme-appropriate colors.
-- **Mermaid diagrams** — renders ` ```mermaid ` blocks inline.
+- **TOC sidebar**: all heading levels (H1-H6) with hierarchical indentation and scroll-aware active highlighting.
+- **Copy buttons**: fixed-position copy button on every code block that stays put while scrolling horizontally.
+- **Syntax highlighting**: code block styling with theme-appropriate colors.
+- **Mermaid diagrams**: renders ` ```mermaid ` blocks inline.
 
 ### Interactive templates
 
 The **interactive-light** and **interactive-dark** templates add client-side interactivity on top of the defaults:
 
-- **Interactive tables** — search, sort, and paginate every Markdown table.
-- **Collapsible sections** — every heading becomes an accordion.
-- **Callout blocks** — note, warning, danger, and success callouts.
-- **Task progress bars** — live progress above checkbox lists.
-- **Cards** — turn lists into a responsive card grid.
+- **Interactive tables**: search, sort, and paginate every Markdown table.
+- **Collapsible sections**: every heading becomes an accordion.
+- **Callout blocks**: note, warning, danger, and success callouts.
+- **Task progress bars**: live progress above checkbox lists.
+- **Cards**: turn lists into a responsive card grid.
 
 Dive into the details on the [Interactivity](./interactive) page.
 
 ### Editable templates (the main option)
 
-The **editable-light** and **editable-dark** templates are the most complete offering. They include everything from the interactive templates — interactive tables, collapsible sections, callouts, task progress, cards — **plus in-preview Markdown editing**:
+The **editable-light** and **editable-dark** templates are the most complete offering. They include everything from the interactive templates (interactive tables, collapsible sections, callouts, task progress, cards), **plus in-preview Markdown editing**:
 
 - Click **Edit** (the floating button in the corner) to enter edit mode.
-- Click any block — paragraph, heading, list, code fence, or table — to edit its Markdown source right in the preview.
+- Click any block (paragraph, heading, list, code fence, or table) to edit its Markdown source right in the preview.
 - Use **Source** to open the whole Markdown file in a full-window editor.
 - Save your changes and the preview re-renders instantly, keeping your scroll position.
 

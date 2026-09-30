@@ -1,7 +1,9 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import * as fs from 'fs';
 import { renderMdStyled, renderMarkdownFragment, hasFileLevelStyling, TemplateFallback } from './engine';
-import { resolveDefaultTemplateAssets } from './defaultTemplate';
+import { resolveDefaultTemplateAssets, getTemplateAssets } from './defaultTemplate';
+import { editableForTheme } from './templates';
 import sanitizeHtml from 'sanitize-html';
 
 const SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
@@ -46,6 +48,16 @@ const SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
   allowVulnerableTags: true
 };
 
+/** Stands for "the editable template in the current theme's light or dark". */
+export const EDIT_TEMPLATE = 'editable-auto';
+
+export interface PreviewOptions {
+  /** Show the file with this template instead of its own, without touching the file. */
+  template?: string;
+  /** Open with the in-preview editor already on. */
+  startEditing?: boolean;
+}
+
 export class MdStyledPreviewProvider {
   private static panels = new Map<string, MdStyledPreviewProvider>();
   private static _activePanel: MdStyledPreviewProvider | undefined;
@@ -57,8 +69,16 @@ export class MdStyledPreviewProvider {
   /** An editor is open inside the preview - re-rendering now would discard it. */
   private editorOpen = false;
   private refreshPending = false;
+  /** Markdown files followed from links in the preview, most recent last. */
+  private history: vscode.Uri[] = [];
+  /** A template for this preview only, never written to the file. EDIT_TEMPLATE follows the theme. */
+  private templateOverride: string | undefined;
+  /** Turn the in-preview editor on with the next render, once. */
+  private startEditing = false;
 
-  public static createOrShow(extensionUri: vscode.Uri, column: vscode.ViewColumn, documentUri: vscode.Uri): void {
+  /** Opens or brings forward the preview of a file. Without a template in `options`
+      the file is shown with its own styling again. */
+  public static createOrShow(extensionUri: vscode.Uri, column: vscode.ViewColumn, documentUri: vscode.Uri, options: PreviewOptions = {}): void {
     const key = documentUri.toString();
     const title = path.basename(documentUri.fsPath) + ' - MdStyled Preview';
     const existing = MdStyledPreviewProvider.panels.get(key);
@@ -66,6 +86,8 @@ export class MdStyledPreviewProvider {
       existing.panel.title = title;
       existing.panel.reveal(column);
       existing.documentUri = documentUri;
+      existing.templateOverride = options.template;
+      existing.startEditing = !!options.startEditing;
       existing.refresh();
       return;
     }
@@ -79,17 +101,31 @@ export class MdStyledPreviewProvider {
         localResourceRoots: [
           vscode.Uri.joinPath(extensionUri, 'node_modules'),
           vscode.Uri.file(path.dirname(documentUri.fsPath)),
+          // Following a link to another Markdown file must not break its images.
+          ...(vscode.workspace.workspaceFolders || []).map(f => f.uri),
         ]
       }
     );
 
-    const provider = new MdStyledPreviewProvider(panel, extensionUri, documentUri);
+    const provider = new MdStyledPreviewProvider(panel, extensionUri, documentUri, options);
     MdStyledPreviewProvider.panels.set(key, provider);
   }
 
   public static refreshAll(): void {
     for (const provider of MdStyledPreviewProvider.panels.values()) {
       provider.refresh();
+    }
+  }
+
+  /** Re-renders the preview of one file, if it has one open. */
+  public static refreshDocument(documentUri: vscode.Uri): void {
+    MdStyledPreviewProvider.panels.get(documentUri.toString())?.refresh();
+  }
+
+  /** The theme changed: previews showing the theme-matched editable template follow it. */
+  public static refreshThemed(): void {
+    for (const provider of MdStyledPreviewProvider.panels.values()) {
+      if (provider.templateOverride === EDIT_TEMPLATE) provider.refresh();
     }
   }
 
@@ -102,10 +138,12 @@ export class MdStyledPreviewProvider {
     return first?.documentUri;
   }
 
-  private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, documentUri: vscode.Uri) {
+  private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, documentUri: vscode.Uri, options: PreviewOptions = {}) {
     this.panel = panel;
     this.extensionUri = extensionUri;
     this.documentUri = documentUri;
+    this.templateOverride = options.template;
+    this.startEditing = !!options.startEditing;
 
     this.disposables.push(
       panel.onDidDispose(() => this.dispose()),
@@ -168,12 +206,36 @@ export class MdStyledPreviewProvider {
       return true;
     }
 
+    // Styles and scripts next to the file, or in the `.mdstyled/` folder templates are copied to.
     const ext = path.extname(uri.fsPath).toLowerCase();
     if (['.css', '.js', '.mdstyled', '.mdjs'].includes(ext)) {
-      return path.dirname(uri.fsPath) === path.dirname(this.documentUri.fsPath);
+      const dir = path.dirname(uri.fsPath);
+      const docDir = path.dirname(this.documentUri.fsPath);
+      return dir === docDir || dir === path.join(docDir, '.mdstyled');
     }
 
     return false;
+  }
+
+  /** A relative link to a Markdown file that actually exists, or undefined. */
+  private resolveMarkdownLink(href: string): vscode.Uri | undefined {
+    if (!href || /^[a-z][a-z0-9+.-]*:/i.test(href)) return undefined;
+
+    const withoutFragment = href.split('#')[0].split('?')[0];
+    if (!/\.(md|markdown)$/i.test(withoutFragment)) return undefined;
+
+    const target = path.resolve(path.dirname(this.documentUri.fsPath), decodeURIComponent(withoutFragment));
+    return fs.existsSync(target) ? vscode.Uri.file(target) : undefined;
+  }
+
+  /** Points this panel at another Markdown file, keeping the panel registry in step. */
+  private goTo(uri: vscode.Uri): void {
+    MdStyledPreviewProvider.panels.delete(this.documentUri.toString());
+    this.documentUri = uri;
+    MdStyledPreviewProvider.panels.set(uri.toString(), this);
+    this.panel.title = path.basename(uri.fsPath) + ' - MdStyled Preview';
+    this.editorOpen = false;
+    this.updateWebview();
   }
 
   /** Serves the requests the in-preview editor makes: rendering Markdown, and writing it back. */
@@ -188,6 +250,40 @@ export class MdStyledPreviewProvider {
       if (!this.editorOpen && this.refreshPending) {
         this.refreshPending = false;
         this.refresh();
+      }
+      return;
+    }
+
+    if (msg.type === 'mdstyled.navigate') {
+      const href = typeof msg.href === 'string' ? msg.href : '';
+      const target = this.resolveMarkdownLink(href);
+      if (!target) {
+        await reply(false, `No Markdown file at ${href}`);
+        return;
+      }
+      this.history.push(this.documentUri);
+      this.goTo(target);
+      await reply(true);
+      return;
+    }
+
+    if (msg.type === 'mdstyled.back') {
+      const previous = this.history.pop();
+      if (!previous) {
+        await reply(false, 'Nothing to go back to.');
+        return;
+      }
+      this.goTo(previous);
+      await reply(true);
+      return;
+    }
+
+    if (msg.type === 'mdstyled.export') {
+      try {
+        await vscode.commands.executeCommand('mdstyled.export', this.documentUri);
+        await reply(true);
+      } catch (err) {
+        await reply(false, err instanceof Error ? err.message : String(err));
       }
       return;
     }
@@ -313,11 +409,18 @@ export class MdStyledPreviewProvider {
       // The file declares no styles or scripts of its own -> use the global default template.
       const editingEnabled = vscode.workspace.getConfiguration('mdstyled').get<boolean>('editing.enabled', true);
 
+      // A template picked for this preview (MdStyled Edit) wins over the file's own.
+      const overrideName = this.templateOverride === EDIT_TEMPLATE ? editableForTheme() : this.templateOverride;
+      const templateOverride = overrideName ? getTemplateAssets(this.extensionUri.fsPath, overrideName) : undefined;
+
       let fallback: TemplateFallback | undefined;
-      if (!(await hasFileLevelStyling(this.documentUri.fsPath))) {
+      if (!templateOverride && !(await hasFileLevelStyling(this.documentUri.fsPath))) {
         fallback = await resolveDefaultTemplateAssets(this.extensionUri.fsPath, { prompt: true });
       }
-      const rawHtml = await renderMdStyled(this.documentUri.fsPath, enabledExtensions, mermaidUri.toString(), fallback, editingEnabled);
+      const startEditing = this.startEditing;
+      this.startEditing = false;
+      const rawHtml = await renderMdStyled(this.documentUri.fsPath, enabledExtensions, mermaidUri.toString(), fallback, editingEnabled, this.history.length > 0,
+        { templateOverride, startEditing });
       const sanitized = sanitizeHtml(rawHtml, SANITIZE_OPTIONS);
       const styleMatch = sanitized.match(/<style>([\s\S]*?)<\/style>/i);
       const cssLen = styleMatch ? styleMatch[1].trim().length : 0;

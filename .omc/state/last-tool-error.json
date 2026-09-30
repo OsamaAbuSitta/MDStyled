@@ -1,7 +1,0 @@
-{
-  "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"cat > /tmp/mdst/fidelity-test.js <<'EOF'\\n// What does a rich-mode save do to Markdown that is written differently than we emit?\\nconst { JSDOM } = require('./node_modules/jsdom');\\nconst ...",
-  "error": "Exit code 1\nnode:internal/modules/cjs/loader:1459\n  throw err;\n  ^\n\nError: Cannot find module './node_modules/jsdom'\nRequire stack:\n- /private/tmp/mdst/fidelity-test.js\n    at Module._resolveFilename (node:internal/modules/cjs/loader:1456:15)\n    at defaultResolveImpl (node:internal/modules/cjs/loader:1066:19)\n    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1071:22)\n    at Module._load (node:internal/modules/cjs/loader:1242:25)\n    at wrapModuleLoad (node:internal/modules/cjs/loa...",
-  "timestamp": "2026-09-08T22:02:40.552Z",
-  "retry_count": 1
-}

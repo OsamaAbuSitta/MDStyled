@@ -59,6 +59,14 @@
     return title ? ' "' + title.replace(/"/g, '\\"') + '"' : '';
   }
 
+  function hasContentAfter(node) {
+    for (var next = node.nextSibling; next; next = next.nextSibling) {
+      if (next.nodeType === 3 && next.nodeValue.trim()) return true;
+      if (next.nodeType === 1 && next.tagName !== 'BR' && (next.textContent.trim() || next.tagName === 'IMG' || next.querySelector('img'))) return true;
+    }
+    return false;
+  }
+
   function serializeInline(node) {
     var out = '';
 
@@ -73,7 +81,13 @@
 
       var tag = child.tagName;
 
-      if (tag === 'BR') { out += '\\\n'; continue; }
+      if (tag === 'BR') {
+        /* A trailing <br> is only the browser holding an empty line open, not a
+           line break anyone typed - writing it would leave a stray backslash. */
+        if (!hasContentAfter(child)) continue;
+        out += '\\\n';
+        continue;
+      }
       if (tag === 'INPUT') continue;
 
       if (tag === 'STRONG' || tag === 'B') {
@@ -152,12 +166,23 @@
     var indent = repeatStr('  ', depth);
     var out = [];
 
+    /* A loose list - blank lines between items - renders each item's text in <p>s. */
+    var loose = Array.prototype.some.call(list.children, function (li) {
+      return li.tagName === 'LI' && Array.prototype.some.call(li.children, function (c) { return c.tagName === 'P'; });
+    });
+
     Array.prototype.slice.call(list.children).forEach(function (li) {
       if (li.tagName !== 'LI') return;
 
       var checkbox = li.querySelector('input[type="checkbox"]');
-      var marker = ordered ? (index++) + '. ' : '- ';
+      var bullet = ordered ? (index++) + '. ' : '- ';
+      var marker = bullet;
       if (checkbox) marker += checkbox.checked ? '[x] ' : '[ ] ';
+
+      if (loose) {
+        out.push(serializeLooseItem(li, indent, marker, repeatStr(' ', bullet.length), depth));
+        return;
+      }
 
       var inlineParts = [];
       var nested = [];
@@ -181,7 +206,57 @@
       nested.forEach(function (block) { out.push(block); });
     });
 
-    return out.join('\n');
+    return out.join(loose ? '\n\n' : '\n');
+  }
+
+  /* One item of a loose list: each paragraph on its own, indented under the marker,
+     with a blank line before it - the way the Markdown was written. */
+  function serializeLooseItem(li, indent, marker, pad, depth) {
+    var blocks = [];
+    var run = [];
+
+    function flush() {
+      var text = run.join('').trim();
+      if (text) blocks.push({ text: text });
+      run = [];
+    }
+
+    Array.prototype.slice.call(li.childNodes).forEach(function (child) {
+      if (child.nodeType === 1 && (child.tagName === 'UL' || child.tagName === 'OL')) {
+        flush();
+        blocks.push({ nested: serializeList(child, depth + 1) });
+      } else if (child.nodeType === 1 && child.tagName === 'P') {
+        flush();
+        var para = serializeInline(child).trim();
+        if (para) blocks.push({ text: para });
+      } else if (child.nodeType === 1 && child.tagName === 'INPUT') {
+        /* the task checkbox, already turned into a marker */
+      } else if (child.nodeType === 3) {
+        run.push(escapeText(child.nodeValue.replace(/\s+/g, ' ')));
+      } else if (child.nodeType === 1) {
+        run.push(serializeInline({ childNodes: [child] }));
+      }
+    });
+    flush();
+
+    var lines = [];
+    blocks.forEach(function (block, i) {
+      if (block.nested) {
+        if (i === 0) lines.push(indent + marker.replace(/\s+$/, ''));
+        lines.push('', block.nested);
+        return;
+      }
+      var paraLines = block.text.split('\n');
+      if (i === 0) {
+        lines.push(indent + marker + paraLines[0]);
+        paraLines.slice(1).forEach(function (l) { lines.push(indent + pad + l); });
+      } else {
+        lines.push('');
+        paraLines.forEach(function (l) { lines.push(indent + pad + l); });
+      }
+    });
+    if (lines.length === 0) lines.push(indent + marker.replace(/\s+$/, ''));
+    return lines.join('\n');
   }
 
   function serializeBlock(el, depth) {
@@ -297,6 +372,17 @@
     var fence = text.match(/^```[\w-]*\n([\s\S]*?)\n?```$/);
     if (fence) text = fence[1];
 
+    if (/^\|/.test(text)) {
+      /* Strip the pipes and the delimiter row when leaving a table. */
+      return text.split('\n')
+        .filter(function (line) { return !/^\s*\|?[\s:|-]+\|?\s*$/.test(line); })
+        .map(function (line) {
+          return line.replace(/^\s*\|/, '').replace(/\|\s*$/, '').split('|')
+            .map(function (cell) { return cell.trim(); }).join(' ').trim();
+        })
+        .filter(function (line) { return line !== ''; });
+    }
+
     return text.split('\n')
       .map(function (line) { return line.replace(LIST_OR_HEADING, '$1').trim(); })
       .filter(function (line, i, all) { return line !== '' || all.length === 1; });
@@ -312,6 +398,17 @@
     if (type === 'task') return lines.map(function (l) { return '- [ ] ' + l; }).join('\n');
     if (type === 'ol') return lines.map(function (l, i) { return (i + 1) + '. ' + l; }).join('\n');
     if (type === 'code') return '```\n' + lines.join('\n') + '\n```';
+    if (type === 'hr') return '---';
+
+    if (type === 'table') {
+      /* First line becomes the header, the rest become rows. */
+      var header = lines[0] || 'Column';
+      var body = lines.slice(1);
+      if (body.length === 0) body = ['Cell'];
+      return ['| ' + header + ' |', '| --- |']
+        .concat(body.map(function (l) { return '| ' + l.replace(/\|/g, '\\|') + ' |'; }))
+        .join('\n');
+    }
 
     var heading = type.match(/^h([1-6])$/);
     if (heading) return repeatStr('#', parseInt(heading[1], 10)) + ' ' + lines.join(' ');

@@ -10,7 +10,7 @@ MdStyled is a VS Code extension for authors who want rich, branded, interactive 
 
 ## Author
 
-**Osama Abu-Sitta** — creator and maintainer.
+**Osama Abu-Sitta**: creator and maintainer.
 
 ## License
 
@@ -42,5 +42,5 @@ SOFTWARE.
 
 ## Links
 
-- **Repository** — [github.com/OsamaAbuSitta/MDStyled](https://github.com/OsamaAbuSitta/MDStyled)
-- **Homepage** — [GitHub readme](https://github.com/OsamaAbuSitta/MDStyled#readme)
+- **Repository**: [github.com/OsamaAbuSitta/MDStyled](https://github.com/OsamaAbuSitta/MDStyled)
+- **Homepage**: [GitHub readme](https://github.com/OsamaAbuSitta/MDStyled#readme)

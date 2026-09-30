@@ -6,9 +6,9 @@ title: Core Syntax
 
 # Core Syntax
 
-This is the control language for the [MdStyled engine](./how-it-works): how you attach CSS and JavaScript to your polished HTML output, and how you target blocks with classes, IDs, and attributes — all from invisible comments that never appear in the result.
+This is the control language for the [MdStyled engine](./how-it-works): how you attach CSS and JavaScript to your polished HTML output, and how you target blocks with classes, IDs, and attributes, all from invisible comments that never appear in the result.
 
-## Directives — attach styles and scripts
+## Directives: attach styles and scripts
 
 ```md
 <!-- @style: ./theme.css -->
@@ -27,9 +27,9 @@ mdstyled:
 ---
 ```
 
-Use as many as you like — each one loads an additional asset.
+Use as many as you like; each one loads an additional asset.
 
-## Selectors — style the next block
+## Selectors: style the next block
 
 Selectors apply to the *next renderable block* and are removed from the preview.
 
@@ -58,7 +58,7 @@ You can combine them in one comment:
 <!-- .callout #special [role=note] -->
 ```
 
-Or stack several comments — they all apply to the next block.
+Or stack several comments; they all apply to the next block.
 
 ## Structural directives
 
@@ -79,7 +79,7 @@ Wraps the full document in `<div class="mdstyled-root report">`.
 
 ## Auto-discovery
 
-If a Markdown file has matching companion files, MdStyled can load them automatically — no directives needed:
+If a Markdown file has matching companion files, MdStyled can load them automatically, with no directives needed:
 
 - `example.md` → `example.css`
 - `example.md` → `example.js`
@@ -103,5 +103,5 @@ You can also define shared defaults with `mdstyled.config.json`.
 ## Tips
 
 - Comments are only treated as directives/selectors when they start with `.`, `#`, `@`, or `[`. A normal comment like `<!-- just a note -->` stays in place and is ignored.
-- Selectors apply to the *next* renderable block — paragraphs, lists, blockquotes, code blocks, and headings.
+- Selectors apply to the *next* renderable block: paragraphs, lists, blockquotes, code blocks, and headings.
 - Combine with [templates](./templates) for instant structure, and add your own classes on top.

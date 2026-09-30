@@ -1,8 +1,8 @@
 {
   "name": "mdstyled",
   "displayName": "MdStyled",
-  "description": "Style Markdown previews with external CSS/JS and comment selectors",
-  "version": "0.1.5",
+  "description": "Edit Markdown visually in a styled live preview: click to edit, table and card designers, six themes, and HTML/PDF export. Your .md stays clean.",
+  "version": "1.0.0",
   "publisher": "OAS",
   "author": "Osama Abu-Sitta",
   "license": "MIT",
@@ -19,9 +19,20 @@
   ],
   "keywords": [
     "markdown",
+    "markdown editor",
+    "wysiwyg",
+    "visual editor",
+    "markdown preview",
+    "live preview",
+    "table editor",
+    "markdown table",
+    "cards",
+    "checklist",
+    "themes",
     "css",
-    "style",
-    "preview",
+    "documentation",
+    "export pdf",
+    "export html",
     "mermaid"
   ],
   "engines": {
@@ -40,22 +51,22 @@
           "enum": [
             "",
             "none",
-            "default-light",
-            "default-dark",
+            "editable-light",
+            "editable-dark",
             "interactive-light",
             "interactive-dark",
-            "editable-light",
-            "editable-dark"
+            "default-light",
+            "default-dark"
           ],
           "enumDescriptions": [
             "Not chosen yet - MdStyled asks once on the first preview of an unstyled file",
             "No default template - preview unstyled Markdown",
-            "Light documentation theme",
-            "Dark documentation theme",
+            "Interactive light theme with in-preview Markdown editing",
+            "Interactive dark theme with in-preview Markdown editing",
             "Light theme with interactive tables",
             "Dark theme with interactive tables",
-            "Interactive light theme with in-preview Markdown editing",
-            "Interactive dark theme with in-preview Markdown editing"
+            "Light documentation theme",
+            "Dark documentation theme"
           ],
           "default": "",
           "markdownDescription": "Template used in the preview when a Markdown file declares no `@style` / `@script` of its own. Applied straight from the extension - nothing is written to the Markdown file or the workspace. Leave empty to be asked once on the first preview.",
@@ -87,6 +98,14 @@
     },
     "commands": [
       {
+        "command": "mdstyled.openWith",
+        "title": "Open with MdStyled",
+        "icon": {
+          "light": "icons/mdstyled-dark.svg",
+          "dark": "icons/mdstyled-light.svg"
+        }
+      },
+      {
         "command": "mdstyled.openPreview",
         "title": "MdStyled: Open Preview",
         "icon": {
@@ -99,12 +118,50 @@
         "title": "MdStyled: Open Preview to Side"
       },
       {
+        "command": "mdstyled.export",
+        "title": "MdStyled: Export to..."
+      },
+      {
         "command": "mdstyled.setDefaultTemplate",
         "title": "MdStyled: Set Default Template"
       },
       {
         "command": "mdstyled.applyTemplate",
         "title": "MdStyled: Apply Template"
+      },
+      {
+        "command": "mdstyled.edit",
+        "title": "MdStyled Edit"
+      },
+      {
+        "command": "mdstyled.applyTemplate.editable-light",
+        "title": "Editable Light",
+        "category": "MdStyled: Apply Template"
+      },
+      {
+        "command": "mdstyled.applyTemplate.editable-dark",
+        "title": "Editable Dark",
+        "category": "MdStyled: Apply Template"
+      },
+      {
+        "command": "mdstyled.applyTemplate.interactive-light",
+        "title": "Interactive Light",
+        "category": "MdStyled: Apply Template"
+      },
+      {
+        "command": "mdstyled.applyTemplate.interactive-dark",
+        "title": "Interactive Dark",
+        "category": "MdStyled: Apply Template"
+      },
+      {
+        "command": "mdstyled.applyTemplate.default-light",
+        "title": "Default Light",
+        "category": "MdStyled: Apply Template"
+      },
+      {
+        "command": "mdstyled.applyTemplate.default-dark",
+        "title": "Default Dark",
+        "category": "MdStyled: Apply Template"
       }
     ],
     "menus": {
@@ -117,15 +174,119 @@
       ],
       "editor/title/context": [
         {
-          "when": "resourceLangId == markdown",
-          "command": "mdstyled.openPreview"
+          "command": "mdstyled.openWith",
+          "when": "resourceExtname == .md || resourceExtname == .markdown",
+          "group": "1_mdstyled@1"
         },
         {
+          "command": "mdstyled.openPreview",
           "when": "resourceLangId == markdown",
-          "command": "mdstyled.applyTemplate"
+          "group": "1_mdstyled@2"
+        },
+        {
+          "command": "mdstyled.applyTemplate",
+          "when": "resourceLangId == markdown",
+          "group": "1_mdstyled@3"
+        },
+        {
+          "command": "mdstyled.edit",
+          "when": "resourceLangId == markdown",
+          "group": "1_mdstyled@4"
+        },
+        {
+          "submenu": "mdstyled.templates",
+          "when": "resourceLangId == markdown",
+          "group": "1_mdstyled@5"
+        },
+        {
+          "command": "mdstyled.export",
+          "when": "resourceLangId == markdown",
+          "group": "1_mdstyled@6"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "mdstyled.openWith",
+          "when": "resourceExtname == .md || resourceExtname == .markdown",
+          "group": "navigation@1"
+        },
+        {
+          "command": "mdstyled.edit",
+          "when": "resourceExtname == .md || resourceExtname == .markdown",
+          "group": "1_mdstyled@1"
+        },
+        {
+          "submenu": "mdstyled.templates",
+          "when": "resourceExtname == .md || resourceExtname == .markdown",
+          "group": "1_mdstyled@2"
+        },
+        {
+          "command": "mdstyled.export",
+          "when": "resourceExtname == .md || resourceExtname == .markdown",
+          "group": "1_mdstyled@3"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "mdstyled.openWith",
+          "when": "resourceLangId == markdown",
+          "group": "navigation@1"
+        },
+        {
+          "command": "mdstyled.edit",
+          "when": "resourceLangId == markdown",
+          "group": "navigation@2"
+        },
+        {
+          "submenu": "mdstyled.templates",
+          "when": "resourceLangId == markdown",
+          "group": "navigation@3"
+        },
+        {
+          "command": "mdstyled.export",
+          "when": "resourceLangId == markdown",
+          "group": "navigation@4"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "mdstyled.openWith",
+          "when": "false"
+        }
+      ],
+      "mdstyled.templates": [
+        {
+          "command": "mdstyled.applyTemplate.editable-light",
+          "group": "1_editable@1"
+        },
+        {
+          "command": "mdstyled.applyTemplate.editable-dark",
+          "group": "1_editable@2"
+        },
+        {
+          "command": "mdstyled.applyTemplate.interactive-light",
+          "group": "2_interactive@3"
+        },
+        {
+          "command": "mdstyled.applyTemplate.interactive-dark",
+          "group": "2_interactive@4"
+        },
+        {
+          "command": "mdstyled.applyTemplate.default-light",
+          "group": "3_default@5"
+        },
+        {
+          "command": "mdstyled.applyTemplate.default-dark",
+          "group": "3_default@6"
         }
       ]
-    }
+    },
+    "submenus": [
+      {
+        "id": "mdstyled.templates",
+        "label": "MdStyled Templates"
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "node esbuild.js --production",

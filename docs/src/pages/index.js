@@ -2,28 +2,29 @@ import React, { useEffect, useRef } from 'react';
 import Layout from '@theme/Layout';
 import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
+import useBaseUrl from '@docusaurus/useBaseUrl';
 import Heading from '@theme/Heading';
 
 const features = [
   {
     icon: '🎨',
     title: 'From Markdown to masterpiece',
-    body: 'MdStyled compiles Markdown into polished, real HTML — then hands you the reins. Shape every detail with the web technologies you already know.',
+    body: 'MdStyled compiles Markdown into polished, real HTML, then hands you the reins. Shape every detail with the web technologies you already know.',
   },
   {
-    icon: '💅',
+    icon: '⚡',
     title: 'CSS & JavaScript at full power',
-    body: 'Attach .css and .js via directives or frontmatter. Layouts, themes, charts, interactions, animations — no limits, no preview markup.',
+    body: 'Attach .css and .js via directives or frontmatter. Layouts, themes, charts, interactions, animations. No limits, no preview markup.',
   },
   {
     icon: '🤖',
     title: 'Built for the AI generation',
-    body: 'Clean, portable Markdown stays the source of truth — the format AI agents read, write, and version best. Styling never bleeds into content.',
+    body: 'Clean, portable Markdown stays the source of truth: the format AI agents read, write, and version best. Styling never bleeds into content.',
   },
   {
     icon: '✨',
     title: 'Invisible selectors',
-    body: 'Apply classes, IDs, and attributes with HTML comments that vanish in the preview — pure intent, zero clutter.',
+    body: 'Apply classes, IDs, and attributes with HTML comments that vanish in the preview. Pure intent, zero clutter.',
   },
   {
     icon: '🧭',
@@ -38,12 +39,17 @@ const features = [
   {
     icon: '📊',
     title: 'Interactive tables',
-    body: 'Search, sort, and paginate Markdown tables out of the box — proof of what the engine enables.',
+    body: 'Search, sort, and paginate Markdown tables out of the box, as proof of what the engine enables.',
   },
   {
     icon: '✏️',
     title: 'Edit in the preview',
-    body: 'Editable templates refine Markdown blocks right in the styled, live view — save, and it re-renders instantly.',
+    body: 'Editable templates refine Markdown blocks right in the styled, live view. Save, and it re-renders instantly.',
+  },
+  {
+    icon: '🗂️',
+    title: 'Card designer',
+    body: 'Lay out card grids visually: add, remove, and reorder cards, edit headers and content, and set columns and rows. It saves back as plain Markdown.',
   },
 ];
 
@@ -73,7 +79,7 @@ export default function Home() {
   }, []);
 
   return (
-    <Layout title={siteConfig.tagline} description="Turn Markdown into refined HTML experiences styled with real CSS & JavaScript — live in VS Code, with clean and portable source.">
+    <Layout title={siteConfig.tagline} description="Turn Markdown into refined HTML experiences styled with real CSS & JavaScript, live in VS Code, with clean and portable source.">
       <main>
         {/* HERO */}
         <section className="hero">
@@ -90,7 +96,7 @@ export default function Home() {
             </h1>
             <p className="hero__subtitle">
               MdStyled turns Markdown into a refined HTML experience you shape
-              with real CSS and JavaScript — rendered live in VS Code while your
+              with real CSS and JavaScript, rendered live in VS Code while your
               source stays clean, portable, and AI-friendly.
             </p>
             <div className="hero__actions">
@@ -109,22 +115,15 @@ export default function Home() {
                 <span className="demo-window__dot" />
                 <span className="demo-window__dot" />
                 <span className="demo-window__dot" />
-                <span className="demo-window__title">brief.md — MdStyled Preview</span>
+                <span className="demo-window__title">launch.md - MdStyled Preview</span>
               </div>
-              <div className="demo-window__body">
-                <pre>
-{`<span class="tok-c"># brief.md</span>
-<span class="tok-cm">&lt;!-- @style: ./theme.css --&gt;</span>
-<span class="tok-cm">&lt;!-- @script: ./behavior.js --&gt;</span>
-
-<span class="tok-c"># Product Brief</span>
-
-<span class="tok-cm">&lt;!-- .hero --&gt;</span>
-Build polished Markdown documents with
-normal web tools.
-
-<span class="tok-k">⟶ HTML + your CSS/JS, live in VS Code</span>`}
-                </pre>
+              <div className="demo-window__media">
+                <img
+                  src={useBaseUrl('/img/editor-demo.gif')}
+                  width="800"
+                  height="540"
+                  alt="Editing a Markdown file in the MdStyled preview: typing into a paragraph, adding a checklist item, adding a table row in the table designer, and adding a card in the card designer."
+                />
               </div>
             </div>
           </div>
@@ -135,7 +134,7 @@ normal web tools.
           <h2 className="features__heading">One tool, unlimited polish</h2>
           <p className="features__sub">
             MdStyled compiles Markdown to refined HTML powered by the web's own
-            technologies. Interactive tables, editing, diagrams — just a preview
+            technologies. Interactive tables, editing, diagrams: just a preview
             of what's possible.
           </p>
           <div className="feature-grid">
@@ -155,7 +154,7 @@ normal web tools.
             <Heading as="h2">From plain text to pixel-perfect</Heading>
             <p>
               Install MdStyled, open a preview, and shape it with real CSS and
-              JavaScript — all inside VS Code.
+              JavaScript, all inside VS Code.
             </p>
             <Link className="button button--primary button--lg" to="/docs/install">
               Install MdStyled

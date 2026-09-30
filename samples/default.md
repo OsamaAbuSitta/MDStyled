@@ -1,3 +1,6 @@
+<!-- @style: ./.mdstyled/editable-dark.css -->
+<!-- @script: ./.mdstyled/editable-dark.js -->
+
 <!-- @style: ./default.css -->
 <!-- @script: ./default.js -->
 
@@ -96,13 +99,13 @@ See changes instantly in the VS Code Webview.
 ## API Endpoints
 
 <!-- .endpoint -->
-`GET /api/v1/users` — List all users
+`GET /api/v1/users`: List all users
 
 <!-- .endpoint -->
-`POST /api/v1/users` — Create a user
+`POST /api/v1/users`: Create a user
 
 <!-- .endpoint -->
-`GET /api/v1/users/:id` — Get user by ID
+`GET /api/v1/users/:id`: Get user by ID
 
 ## Ordered Steps
 
@@ -123,8 +126,8 @@ Watch your styled preview appear.
 > MdStyled is not a new Markdown format and not a new CSS language.
 > It is a bridge between Markdown and normal web technologies.
 >
-> — MdStyled Specification
+> *MdStyled Specification*
 
 ## Conclusion
 
-This sample shows what MdStyled can do with just a CSS file and comment selectors. The Markdown source stays perfectly clean — no inline HTML, no custom syntax, no clutter.
+This sample shows what MdStyled can do with just a CSS file and comment selectors. The Markdown source stays perfectly clean: no inline HTML, no custom syntax, no clutter.
