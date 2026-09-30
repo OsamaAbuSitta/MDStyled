@@ -1,0 +1,1655 @@
+
+/* ═══════════════════════════════════════
+   In-preview editing
+   ═══════════════════════════════════════ */
+
+.mdstyled-edit-bar [hidden],
+.mdstyled-block-editor [hidden],
+.mdstyled-insert-menu[hidden],
+.mdstyled-insert-line[hidden] {
+  display: none !important;
+}
+
+.mdstyled-edit-bar {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 40;
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 10px;
+  background: @@SURFACE@@;
+  border: 1px solid @@BORDER@@;
+  box-shadow: @@SHADOW@@;
+}
+
+.mdstyled-edit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+  color: @@BTN_FG@@;
+  background: @@BTN_BG@@;
+  border: 1px solid @@BORDER@@;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.mdstyled-edit-btn:hover:not(:disabled) {
+  background: @@BTN_HOVER_BG@@;
+  border-color: @@ACCENT@@;
+  color: @@ACCENT@@;
+}
+
+.mdstyled-edit-btn:focus-visible {
+  outline: 2px solid @@ACCENT@@;
+  outline-offset: 2px;
+}
+
+.mdstyled-edit-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.mdstyled-edit-btn.primary,
+.mdstyled-edit-btn.active {
+  color: @@ON_ACCENT@@;
+  background: @@ACCENT@@;
+  border-color: @@ACCENT@@;
+}
+
+.mdstyled-edit-btn.primary:hover:not(:disabled),
+.mdstyled-edit-btn.active:hover:not(:disabled) {
+  color: @@ON_ACCENT@@;
+  background: @@ACCENT_HOVER@@;
+  border-color: @@ACCENT_HOVER@@;
+}
+
+.mdstyled-edit-btn.danger {
+  color: @@DANGER@@;
+}
+
+.mdstyled-edit-btn.danger:hover:not(:disabled) {
+  color: @@ON_ACCENT@@;
+  background: @@DANGER@@;
+  border-color: @@DANGER@@;
+}
+
+.mdstyled-edit-icon {
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+/* ── Edit mode ── */
+
+body.mdstyled-edit-mode .mdstyled-editable {
+  cursor: text;
+  border-radius: 4px;
+  box-shadow: 0 0 0 1px @@OUTLINE_IDLE@@;
+  transition: box-shadow 0.15s ease, background 0.15s ease;
+}
+
+body.mdstyled-edit-mode .mdstyled-editable:hover {
+  background: @@EDIT_HOVER_BG@@;
+  box-shadow: 0 0 0 2px @@ACCENT@@;
+}
+
+.mdstyled-editable-hidden {
+  display: none !important;
+}
+
+/* ── Add block ── */
+
+.mdstyled-insert-line {
+  display: none;
+  position: relative;
+  height: 18px;
+  margin: -9px 0;
+  z-index: 5;
+}
+
+body.mdstyled-edit-mode .mdstyled-insert-line {
+  display: block;
+}
+
+.mdstyled-insert-line::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  border-radius: 2px;
+  background: @@ACCENT@@;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.mdstyled-insert-line:hover::before,
+.mdstyled-insert-line:focus-within::before {
+  opacity: 0.45;
+}
+
+.mdstyled-insert-plus {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 22px;
+  height: 22px;
+  min-width: 0;
+  padding: 0;
+  justify-content: center;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.mdstyled-insert-line:hover .mdstyled-insert-plus,
+.mdstyled-insert-plus:focus-visible {
+  opacity: 1;
+}
+
+.mdstyled-prefers-markdown .mdstyled-mode-toggle {
+  border-color: @@MUTED@@;
+}
+
+.mdstyled-insert-menu {
+  position: absolute;
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 180px;
+  padding: 6px;
+  border-radius: 10px;
+  background: @@SURFACE@@;
+  border: 1px solid @@BORDER@@;
+  box-shadow: @@SHADOW@@;
+}
+
+.mdstyled-insert-menu {
+  max-height: min(60vh, 420px);
+  overflow-y: auto;
+}
+
+.mdstyled-insert-title {
+  padding: 6px 8px 2px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: @@MUTED@@;
+}
+
+.mdstyled-insert-item {
+  justify-content: flex-start;
+  width: 100%;
+  height: 30px;
+  padding: 0 8px;
+  font-weight: 500;
+}
+
+.mdstyled-insert-item .mdstyled-tool-text {
+  font-weight: 500;
+}
+
+/* ── Block editor ── */
+
+.mdstyled-block-editor {
+  margin: 12px 0;
+  padding: 10px;
+  border-radius: 8px;
+  background: @@EDITOR_BG@@;
+  border: 1px solid @@ACCENT@@;
+}
+
+.mdstyled-editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 4px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  background: @@TOOLBAR_BG@@;
+  border: 1px solid @@BORDER@@;
+}
+
+.mdstyled-tool-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.mdstyled-toolbar-sep {
+  width: 1px;
+  align-self: stretch;
+  margin: 2px 4px;
+  background: @@BORDER@@;
+}
+
+.mdstyled-toolbar-spacer {
+  flex: 1;
+  min-width: 4px;
+}
+
+.mdstyled-tool {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 6px;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: @@BTN_FG@@;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+
+.mdstyled-tool:hover:not(:disabled) {
+  color: @@ACCENT@@;
+  background: @@BTN_HOVER_BG@@;
+}
+
+.mdstyled-tool:focus-visible {
+  outline: 2px solid @@ACCENT@@;
+  outline-offset: 1px;
+}
+
+.mdstyled-tool:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.mdstyled-tool.active {
+  color: @@ON_ACCENT@@;
+  background: @@ACCENT@@;
+}
+
+.mdstyled-tool.active:hover {
+  color: @@ON_ACCENT@@;
+  background: @@ACCENT_HOVER@@;
+}
+
+.mdstyled-icon {
+  display: block;
+  flex: none;
+}
+
+.mdstyled-tool-glyph {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.mdstyled-tool-text {
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.mdstyled-mode-toggle {
+  border-color: @@BORDER@@;
+  background: @@BTN_BG@@;
+}
+
+/* ── Colour picker ── */
+
+.mdstyled-color-popover {
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 8px;
+  background: @@SURFACE@@;
+  border: 1px solid @@BORDER@@;
+  box-shadow: @@SHADOW@@;
+}
+
+.mdstyled-color-title {
+  margin-bottom: 6px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: @@MUTED@@;
+}
+
+.mdstyled-color-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.mdstyled-swatch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  font-weight: 800;
+  border: 1px solid @@BORDER@@;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform 0.12s ease, border-color 0.12s ease;
+}
+
+.mdstyled-swatch:hover,
+.mdstyled-swatch:focus-visible {
+  transform: translateY(-1px);
+  border-color: @@ACCENT@@;
+  outline: none;
+}
+
+.mdstyled-swatch-letter {
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.mdstyled-color-clear {
+  width: 100%;
+  justify-content: center;
+}
+
+/* ── Rich surface ── */
+
+.mdstyled-rich {
+  padding: 12px 14px;
+  background: @@INPUT_BG@@;
+  border: 1px solid @@BORDER@@;
+  border-radius: 6px;
+}
+
+.mdstyled-rich:focus {
+  outline: none;
+  border-color: @@ACCENT@@;
+  box-shadow: 0 0 0 2px @@FOCUS_RING@@;
+}
+
+.mdstyled-rich > :first-child { margin-top: 0; }
+.mdstyled-rich > :last-child { margin-bottom: 0; }
+
+.mdstyled-rich h1,
+.mdstyled-rich h2,
+.mdstyled-rich h3,
+.mdstyled-rich h4,
+.mdstyled-rich h5,
+.mdstyled-rich h6 {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+/* ── Markdown surface ── */
+
+.mdstyled-edit-textarea {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 72px;
+  padding: 10px 12px;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  tab-size: 2;
+  color: @@TEXT@@;
+  background: @@INPUT_BG@@;
+  border: 1px solid @@BORDER@@;
+  border-radius: 6px;
+  resize: vertical;
+}
+
+.mdstyled-edit-textarea:focus {
+  outline: none;
+  border-color: @@ACCENT@@;
+  box-shadow: 0 0 0 2px @@FOCUS_RING@@;
+}
+
+/* ── Link row ── */
+
+.mdstyled-link-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.mdstyled-link-input {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 10px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  color: @@TEXT@@;
+  background: @@INPUT_BG@@;
+  border: 1px solid @@BORDER@@;
+  border-radius: 6px;
+}
+
+.mdstyled-link-input:focus {
+  outline: none;
+  border-color: @@ACCENT@@;
+  box-shadow: 0 0 0 2px @@FOCUS_RING@@;
+}
+
+/* ── Actions ── */
+
+.mdstyled-edit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.mdstyled-edit-status {
+  font-size: 0.75rem;
+  color: @@MUTED@@;
+}
+
+.mdstyled-edit-status.error {
+  color: @@DANGER@@;
+  font-weight: 600;
+}
+
+.mdstyled-edit-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 84px;
+  z-index: 80;
+  transform: translateX(-50%);
+  max-width: 480px;
+  padding: 10px 16px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: @@ON_ACCENT@@;
+  background: @@DANGER@@;
+  border-radius: 8px;
+  box-shadow: @@SHADOW@@;
+}
+
+/* ── Whole-file editor ── */
+
+.mdstyled-source-editor {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 24px;
+  background: @@SURFACE@@;
+}
+
+body.mdstyled-source-open .mdstyled-edit-bar,
+body.mdstyled-source-open .mdstyled-insert-line {
+  display: none;
+}
+
+.mdstyled-source-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: @@MUTED@@;
+}
+
+.mdstyled-source-textarea {
+  flex: 1;
+  min-height: 0;
+  resize: none;
+}
+
+/* ── Card component ── */
+
+.card {
+  margin: 16px 0;
+  padding: 16px 18px;
+  border: 1px solid @@BORDER@@;
+  border-left: 1px solid @@BORDER@@;
+  border-radius: 10px;
+  background: @@CARD_BG@@;
+  box-shadow: @@CARD_SHADOW@@;
+}
+
+.card > :first-child { margin-top: 0; }
+.card > :last-child { margin-bottom: 0; }
+
+.card h1, .card h2, .card h3, .card h4 {
+  margin-top: 0;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+/* Two half cards in a row read as a card grid, with no wrapper element. */
+.card.half {
+  display: inline-block;
+  width: calc(50% - 6px);
+  vertical-align: top;
+}
+
+.card.half + .card.half {
+  margin-left: 8px;
+}
+
+@media (max-width: 700px) {
+  .card.half {
+    display: block;
+    width: 100%;
+  }
+  .card.half + .card.half {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 800px) {
+  .mdstyled-edit-bar {
+    right: 12px;
+    bottom: 12px;
+    flex-wrap: wrap;
+    max-width: calc(100vw - 24px);
+  }
+}
+
+/* ── Zoom, navigation and export controls ── */
+
+.mdstyled-edit-bar [hidden] {
+  display: none !important;
+}
+
+.mdstyled-zoom {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid @@BORDER@@;
+  border-radius: 6px;
+}
+
+.mdstyled-zoom .mdstyled-tool {
+  width: 24px;
+  height: 24px;
+}
+
+.mdstyled-zoom-level {
+  min-width: 46px;
+  padding: 4px 2px;
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  color: @@BTN_FG@@;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.mdstyled-zoom-level:hover {
+  color: @@ACCENT@@;
+  background: @@BTN_HOVER_BG@@;
+}
+
+.mdstyled-zoom-level:focus-visible {
+  outline: 2px solid @@ACCENT@@;
+  outline-offset: 1px;
+}
+
+/* A link to another Markdown file reads as navigation, not a plain reference. */
+body:not(.mdstyled-edit-mode) .mdstyled-root a[href$=".md"],
+body:not(.mdstyled-edit-mode) .mdstyled-root a[data-mdstyled-uri$=".md"] {
+  cursor: pointer;
+  text-decoration-style: dotted;
+  text-underline-offset: 3px;
+}
+
+@media (max-width: 800px) {
+  .mdstyled-edit-bar .mdstyled-edit-export .mdstyled-btn-text,
+  .mdstyled-edit-bar .mdstyled-edit-back .mdstyled-btn-text {
+    display: none;
+  }
+}
+
+/* ── Block type dropdown ── */
+
+.mdstyled-type-group {
+  position: relative;
+}
+
+.mdstyled-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 6px 0 8px;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: @@BTN_FG@@;
+  background: @@BTN_BG@@;
+  border: 1px solid @@BORDER@@;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+
+.mdstyled-select:hover {
+  color: @@ACCENT@@;
+  border-color: @@ACCENT@@;
+}
+
+.mdstyled-select:focus-visible {
+  outline: 2px solid @@ACCENT@@;
+  outline-offset: 1px;
+}
+
+.mdstyled-select[aria-expanded="true"] {
+  color: @@ACCENT@@;
+  border-color: @@ACCENT@@;
+  background: @@BTN_HOVER_BG@@;
+}
+
+.mdstyled-select-icon {
+  display: inline-flex;
+  align-items: center;
+}
+
+.mdstyled-select-label {
+  min-width: 74px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.mdstyled-select-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 66;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 180px;
+  margin-top: 6px;
+  padding: 6px;
+  border-radius: 10px;
+  background: @@SURFACE@@;
+  border: 1px solid @@BORDER@@;
+  box-shadow: @@SHADOW@@;
+}
+
+.mdstyled-select-menu[hidden] {
+  display: none !important;
+}
+
+.mdstyled-select-item {
+  justify-content: flex-start;
+  gap: 8px;
+  width: 100%;
+  font-weight: 500;
+  background: transparent;
+  border-color: transparent;
+}
+
+.mdstyled-select-item .mdstyled-icon,
+.mdstyled-select-item .mdstyled-tool-glyph {
+  color: @@MUTED@@;
+}
+
+.mdstyled-select-item:hover .mdstyled-icon,
+.mdstyled-select-item:hover .mdstyled-tool-glyph {
+  color: @@ACCENT@@;
+}
+
+.mdstyled-select-item.active {
+  color: @@ON_ACCENT@@;
+  background: @@ACCENT@@;
+  border-color: @@ACCENT@@;
+}
+
+.mdstyled-select-item.active .mdstyled-icon,
+.mdstyled-select-item.active .mdstyled-tool-glyph {
+  color: @@ON_ACCENT@@;
+}
+
+@media (max-width: 800px) {
+  .mdstyled-select-label {
+    min-width: 0;
+  }
+}
+
+.mdstyled-select-menu {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.mdstyled-select-title {
+  padding: 6px 8px 3px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: @@MUTED@@;
+}
+
+.mdstyled-select-title:not(:first-child) {
+  margin-top: 4px;
+  border-top: 1px solid @@BORDER@@;
+}
+
+.mdstyled-select-item:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.mdstyled-select-clear {
+  font-style: italic;
+}
+
+/* ── Task checkboxes ── */
+
+/* Read-only until Edit is on, and it should look that way. */
+.mdstyled-root input[type="checkbox"]:disabled {
+  cursor: default;
+  opacity: 0.65;
+}
+
+body.mdstyled-edit-mode .mdstyled-root input[type="checkbox"]:not(:disabled),
+.mdstyled-rich input[type="checkbox"] {
+  cursor: pointer;
+  opacity: 1;
+}
+
+body.mdstyled-edit-mode .mdstyled-root input[type="checkbox"]:not(:disabled):hover,
+.mdstyled-rich input[type="checkbox"]:hover {
+  outline: 2px solid @@ACCENT@@;
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* ═══════════════════════════════════════
+   Top toolbar
+   ═══════════════════════════════════════ */
+
+.mdstyled-edit-bar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: auto;
+  left: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 48px;
+  padding: 0 14px;
+  border: none;
+  border-bottom: 1px solid @@BAR_BORDER@@;
+  border-radius: 0;
+  /* Frosted, so the document reads through it as you scroll. */
+  background: @@BAR_BG@@;
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  backdrop-filter: saturate(180%) blur(14px);
+  box-shadow: @@BAR_SHADOW@@;
+}
+
+body {
+  padding-top: 48px;
+}
+
+.mdstyled-toc {
+  top: 64px;
+  max-height: calc(100vh - 96px);
+}
+
+.mdstyled-bar-spacer {
+  flex: 1;
+}
+
+.mdstyled-bar-divider {
+  width: 1px;
+  height: 20px;
+  margin: 0 6px;
+  background: @@BAR_BORDER@@;
+}
+
+/* ── Bar buttons ── */
+
+.mdstyled-edit-bar .mdstyled-edit-btn {
+  height: 32px;
+  gap: 7px;
+  padding: 0 11px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  color: @@MUTED@@;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  transition: color 0.14s ease, background 0.14s ease, border-color 0.14s ease;
+}
+
+.mdstyled-edit-bar .mdstyled-edit-btn:hover:not(:disabled) {
+  color: @@TEXT@@;
+  background: @@SEGMENT_BG@@;
+  border-color: transparent;
+}
+
+.mdstyled-edit-bar .mdstyled-edit-btn:active:not(:disabled) {
+  transform: translateY(0.5px);
+}
+
+.mdstyled-edit-bar .mdstyled-edit-btn:focus-visible {
+  outline: 2px solid @@ACCENT@@;
+  outline-offset: 1px;
+}
+
+.mdstyled-edit-bar .mdstyled-icon {
+  opacity: 0.85;
+}
+
+.mdstyled-edit-bar .mdstyled-edit-btn:hover .mdstyled-icon {
+  opacity: 1;
+}
+
+/* Edit is the one action that changes what the page is for, so it carries weight. */
+.mdstyled-edit-bar .mdstyled-edit-toggle {
+  color: @@TEXT@@;
+  border-color: @@BORDER@@;
+  background: @@SURFACE@@;
+}
+
+.mdstyled-edit-bar .mdstyled-edit-toggle:hover:not(:disabled) {
+  border-color: @@ACCENT@@;
+  color: @@ACCENT@@;
+  background: @@SURFACE@@;
+}
+
+.mdstyled-edit-bar .mdstyled-edit-toggle.active,
+.mdstyled-edit-bar .mdstyled-edit-toggle.active:hover {
+  color: @@ON_ACCENT@@;
+  background: @@ACCENT@@;
+  border-color: @@ACCENT@@;
+}
+
+.mdstyled-edit-bar .mdstyled-edit-toggle.active .mdstyled-icon {
+  opacity: 1;
+}
+
+.mdstyled-edit-bar .mdstyled-edit-back {
+  margin-right: 2px;
+}
+
+/* ── Zoom, as one segmented control ── */
+
+.mdstyled-edit-bar .mdstyled-zoom {
+  height: 32px;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  background: @@SEGMENT_BG@@;
+  border: 1px solid @@BAR_BORDER@@;
+  border-radius: 8px;
+}
+
+.mdstyled-edit-bar .mdstyled-zoom .mdstyled-tool {
+  width: 30px;
+  height: 30px;
+  color: @@MUTED@@;
+  border: none;
+  border-radius: 0;
+}
+
+.mdstyled-edit-bar .mdstyled-zoom .mdstyled-tool:hover:not(:disabled) {
+  color: @@TEXT@@;
+  background: @@BTN_HOVER_BG@@;
+}
+
+.mdstyled-edit-bar .mdstyled-zoom .mdstyled-tool:disabled {
+  opacity: 0.35;
+}
+
+.mdstyled-zoom-level {
+  min-width: 50px;
+  height: 30px;
+  padding: 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: @@TEXT@@;
+  border-right: 1px solid @@BAR_BORDER@@;
+  border-left: 1px solid @@BAR_BORDER@@;
+  border-radius: 0;
+  transition: background 0.14s ease;
+}
+
+.mdstyled-zoom-level:hover {
+  color: @@ACCENT@@;
+  background: @@BTN_HOVER_BG@@;
+}
+
+/* ── Narrow previews keep the icons and drop the words ── */
+
+@media (max-width: 760px) {
+  .mdstyled-edit-bar {
+    gap: 2px;
+    padding: 0 10px;
+  }
+
+  .mdstyled-edit-bar .mdstyled-edit-btn {
+    padding: 0 8px;
+  }
+
+  .mdstyled-edit-bar .mdstyled-btn-label {
+    display: none;
+  }
+
+  .mdstyled-edit-bar .mdstyled-edit-toggle .mdstyled-btn-label {
+    display: inline;
+  }
+}
+
+/* ── Empty document ── */
+
+/* Nothing to hover between, so the one insert line stands open instead of waiting. */
+.mdstyled-insert-line-empty {
+  display: block;
+  height: 72px;
+  margin: 24px 0;
+}
+
+.mdstyled-insert-line-empty::before {
+  opacity: 0.3;
+}
+
+.mdstyled-insert-line-empty .mdstyled-insert-plus {
+  opacity: 1;
+}
+
+/* ── Clickable editor space ── */
+
+.mdstyled-rich {
+  min-height: 88px;
+  cursor: text;
+}
+
+/* ═══════════════════════════════════════
+   Card grids
+   ═══════════════════════════════════════ */
+
+.mdstyled-cards {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 16px 0 24px;
+}
+
+.mdstyled-cards.cols-1 { grid-template-columns: minmax(0, 1fr); }
+.mdstyled-cards.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.mdstyled-cards.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.mdstyled-cards.cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+/* A card in a grid fills its cell rather than carrying its own spacing. */
+.mdstyled-cards > .card {
+  width: auto;
+  margin: 0;
+  display: block;
+}
+
+/* Insert lines are never built inside a grid - each would take a grid cell. This
+   is the backstop, and has to outrank the edit-mode rule that shows them. */
+.mdstyled-cards > .mdstyled-insert-line,
+body.mdstyled-edit-mode .mdstyled-cards > .mdstyled-insert-line {
+  display: none;
+}
+
+/* An editor opened on a card takes the whole row, not one cell. */
+.mdstyled-cards > .mdstyled-block-editor {
+  grid-column: 1 / -1;
+}
+
+/* A `.cards` list takes a column count the same way. Without one it fits as many
+   as it can. */
+ul.cards.cols-1, ol.cards.cols-1 { grid-template-columns: minmax(0, 1fr); }
+ul.cards.cols-2, ol.cards.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+ul.cards.cols-3, ol.cards.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+ul.cards.cols-4, ol.cards.cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+@media (max-width: 760px) {
+  .mdstyled-cards,
+  .mdstyled-cards.cols-2,
+  .mdstyled-cards.cols-3,
+  .mdstyled-cards.cols-4,
+  ul.cards.cols-2, ul.cards.cols-3, ul.cards.cols-4,
+  ol.cards.cols-2, ol.cards.cols-3, ol.cards.cols-4 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ── Card controls in the editor ── */
+
+.mdstyled-card-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid @@BORDER@@;
+}
+
+.mdstyled-card-spacer {
+  flex: 1;
+}
+
+.mdstyled-card-count,
+.mdstyled-card-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: @@MUTED@@;
+}
+
+.mdstyled-card-add {
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  font-size: 0.72rem;
+}
+
+.mdstyled-col-group {
+  display: flex;
+  overflow: hidden;
+  background: @@SEGMENT_BG@@;
+  border: 1px solid @@BORDER@@;
+  border-radius: 7px;
+}
+
+.mdstyled-col-btn {
+  width: 28px;
+  height: 26px;
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: @@BTN_FG@@;
+  background: transparent;
+  border: none;
+  border-left: 1px solid @@BORDER@@;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.mdstyled-col-btn:first-child {
+  border-left: none;
+}
+
+.mdstyled-col-btn:hover {
+  color: @@ACCENT@@;
+  background: @@BTN_HOVER_BG@@;
+}
+
+.mdstyled-col-btn:focus-visible {
+  outline: 2px solid @@ACCENT@@;
+  outline-offset: -2px;
+}
+
+.mdstyled-col-btn.active {
+  color: @@ON_ACCENT@@;
+  background: @@ACCENT@@;
+}
+
+/* ── Card designer ── */
+
+.mdstyled-designer-bar {
+  gap: 10px;
+  padding: 6px 8px;
+}
+
+.mdstyled-designer-heading {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: @@TEXT@@;
+}
+
+.mdstyled-designer-heading .mdstyled-icon {
+  color: @@ACCENT@@;
+}
+
+.mdstyled-designer-count {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: @@MUTED@@;
+  font-variant-numeric: tabular-nums;
+}
+
+.mdstyled-designer-layout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.mdstyled-designer-layout[hidden] {
+  display: none;
+}
+
+.mdstyled-col-btn.mdstyled-col-auto {
+  width: auto;
+  padding: 0 8px;
+}
+
+.mdstyled-stepper {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  background: @@SEGMENT_BG@@;
+  border: 1px solid @@BORDER@@;
+  border-radius: 7px;
+}
+
+.mdstyled-stepper .mdstyled-stepper-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 0;
+}
+
+.mdstyled-stepper-value {
+  min-width: 24px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  color: @@TEXT@@;
+}
+
+.mdstyled-designer-grid {
+  display: grid;
+  gap: 12px;
+  padding: 2px;
+}
+
+.mdstyled-designer-grid[hidden] {
+  display: none;
+}
+
+.mdstyled-designer-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  padding: 8px 10px 10px;
+  background: @@CARD_BG@@;
+  border: 1px solid @@BORDER@@;
+  border-radius: 8px;
+  box-shadow: @@CARD_SHADOW@@;
+  transition: border-color 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
+}
+
+.mdstyled-designer-card:focus-within {
+  border-color: @@ACCENT@@;
+  box-shadow: 0 0 0 2px @@FOCUS_RING@@;
+}
+
+.mdstyled-designer-card.mdstyled-dragging {
+  opacity: 0.45;
+}
+
+.mdstyled-designer-card.mdstyled-drop-target {
+  border-color: @@ACCENT@@;
+  border-style: dashed;
+}
+
+.mdstyled-designer-card-head {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.mdstyled-designer-grip {
+  display: inline-flex;
+  padding: 2px;
+  color: @@MUTED@@;
+  cursor: grab;
+}
+
+.mdstyled-designer-card-index {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: @@MUTED@@;
+  font-variant-numeric: tabular-nums;
+}
+
+.mdstyled-designer-card .mdstyled-designer-card-btn {
+  width: 24px;
+  height: 24px;
+  opacity: 0.55;
+}
+
+.mdstyled-designer-card:hover .mdstyled-designer-card-btn,
+.mdstyled-designer-card:focus-within .mdstyled-designer-card-btn {
+  opacity: 1;
+}
+
+.mdstyled-designer-card .mdstyled-designer-card-btn:disabled {
+  opacity: 0.25;
+}
+
+.mdstyled-designer-card .mdstyled-designer-remove:hover:not(:disabled) {
+  color: @@DANGER@@;
+  background: @@DANGER_SOFT@@;
+}
+
+.mdstyled-designer-title-input,
+.mdstyled-designer-body {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+  color: @@TEXT@@;
+  background: @@INPUT_BG@@;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 5px 7px;
+}
+
+.mdstyled-designer-title-input {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.mdstyled-designer-body {
+  min-height: 72px;
+  resize: vertical;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.mdstyled-designer-title-input:hover,
+.mdstyled-designer-body:hover {
+  border-color: @@BORDER@@;
+}
+
+.mdstyled-designer-title-input:focus,
+.mdstyled-designer-body:focus {
+  outline: none;
+  border-color: @@ACCENT@@;
+}
+
+.mdstyled-designer-add {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 120px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: @@MUTED@@;
+  background: transparent;
+  border: 1.5px dashed @@BORDER@@;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: color 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+}
+
+.mdstyled-designer-add:hover,
+.mdstyled-designer-add:focus-visible {
+  color: @@ACCENT@@;
+  border-color: @@ACCENT@@;
+  background: @@EDIT_HOVER_BG@@;
+  outline: none;
+}
+
+@media (max-width: 760px) {
+  .mdstyled-designer-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+/* ── Table designer ── */
+
+.mdstyled-tdesign-scroll {
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.mdstyled-tdesign-scroll[hidden] {
+  display: none;
+}
+
+.mdstyled-tdesign {
+  width: 100%;
+  margin: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.85rem;
+  background: transparent;
+  box-shadow: none;
+}
+
+.mdstyled-tdesign th,
+.mdstyled-tdesign td {
+  padding: 0;
+  background: @@CARD_BG@@;
+  border: none;
+  border-right: 1px solid @@BORDER@@;
+  border-bottom: 1px solid @@BORDER@@;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.mdstyled-tdesign tr > :first-child {
+  border-left: 1px solid @@BORDER@@;
+}
+
+.mdstyled-tdesign .mdstyled-tdesign-tools th {
+  background: transparent;
+  border: none;
+  padding: 0 2px 4px;
+}
+
+.mdstyled-tdesign .mdstyled-tdesign-header th {
+  border-top: 1px solid @@BORDER@@;
+  background: @@TOOLBAR_BG@@;
+}
+
+.mdstyled-tdesign-coltools {
+  min-width: 150px;
+}
+
+.mdstyled-tdesign-coltools,
+.mdstyled-tdesign-rowtools {
+  white-space: nowrap;
+}
+
+.mdstyled-tdesign-coltools > * {
+  vertical-align: middle;
+}
+
+.mdstyled-tdesign-align {
+  display: inline-flex;
+  margin-right: 4px;
+  overflow: hidden;
+  background: @@SEGMENT_BG@@;
+  border: 1px solid @@BORDER@@;
+  border-radius: 6px;
+}
+
+.mdstyled-tdesign .mdstyled-tdesign-btn {
+  width: 22px;
+  height: 22px;
+  opacity: 0.6;
+}
+
+.mdstyled-tdesign-align .mdstyled-tdesign-btn {
+  border-radius: 0;
+}
+
+.mdstyled-tdesign .mdstyled-tdesign-btn:hover:not(:disabled),
+.mdstyled-tdesign .mdstyled-tdesign-btn.active {
+  opacity: 1;
+}
+
+.mdstyled-tdesign .mdstyled-tdesign-btn.active {
+  color: @@ON_ACCENT@@;
+  background: @@ACCENT@@;
+}
+
+.mdstyled-tdesign .mdstyled-tdesign-btn:disabled {
+  opacity: 0.2;
+}
+
+.mdstyled-tdesign .mdstyled-designer-remove:hover:not(:disabled) {
+  color: @@DANGER@@;
+  background: @@DANGER_SOFT@@;
+}
+
+.mdstyled-tdesign .mdstyled-tdesign-rowtools {
+  width: 1%;
+  padding: 0 4px;
+  background: @@SEGMENT_BG@@;
+}
+
+.mdstyled-tdesign .mdstyled-tdesign-corner {
+  width: 1%;
+}
+
+.mdstyled-tdesign-rownum {
+  display: inline-block;
+  min-width: 18px;
+  margin-right: 2px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: @@MUTED@@;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  vertical-align: middle;
+}
+
+/* Row tools stay quiet until you are on the row. */
+.mdstyled-tdesign tbody .mdstyled-tdesign-rowtools .mdstyled-tdesign-btn {
+  visibility: hidden;
+}
+
+.mdstyled-tdesign tbody tr:hover .mdstyled-tdesign-rowtools .mdstyled-tdesign-btn,
+.mdstyled-tdesign tbody tr:focus-within .mdstyled-tdesign-rowtools .mdstyled-tdesign-btn {
+  visibility: visible;
+}
+
+.mdstyled-tdesign-input {
+  display: block;
+  width: 100%;
+  min-width: 120px;
+  box-sizing: border-box;
+  padding: 7px 9px;
+  font-family: inherit;
+  font-size: inherit;
+  color: @@TEXT@@;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+}
+
+.mdstyled-tdesign-input.mdstyled-tdesign-head {
+  font-weight: 700;
+}
+
+.mdstyled-tdesign-input:focus {
+  outline: 2px solid @@ACCENT@@;
+  outline-offset: -2px;
+  background: @@INPUT_BG@@;
+}
+
+.mdstyled-tdesign tbody tr:focus-within td:not(.mdstyled-tdesign-rowtools) {
+  background: @@EDIT_HOVER_BG@@;
+}
+
+/* ── Delete ── */
+
+.mdstyled-actions-spacer {
+  flex: 1;
+}
+
+/* Quiet and icon-only at rest: it is the one action here you cannot undo from the
+   preview, so it does not compete with Save. */
+.mdstyled-delete {
+  gap: 0;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  overflow: hidden;
+  color: @@MUTED@@;
+  background: transparent;
+  border-color: transparent;
+  transition: width 0.16s ease, padding 0.16s ease, color 0.14s ease,
+              background 0.14s ease, border-color 0.14s ease;
+}
+
+.mdstyled-delete .mdstyled-btn-label {
+  display: none;
+  white-space: nowrap;
+}
+
+.mdstyled-delete:hover:not(:disabled),
+.mdstyled-delete:focus-visible {
+  color: @@DANGER@@;
+  background: @@DANGER_SOFT@@;
+  border-color: transparent;
+}
+
+/* Armed: it says what the next click does, and looks like it means it. */
+.mdstyled-delete.armed,
+.mdstyled-delete.armed:hover:not(:disabled) {
+  gap: 7px;
+  width: auto;
+  padding: 0 12px;
+  color: #fff;
+  background: @@DANGER@@;
+  border-color: @@DANGER@@;
+}
+
+.mdstyled-delete.armed .mdstyled-btn-label {
+  display: inline;
+}
+
+.mdstyled-delete:disabled {
+  opacity: 0.4;
+}
+
+/* ── Emoji ── */
+
+.mdstyled-emoji-popover {
+  width: 320px;
+  padding: 10px;
+}
+
+.mdstyled-emoji-search {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  font-family: inherit;
+  font-size: 0.78rem;
+  color: @@TEXT@@;
+  background: @@INPUT_BG@@;
+  border: 1px solid @@BORDER@@;
+  border-radius: 6px;
+}
+
+.mdstyled-emoji-search:focus {
+  outline: none;
+  border-color: @@ACCENT@@;
+  box-shadow: 0 0 0 2px @@FOCUS_RING@@;
+}
+
+.mdstyled-emoji-body {
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.mdstyled-emoji-title {
+  padding: 6px 2px 4px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: @@MUTED@@;
+}
+
+.mdstyled-emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 2px;
+}
+
+.mdstyled-emoji {
+  width: 100%;
+  height: 30px;
+  padding: 0;
+  font-size: 1.05rem;
+  line-height: 1;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.1s ease, transform 0.1s ease;
+}
+
+.mdstyled-emoji:hover,
+.mdstyled-emoji:focus-visible {
+  background: @@BTN_HOVER_BG@@;
+  transform: scale(1.15);
+  outline: none;
+}
+
+.mdstyled-emoji-none {
+  margin: 8px 2px;
+  font-size: 0.75rem;
+  color: @@MUTED@@;
+}
+
+/* ── `:shortcode` suggestions ── */
+
+.mdstyled-emoji-suggest {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+  padding: 6px;
+  background: @@SURFACE@@;
+  border: 1px solid @@BORDER@@;
+  border-radius: 8px;
+  box-shadow: @@SHADOW@@;
+}
+
+.mdstyled-emoji-suggest[hidden] {
+  display: none !important;
+}
+
+.mdstyled-emoji-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  font-family: inherit;
+  font-size: 0.72rem;
+  color: @@BTN_FG@@;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.mdstyled-emoji-option:hover {
+  background: @@BTN_HOVER_BG@@;
+}
+
+.mdstyled-emoji-option.active {
+  color: @@ON_ACCENT@@;
+  background: @@ACCENT@@;
+}
+
+.mdstyled-emoji-glyph {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.mdstyled-emoji-name {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+}

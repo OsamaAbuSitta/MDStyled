@@ -13,3 +13,8 @@ spec/**
 **/*.ts
 **/*.map
 out/**/*.d.ts
+test/**
+scripts/**
+screenshots/**
+docs/**
+*.vsix

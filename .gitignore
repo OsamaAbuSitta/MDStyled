@@ -142,3 +142,12 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
 samples/.mdstyled/
+
+# Docusaurus docs
+docs/.docusaurus/
+docs/build/
+docs/node_modules/
+
+# test scratch build
+test/helpers/.engine.build.js
+screenshots/*

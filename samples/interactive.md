@@ -1,6 +1,3 @@
-<!-- @style: ./.mdstyled/interactive-light.css -->
-<!-- @script: ./.mdstyled/interactive-light.js -->
-
 # Interactive Template Demo
 
 A complete showcase of the **interactive-light** (or **interactive-dark**) template features.
@@ -8,11 +5,42 @@ Apply a template with **MdStyled: Apply Template** and open the preview with **M
 
 ---
 
+Write something.
+
+# Heading
+
+<div class="mdstyled-cards cols-3">
+
+<!-- .card -->
+> ### First card
+>
+> What this card is about.
+
+<!-- .card -->
+> ### Second card
+>
+> What this card is about.
+
+<!-- .card -->
+> ### Third card
+>
+> What this card is about.
+
+</div>
+
+<!-- .lead -->
+---
+
+<!-- .card -->
+> ### Card title
+>
+> What this card is about.
+
 ## Callout Variants
 
 Use comment selectors to attach `.note`, `.warning`, `.danger`, or `.success` to any block.
 
-<!-- .note -->
+<!-- .doc-card -->
 **Note:** Use this for general information or tips that help the reader but aren't critical.
 
 <!-- .warning -->
@@ -42,8 +70,8 @@ Every checkbox list automatically gets an interactive progress bar. Check items 
 
 ### Onboarding checklist
 
-- [x] Install VS Code
-- [x] Install MdStyled extension
+- [ ] Install VS Code
+- [ ] Install MdStyled extension
 - [ ] Apply a template
 - [ ] Open first preview
 - [ ] Customise the CSS
@@ -120,35 +148,32 @@ Every table gets a search box, column-specific filtering, sortable headers, and 
 
 ### API reference
 
-| Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| GET | `/users` | Bearer | List all users |
-| POST | `/users` | Bearer | Create a new user |
-| GET | `/users/:id` | Bearer | Get user by ID |
-| PUT | `/users/:id` | Bearer | Update user |
-| DELETE | `/users/:id` | Admin | Delete user |
-| GET | `/posts` | None | List public posts |
-| POST | `/posts` | Bearer | Create a post |
-| GET | `/posts/:id` | None | Get post by ID |
-| PUT | `/posts/:id` | Bearer | Update post |
-| DELETE | `/posts/:id` | Bearer | Delete post |
-| GET | `/comments` | None | List comments |
-| POST | `/comments` | Bearer | Add a comment |
-| GET | `/comments/:id` | None | Get comment by ID |
-| DELETE | `/comments/:id` | Bearer | Delete comment |
-| GET | `/tags` | None | List all tags |
-| POST | `/tags` | Admin | Create a tag |
+| Method | Endpoint        | Auth   | Description       |
+| ------ | --------------- | ------ | ----------------- |
+| GET    | `/users/:id`    | Bearer | Get user by ID    |
+| PUT    | `/users/:id`    | Bearer | Update user       |
+| DELETE | `/users/:id`    | Admin  | Delete user       |
+| GET    | `/posts`        | None   | List public posts |
+| POST   | `/posts`        | Bearer | Create a post     |
+| GET    | `/posts/:id`    | None   | Get post by ID    |
+| PUT    | `/posts/:id`    | Bearer | Update post       |
+| DELETE | `/posts/:id`    | Bearer | Delete post       |
+| GET    | `/comments`     | None   | List comments     |
+| POST   | `/comments`     | Bearer | Add a comment     |
+| GET    | `/comments/:id` | None   | Get comment by ID |
+| DELETE | `/comments/:id` | Bearer | Delete comment    |
+| GET    | `/tags`         | None   | List all tags     |
+| POST   | `/tags`         | Admin  | Create a tag      |
 
 ### Package comparison
 
-| Package | Version | License | Weekly Downloads | Size |
-|---|---|---|---|---|
-| markdown-it | 14.1.0 | MIT | 8.2M | 112 KB |
-| marked | 12.0.0 | MIT | 15.4M | 56 KB |
-| remark | 15.0.1 | MIT | 5.1M | 38 KB |
-| unified | 11.0.5 | MIT | 22.1M | 12 KB |
-| showdown | 2.1.0 | MIT | 1.3M | 78 KB |
-| micromark | 4.0.0 | MIT | 18.6M | 44 KB |
+| Package     | Version | License | Weekly Downloads | Size   |
+| ----------- | ------- | ------- | ---------------- | ------ |
+| markdown-it | 14.1.0  | MIT     | 8.2M             | 112 KB |
+| remark      | 15.0.1  | MIT     | 5.1M             | 38 KB  |
+| unified     | 11.0.5  | MIT     | 22.1M            | 12 KB  |
+| showdown    | 2.1.0   | MIT     | 1.3M             | 78 KB  |
+| micromark   | 4.0.0   | MIT     | 18.6M            | 44 KB  |
 
 ---
 
@@ -171,7 +196,7 @@ Apply `<!-- .cards -->` to any unordered list. Each item becomes a card in a res
 
 - **Live preview**
 
-  The preview refreshes automatically on every file save — edit CSS and see changes instantly.
+  The preview refreshes automatically on every file save. Edit CSS and see changes instantly.
 
 - **Mermaid diagrams**
 
@@ -306,7 +331,9 @@ Current release tasks:
 ### Known limitations
 
 <!-- .warning -->
-Checkboxes in the preview are interactive but changes are not written back to the source file — they reset when the preview reloads.
+Checkboxes in the preview are interactive but changes are not written back to the source file; they reset when the preview reloads.
 
 <!-- .danger -->
 Do not load untrusted external scripts via `@script:` directives. The preview runs in a VS Code webview with `unsafe-inline` scripts enabled.
+
+# Heading
