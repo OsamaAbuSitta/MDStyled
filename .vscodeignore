@@ -18,3 +18,4 @@ scripts/**
 screenshots/**
 docs/**
 *.vsix
+CONTRIBUTING.md

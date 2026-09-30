@@ -2,6 +2,11 @@
 
 All notable changes to the "MdStyled" extension will be documented in this file.
 
+## [1.0.1] - 2026-10-01
+
+- The Marketplace page shows the editor demo animation, which did not load in 1.0.0.
+- A shorter README focused on the editor; development notes and the template API moved to `CONTRIBUTING.md`.
+
 ## [1.0.0] - 2026-09-30
 
 MdStyled 1.0 turns the preview into an editor: click any block of a Markdown file and edit it in place, in a styled page, while the file stays plain Markdown.

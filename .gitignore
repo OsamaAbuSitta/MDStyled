@@ -151,3 +151,4 @@ docs/node_modules/
 # test scratch build
 test/helpers/.engine.build.js
 screenshots/*
+.omc/

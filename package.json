@@ -2,7 +2,7 @@
   "name": "mdstyled",
   "displayName": "MdStyled",
   "description": "Edit Markdown visually in a styled live preview: click to edit, table and card designers, six themes, and HTML/PDF export. Your .md stays clean.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "OAS",
   "author": "Osama Abu-Sitta",
   "license": "MIT",
