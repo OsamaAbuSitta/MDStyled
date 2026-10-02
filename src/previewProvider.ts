@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { renderMdStyled, renderMarkdownFragment, hasFileLevelStyling, TemplateFallback } from './engine';
 import { resolveDefaultTemplateAssets, getTemplateAssets } from './defaultTemplate';
+import { planBlockEdit } from './blockEdit';
 import { editableForTheme } from './templates';
 import sanitizeHtml from 'sanitize-html';
 
@@ -308,45 +309,25 @@ export class MdStyledPreviewProvider {
     }
 
     try {
-      const startLine = Number(msg.startLine);
-      const endLine = Number(msg.endLine);
-      const text = typeof msg.text === 'string' ? msg.text : '';
-
-      if (!Number.isInteger(startLine) || !Number.isInteger(endLine) || startLine < 0 || endLine < startLine) {
-        await reply(false, 'Invalid edit range.');
-        return;
-      }
-
       const doc = await vscode.workspace.openTextDocument(this.documentUri);
-      const end = Math.min(endLine, doc.lineCount);
-      const range = doc.validateRange(new vscode.Range(startLine, 0, end, 0));
+      const lines: string[] = [];
+      for (let i = 0; i < doc.lineCount; i++) lines.push(doc.lineAt(i).text);
       const eol = doc.eol === vscode.EndOfLine.CRLF ? '\r\n' : '\n';
-      const normalize = (s: string) => s.replace(/\r\n?/g, '\n').replace(/\n+$/, '');
 
-      // The preview was rendered from an older version of the file - don't clobber it.
-      if (typeof msg.original === 'string' && normalize(doc.getText(range)) !== normalize(msg.original)) {
-        await reply(false, 'The file changed since this block was loaded. Reload the preview and try again.');
+      const plan = planBlockEdit(lines, eol, {
+        startLine: msg.startLine,
+        endLine: msg.endLine,
+        text: typeof msg.text === 'string' ? msg.text : '',
+        original: typeof msg.original === 'string' ? msg.original : undefined,
+      });
+      if (!plan.ok) {
+        await reply(false, plan.error);
         return;
       }
-
-      // The range stops at the start of the next line, or at the end of the file.
-      const keepsTrailingEol = end < doc.lineCount;
-      const fileEndsWithEol = doc.lineCount > 0 && doc.lineAt(doc.lineCount - 1).text.length === 0;
-
-      let body = text.replace(/\r\n?/g, '\n');
-      if (body === '') {
-        // An empty replacement means "remove these lines", not "leave a blank one".
-      } else if (keepsTrailingEol) {
-        // Blank lines the caller asked for are kept - that is how a block is separated
-        // from the one after it when inserting.
-        if (!body.endsWith('\n')) body += '\n';
-      } else {
-        body = body.replace(/\n+$/, '');
-        if (fileEndsWithEol) body += '\n';
-      }
+      const range = doc.validateRange(new vscode.Range(plan.start, 0, plan.end, 0));
 
       const edit = new vscode.WorkspaceEdit();
-      edit.replace(doc.uri, range, body.split('\n').join(eol));
+      edit.replace(doc.uri, range, plan.replacement);
 
       if (!(await vscode.workspace.applyEdit(edit))) {
         await reply(false, 'VS Code rejected the edit.');

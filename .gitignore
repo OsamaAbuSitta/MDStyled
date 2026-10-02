@@ -152,3 +152,7 @@ docs/node_modules/
 test/helpers/.engine.build.js
 screenshots/*
 .omc/
+test-results/
+
+playwright-report/
+test-results/

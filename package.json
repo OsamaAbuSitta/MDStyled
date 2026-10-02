@@ -293,17 +293,25 @@
     "compile": "node esbuild.js",
     "watch": "node esbuild.js --watch",
     "test": "node ./test/run.js",
+    "test:pw": "playwright test",
+    "test:unit": "playwright test --project=unit",
+    "test:e2e": "playwright test --project=e2e",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --project=e2e --headed",
+    "test:report": "playwright show-report",
+    "test:all": "playwright test; playwright show-report",
     "build:templates": "node ./scripts/build-editable-templates.js",
     "lint": "eslint src --ext ts"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@types/markdown-it": "^14.1.2",
     "@types/node": "^20.19.41",
     "@types/sanitize-html": "^2.16.1",
     "@types/vscode": "^1.85.0",
-    "jsdom": "^29.1.1",
     "@vscode/test-electron": "^2.4.0",
     "esbuild": "^0.28.0",
+    "jsdom": "^29.1.1",
     "typescript": "^5.4.0"
   },
   "dependencies": {
