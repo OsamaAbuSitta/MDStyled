@@ -10,9 +10,9 @@ const config = {
   favicon: 'img/favicon.svg',
 
   // Set the production url of your site here
-  url: 'https://osamaabusitta.github.io',
+  url: process.env.SITE_URL || 'https://osamaabusitta.github.io',
   // Set the /<baseUrl>/ pathname under which your site is served
-  baseUrl: '/MDStyled/',
+  baseUrl: process.env.BASE_URL || '/MDStyled/',
 
   // GitHub pages deployment config.
   organizationName: 'OsamaAbuSitta',

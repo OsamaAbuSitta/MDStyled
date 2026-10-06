@@ -1,0 +1,14 @@
+services:
+  docs:
+    build:
+      context: .
+      args:
+        SITE_URL: ${SITE_URL:-http://localhost:3000}
+        BASE_URL: ${BASE_URL:-/}
+    image: mdstyled-docs:latest
+    container_name: mdstyled-docs
+    env_file:
+      - .env
+    ports:
+      - "${PORT:-3000}:80"
+    restart: unless-stopped
