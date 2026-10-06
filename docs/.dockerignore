@@ -1,0 +1,8 @@
+node_modules
+build
+.docusaurus
+.omc
+.env
+.env.*
+Dockerfile
+docker-compose.yml

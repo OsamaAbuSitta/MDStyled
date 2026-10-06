@@ -1,0 +1,31 @@
+server {
+    listen 80;
+    server_name _;
+    root /usr/share/nginx/html;
+
+    gzip on;
+    gzip_types text/plain text/css application/javascript application/json image/svg+xml;
+
+    # Long-cache hashed assets
+    location ~* \.(js|css|woff2?|png|jpg|jpeg|gif|svg|ico)$ {
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+        try_files $uri =404;
+    }
+
+    # Serve root index when BASE_URL is "/", otherwise redirect into BASE_URL
+    location = / {
+        try_files /index.html @base;
+    }
+
+    location @base {
+        return 302 ${BASE_URL};
+    }
+
+    # trailingSlash: false -> pages are emitted as /path.html
+    location / {
+        try_files $uri $uri.html $uri/index.html =404;
+    }
+
+    error_page 404 ${BASE_URL}404.html;
+}
