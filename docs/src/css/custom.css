@@ -54,6 +54,11 @@ html {
   background-color: rgba(20, 20, 35, 0.78);
 }
 
+/* backdrop-filter traps the fixed mobile sidebar inside the navbar box */
+.navbar.navbar-sidebar--show {
+  backdrop-filter: none;
+}
+
 .navbar__brand {
   font-weight: 700;
 }
@@ -68,6 +73,8 @@ html {
 /* ---------- Hero section ---------- */
 
 .hero {
+  flex-direction: column;
+  align-items: stretch;
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -146,6 +153,13 @@ html {
 
 .hero__actions .button--secondary {
   background: transparent;
+  color: var(--ifm-font-color-base);
+  border-color: var(--ifm-color-emphasis-400);
+}
+
+.hero__actions .button--secondary:hover {
+  background: var(--ifm-color-emphasis-100);
+  color: var(--ifm-font-color-base);
 }
 
 /* ---------- Terminal / code card ---------- */
@@ -354,6 +368,13 @@ html {
 /* ---------- Responsive ---------- */
 
 @media (max-width: 600px) {
-  .hero { padding: 3.5rem 0; }
+  .hero { padding: 3rem 1rem; }
+  .hero__inner { padding: 0; }
+  .hero__demo { margin-top: 2.5rem; }
+  .hero__actions .button { flex: 1 1 100%; }
+  .features { padding: 3rem 1rem; }
+  .feature-card { padding: 1.4rem; }
+  .cta-banner { padding: 1rem; margin-bottom: 3rem; }
+  .cta-box { padding: 2.5rem 1.25rem; }
   .feature-grid { grid-template-columns: 1fr; }
 }

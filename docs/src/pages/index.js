@@ -103,8 +103,8 @@ export default function Home() {
               <Link className="button button--primary button--lg" to="/docs/intro">
                 Get started
               </Link>
-              <Link className="button button--secondary button--lg" to="/docs/syntax">
-                Explore the syntax
+              <Link className="button button--secondary button--lg" href="https://marketplace.visualstudio.com/items?itemName=OAS.mdstyled">
+                Install
               </Link>
             </div>
           </div>
