@@ -1529,6 +1529,8 @@
     card: 'M4 5h16v14H4zM4 9.5h16',
     table: 'M3 5h18v14H3zM3 10h18M9.5 5v14',
     zoomIn: 'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-4-4M11 8v6M8 11h6',
+    expand: 'M3 12h18M7 8l-4 4 4 4M17 8l4 4-4 4',
+    contract: 'M3 12h6M21 12h-6M6 9l3 3-3 3M18 9l-3 3 3 3',
     zoomOut: 'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-4-4M8 11h6',
     back: 'M19 12H5M11 6l-6 6 6 6',
     print: 'M7 9V4h10v5M7 18H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 15h10v5H7z',
@@ -1590,6 +1592,12 @@
     return b;
   }
 
+  /* The templates set `scroll-behavior: smooth`, which would animate every
+     correction as a visible scroll. Restoring a position has to be instant. */
+  function jump(y) {
+    window.scrollTo({ top: y, left: window.scrollX, behavior: 'instant' });
+  }
+
   function patchState(patch) {
     if (!window.mdstyled || !window.mdstyled.setState) return;
     var next = window.mdstyled.getState();
@@ -1627,11 +1635,63 @@
     ta.style.height = Math.max(ta.scrollHeight, 72) + 'px';
   }
 
+  /* A save re-renders the page from the top. Hide it from the very start of init, before
+     the accordions and tables are built, and show it once the position is back - so
+     the reader never sees it sit at the top and then travel to where they were. */
+  function holdPaint() {
+    var st = (window.mdstyled && window.mdstyled.getState) ? window.mdstyled.getState() : {};
+    if (!(st && (st.place || (typeof st.scrollY === 'number' && st.scrollY > 0)))) return;
+    var shown = false;
+    function reveal() {
+      if (shown) return;
+      shown = true;
+      document.documentElement.style.visibility = '';
+    }
+    document.documentElement.style.visibility = 'hidden';
+    /* initEditing restores the position synchronously; two frames let it settle. */
+    setTimeout(function () {
+      requestAnimationFrame(function () { requestAnimationFrame(reveal); });
+    }, 0);
+    setTimeout(reveal, 800);
+  }
+
   function initEditing() {
     var root = document.querySelector('.mdstyled-root');
     if (!root) return;
 
     var state = (window.mdstyled && window.mdstyled.getState) ? window.mdstyled.getState() : {};
+
+    /* A save re-renders the page with every section open again, which moves the block
+       you just edited. Remember which sections were folded and fold them again. */
+    function sectionKeys() {
+      var seen = {};
+      return Array.prototype.map.call(root.querySelectorAll('.accordion-section'), function (section) {
+        var heading = section.querySelector(':scope > .accordion-header > h1, :scope > .accordion-header > h2, :scope > .accordion-header > h3, :scope > .accordion-header > h4, :scope > .accordion-header > h5, :scope > .accordion-header > h6');
+        var base = heading ? heading.tagName + ':' + heading.textContent.trim() : '';
+        seen[base] = (seen[base] || 0) + 1;
+        return { section: section, key: base + '#' + seen[base], toggle: section.querySelector(':scope > .accordion-header > .accordion-toggle') };
+      });
+    }
+
+    var restoringSections = false;
+    root.addEventListener('click', function (e) {
+      if (restoringSections || !e.target.closest || !e.target.closest('.accordion-toggle')) return;
+      patchState({
+        collapsed: sectionKeys().filter(function (entry) {
+          return entry.toggle && entry.toggle.classList.contains('collapsed');
+        }).map(function (entry) { return entry.key; })
+      });
+    });
+
+    if (state.collapsed && state.collapsed.length) {
+      restoringSections = true;
+      sectionKeys().forEach(function (entry) {
+        if (state.collapsed.indexOf(entry.key) !== -1 && entry.toggle && !entry.toggle.classList.contains('collapsed')) {
+          entry.toggle.click();
+        }
+      });
+      restoringSections = false;
+    }
 
     /* Every save re-renders the preview, so keep the reading position across reloads. */
     var scrollTimer = null;
@@ -1643,9 +1703,19 @@
       }, SCROLL_SAVE_MS);
     });
     if (!state.place && typeof state.scrollY === 'number' && state.scrollY > 0) {
-      requestAnimationFrame(function () {
-        requestAnimationFrame(function () { window.scrollTo(0, state.scrollY); });
+      /* The page keeps growing as tables paginate and diagrams render, so hold the
+         offset until the reader scrolls for themselves. */
+      var scrollStopped = false;
+      var stopScroll = function () { scrollStopped = true; };
+      ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(function (type) {
+        window.addEventListener(type, stopScroll, { once: true, passive: true });
       });
+      var holdScroll = function () {
+        if (!scrollStopped && Math.abs(window.scrollY - state.scrollY) >= 1) jump(state.scrollY);
+      };
+      requestAnimationFrame(function () { requestAnimationFrame(holdScroll); });
+      [60, 150, 350, 700, 1200].forEach(function (ms) { setTimeout(holdScroll, ms); });
+      window.addEventListener('load', holdScroll);
     }
 
     /* A checkbox is only tickable while editing - the preview is a document to read,
@@ -1883,13 +1953,37 @@
       api.openDocument(href).catch(reportError);
     }, true);
 
-    [backBtn, toggleBtn, exportBtn, sourceBtn].forEach(withLabel);
+    /* ── Wide ── */
+
+    var wideBtn = button('Default', 'mdstyled-edit-wide', 'Stretch the page to fill the window');
+    wideBtn.setAttribute('aria-pressed', 'false');
+    wideBtn.insertBefore(icon('expand'), wideBtn.firstChild);
+
+    function setWide(on, remember) {
+      document.body.classList.toggle('mdstyled-wide', on);
+      wideBtn.classList.toggle('active', on);
+      wideBtn.setAttribute('aria-pressed', String(on));
+      /* Icon only: arrows pointing out to fill the window, in when it is filled. */
+      var label = on ? 'Full width - click for the default reading width' : 'Default width - click to fill the window';
+      wideBtn.title = label;
+      wideBtn.setAttribute('aria-label', label);
+      wideBtn.lastChild.textContent = on ? 'Full' : 'Default';
+      wideBtn.replaceChild(icon(on ? 'contract' : 'expand'), wideBtn.firstChild);
+      if (remember !== false) patchState({ wide: on });
+    }
+    wideBtn.addEventListener('click', function () {
+      setWide(!document.body.classList.contains('mdstyled-wide'));
+    });
+    setWide(!!state.wide, false);
+
+    [backBtn, toggleBtn, wideBtn, exportBtn, sourceBtn].forEach(withLabel);
 
     bar.appendChild(backBtn);
     bar.appendChild(toggleBtn);
     bar.appendChild(el('span', 'mdstyled-bar-spacer'));
     bar.appendChild(zoomBox);
     bar.appendChild(el('span', 'mdstyled-bar-divider'));
+    bar.appendChild(wideBtn);
     bar.appendChild(exportBtn);
     bar.appendChild(sourceBtn);
     document.body.appendChild(bar);
@@ -2122,8 +2216,14 @@
 
     function closeBlockEditor() {
       if (!open) return;
+      var wrapTop = open.wrap.isConnected ? open.wrap.getBoundingClientRect().top : null;
       open.group.forEach(function (node) { node.classList.remove('mdstyled-editable-hidden'); });
       if (open.wrap.parentNode) open.wrap.parentNode.removeChild(open.wrap);
+      /* Closing shrinks the block back; keep it where the editor was. */
+      if (wrapTop != null && open.group[0]) {
+        var delta = open.group[0].getBoundingClientRect().top - wrapTop;
+        if (Math.abs(delta) >= 1) jump(window.scrollY + delta);
+      }
       open = null;
       api.setEditorOpen(false);
     }
@@ -2159,8 +2259,33 @@
       openBlockEditor(host, e.target, { x: e.clientX, y: e.clientY });
     });
 
-    function openBlockEditor(host, clickTarget, clickPoint) {
+    /* Opening an editor swaps the block for a taller one and focuses it, which lets the
+       browser scroll. Keep the block exactly where it was on screen instead, until the
+       reader scrolls for themselves. */
+    function openBlockEditor(host, clickTarget, clickPoint, restoring) {
       if (open && open.host === host) return;
+      var before = groupFor(host)[0];
+      var top = before ? before.getBoundingClientRect().top : null;
+      openBlockEditorAt(host, clickTarget, clickPoint);
+      /* After a re-render the restore below owns the scroll position. */
+      if (restoring || top == null || !open || !open.wrap) return;
+
+      var stopped = false;
+      function stop() { stopped = true; }
+      ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(function (type) {
+        window.addEventListener(type, stop, { once: true, passive: true });
+      });
+      function pin() {
+        if (stopped || !open || !open.wrap.isConnected) return;
+        var delta = open.wrap.getBoundingClientRect().top - top;
+        if (Math.abs(delta) >= 1) jump(window.scrollY + delta);
+      }
+      pin();
+      requestAnimationFrame(pin);
+      [60, 150, 350].forEach(function (ms) { setTimeout(pin, ms); });
+    }
+
+    function openBlockEditorAt(host, clickTarget, clickPoint) {
       /* Where in the text the click landed, measured before the block is swapped out. */
       var clickOffset = clickPoint ? textOffsetAt(host, clickPoint.x, clickPoint.y) : null;
       closeBlockEditor();
@@ -4673,9 +4798,22 @@
       var target = root.querySelector('[data-mdstyled-start="' + state.focusLine + '"]');
       patchState({ focusLine: null });
       if (target) {
+        /* A new block inside a folded section would open out of sight. */
+        var folded = target.closest('.accordion-content');
+        while (folded) {
+          if (folded.style.display === 'none') {
+            var tg = folded.parentElement.querySelector(':scope > .accordion-header > .accordion-toggle');
+            if (tg) tg.click();
+          }
+          folded = folded.parentElement && folded.parentElement.closest('.accordion-content');
+        }
         if (!editing) setEditing(true);
-        openBlockEditor(target);
-        if (!state.place && typeof target.scrollIntoView === 'function') target.scrollIntoView({ block: 'center' });
+        openBlockEditor(target, null, null, true);
+        if (!state.place && open && open.wrap && typeof open.wrap.scrollIntoView === 'function') {
+          var r = open.wrap.getBoundingClientRect();
+          /* Only travel when the new block would otherwise be out of sight. */
+          if (r.bottom < 0 || r.top > window.innerHeight) open.wrap.scrollIntoView({ block: 'center' });
+        }
       }
     }
 
@@ -4712,7 +4850,7 @@
         var node = anchorNode();
         if (!node) return;
         var delta = node.getBoundingClientRect().top - place.top;
-        if (Math.abs(delta) >= 1) window.scrollTo(0, window.scrollY + delta);
+        if (Math.abs(delta) >= 1) jump(window.scrollY + delta);
       }
 
       apply();
@@ -4725,6 +4863,7 @@
   /* ── Init ── */
 
   function init() {
+    holdPaint();
     initAccordions();
     buildTOC();
     initInteractiveTables();

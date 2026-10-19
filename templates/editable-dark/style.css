@@ -1432,7 +1432,18 @@ body:not(.mdstyled-edit-mode) .mdstyled-root a[data-mdstyled-uri$=".md"] {
   text-underline-offset: 3px;
 }
 
+/* ── Wide: drop the reading-width caps and fill the window ── */
+
+body.mdstyled-wide {
+  max-width: none;
+}
+
+body.mdstyled-wide .mdstyled-root {
+  max-width: none;
+}
+
 @media (max-width: 800px) {
+  .mdstyled-edit-bar .mdstyled-edit-wide .mdstyled-btn-text,
   .mdstyled-edit-bar .mdstyled-edit-export .mdstyled-btn-text,
   .mdstyled-edit-bar .mdstyled-edit-back .mdstyled-btn-text {
     display: none;

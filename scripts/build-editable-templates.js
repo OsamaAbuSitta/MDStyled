@@ -65,6 +65,7 @@ for (const theme of ['light', 'dark']) {
   }
   js = js.replace(INIT_MARKER, `${editorJs}\n\n${INIT_MARKER}`);
   js = js.replace(INIT_CALL, `${INIT_CALL}    initEditing();\n`);
+  js = js.replace('  function init() {\n', '  function init() {\n    holdPaint();\n');
   fs.writeFileSync(path.join(to, 'script.js'), js);
 
   console.log(`built templates/editable-${theme}`);
