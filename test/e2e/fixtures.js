@@ -100,11 +100,21 @@ const test = base.test.extend({
       editor: () => page.locator('.mdstyled-block-editor'),
       rich: () => page.locator('.mdstyled-block-editor .mdstyled-rich'),
 
-      /** Runs `action` (a save, an insert, a tick) and waits for the re-render it causes. */
+      /**
+       * Runs `action` (a save, an insert, a tick) and waits for the page to show it:
+       * patched in place, or - for what cannot be patched - re-rendered.
+       */
       async rerender(action) {
+        await page.evaluate(() => {
+          window.__mdstyledPatched = false;
+          document.addEventListener('mdstyled:patched', () => { window.__mdstyledPatched = true; }, { once: true });
+        });
         const loaded = page.waitForEvent('load', { timeout: 8000 });
+        const patched = page.waitForFunction(() => window.__mdstyledPatched === true, null, { timeout: 8000 });
+        loaded.catch(() => {});
+        patched.catch(() => {});
         await action();
-        await loaded;
+        await Promise.any([loaded, patched]);
         await page.locator('.mdstyled-root').waitFor();
       },
 

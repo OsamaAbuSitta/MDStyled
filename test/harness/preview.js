@@ -6,7 +6,9 @@
  *  - saves go through the extension's own planBlockEdit, then the file is written;
  *  - a changed file re-renders the page 300 ms later (the provider's debounce), but
  *    never while an editor is open - it catches up when the editor closes;
- *  - a re-render replaces the whole page, and getState/setState survive it.
+ *  - a re-render replaces the whole page, and getState/setState survive it;
+ *  - a save that asks to patch is answered with the re-rendered content instead, and
+ *    does not re-render - unless the page shell (styles, scripts) changed.
  */
 const http = require('http');
 const fs = require('fs');
@@ -42,7 +44,12 @@ async function startPreview({ file, template = 'editable-light', editing = true 
   const T = path.join(ROOT, 'templates', template);
   const fallback = { styles: [path.join(T, 'style.css')], scripts: [path.join(T, 'script.js')] };
 
-  const state = { editorOpen: false, refreshPending: false, timer: null, renders: 0, saves: [], clients: new Set() };
+  const state = { editorOpen: false, refreshPending: false, timer: null, renders: 0, patches: 0, saves: [], clients: new Set(), shell: null };
+
+  async function renderPage() {
+    const hasOwn = await E.hasFileLevelStyling(file);
+    return E.renderMdStyled(file, ['mermaid', 'copy-code', 'highlight'], undefined, hasOwn ? undefined : fallback, editing, false);
+  }
 
   function refresh() {
     clearTimeout(state.timer);
@@ -62,6 +69,7 @@ async function startPreview({ file, template = 'editable-light', editing = true 
       if (!state.editorOpen && state.refreshPending) { state.refreshPending = false; refresh(); }
       return null;
     }
+    if (msg.type === 'mdstyled.reload') { updateWebview(); return null; }
     if (msg.type === 'mdstyled.render') return reply(true, undefined, { html: E.renderMarkdownFragment(msg.markdown || '') });
     if (msg.type === 'mdstyled.export') return reply(true);
     if (msg.type === 'mdstyled.navigate' || msg.type === 'mdstyled.back') return reply(false, 'Not available in tests.');
@@ -72,8 +80,18 @@ async function startPreview({ file, template = 'editable-light', editing = true 
     const eol = text.includes('\r\n') ? '\r\n' : '\n';
     const plan = planBlockEdit(text.split(/\r\n|\n/), eol, msg);
     if (!plan.ok) return reply(false, plan.error);
-    fs.writeFileSync(file, applyBlockEditPlan(text, plan));
+    const next = applyBlockEditPlan(text, plan);
+    fs.writeFileSync(file, next);
     state.saves.push(msg);
+    if (msg.patch) {
+      const parts = E.splitPreviewHtml(await renderPage());
+      if (parts && parts.shell === state.shell) {
+        state.patches++;
+        return reply(true, undefined, {
+          patch: { from: plan.start, to: plan.end, html: parts.content, lines: E.splitSourceLines(next) },
+        });
+      }
+    }
     refresh();                                   // onDidChangeTextDocument
     return reply(true);
   }
@@ -97,8 +115,9 @@ async function startPreview({ file, template = 'editable-light', editing = true 
           return;
         }
         if (req.url === '/' || req.url.startsWith('/?')) {
-          const hasOwn = await E.hasFileLevelStyling(file);
-          const raw = await E.renderMdStyled(file, ['mermaid', 'copy-code', 'highlight'], undefined, hasOwn ? undefined : fallback, editing, false);
+          const raw = await renderPage();
+          const parts = E.splitPreviewHtml(raw);
+          state.shell = parts ? parts.shell : null;
           res.setHeader('Content-Type', 'text/html; charset=utf-8');
           res.end(raw.replace('<head>', '<head>' + WEBVIEW_API));
           return;

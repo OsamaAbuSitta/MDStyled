@@ -171,6 +171,8 @@
 
     var tables = root.querySelectorAll('table');
     tables.forEach(function (table) {
+      // Already set up: this runs again for tables the editor swaps in.
+      if (table.parentNode.classList && table.parentNode.classList.contains('table-wrapper')) return;
       var wrapper = document.createElement('div');
       wrapper.className = 'table-wrapper';
       table.parentNode.insertBefore(wrapper, table);
@@ -469,6 +471,8 @@
     root.querySelectorAll('.contains-task-list').forEach(function(list) {
       var boxes = Array.from(list.querySelectorAll('.task-list-item-checkbox'));
       if (boxes.length === 0) return;
+      var prev = list.previousElementSibling;
+      if (prev && prev.classList.contains('task-progress')) return;
 
       boxes.forEach(function(cb) { cb.removeAttribute('disabled'); });
 

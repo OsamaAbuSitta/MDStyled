@@ -181,7 +181,7 @@ Every table gets a search box, column-specific filtering, sortable headers, and 
 
 Apply `<!-- .cards -->` to any unordered list. Each item becomes a card in a responsive grid.
 
-<!-- .cards -->
+<!-- .cards .cols-3 -->
 - **Getting started**
 
   Install MdStyled, open a Markdown file, and run **Apply Template** to scaffold a theme.

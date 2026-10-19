@@ -67718,6 +67718,7 @@ __export(index_exports, {
   renderMdStyled: () => renderMdStyled,
   resolveConfig: () => resolveConfig,
   sanitizeHtml: () => sanitizeHtml,
+  splitPreviewHtml: () => splitPreviewHtml,
   splitSourceLines: () => splitSourceLines
 });
 module.exports = __toCommonJS(index_exports);
@@ -73152,7 +73153,9 @@ var fs2 = __toESM(require("fs"));
 var SOURCE_PLACEHOLDER = "__MDSTYLED_SOURCE__";
 var BACK_PLACEHOLDER = "__MDSTYLED_CAN_GO_BACK__";
 var START_EDITING_PLACEHOLDER = "__MDSTYLED_START_EDITING__";
-var MDSTYLED_RUNTIME = `
+var RUNTIME_MARKER = "/* mdstyled-runtime */";
+var ROOT_OPEN = '<div class="mdstyled-root">';
+var MDSTYLED_RUNTIME = `${RUNTIME_MARKER}
 (function () {
   var vscodeApi;
   try {
@@ -73210,14 +73213,23 @@ var MDSTYLED_RUNTIME = `
         return source.slice(startLine, endLine).join('\\n');
       },
       getDocument: function() { return source ? source.join('\\n') : ''; },
-      saveBlock: function(startLine, endLine, text, original) {
+      /* With options.patch the page updates itself from the reply instead of being
+         re-rendered, so it never reloads under the reader. */
+      saveBlock: function(startLine, endLine, text, original, options) {
         return request({
           type: 'mdstyled.saveBlock',
           startLine: startLine,
           endLine: endLine,
           text: text,
-          original: (typeof original === 'string') ? original : undefined
+          original: (typeof original === 'string') ? original : undefined,
+          patch: !!(options && options.patch)
         });
+      },
+      /* The file as it now stands, after the page patched itself. */
+      setSource: function(lines) { if (Array.isArray(lines)) source = lines; },
+      /* The page could not patch itself: ask for a full re-render. */
+      reload: function() {
+        try { if (vscodeApi) vscodeApi.postMessage({ type: 'mdstyled.reload' }); } catch (e) {}
       },
       /* Following a link to another Markdown file, and stepping back out again. */
       canGoBack: canGoBack,
@@ -73294,13 +73306,26 @@ ${allCss}
 </style>
 </head>
 <body>
-` + applyTemplateBanner + `<div class="mdstyled-root">
+` + applyTemplateBanner + `${ROOT_OPEN}
 ${params.html}
 </div>
 <script>
 ${MDSTYLED_RUNTIME.replace(SOURCE_PLACEHOLDER, () => encodeSource(params.sourceLines)).replace(BACK_PLACEHOLDER, () => params.canGoBack ? "true" : "false").replace(START_EDITING_PLACEHOLDER, () => params.startEditing ? "true" : "false")}
 </script>
 ` + (scriptTags ? scriptTags + "\n" : "") + "</body>\n</html>";
+}
+function splitPreviewHtml(html) {
+  const rootStart = html.indexOf(ROOT_OPEN);
+  const marker = html.lastIndexOf(RUNTIME_MARKER);
+  if (rootStart === -1 || marker === -1 || marker < rootStart) return null;
+  const scriptOpen = html.lastIndexOf("<script>", marker);
+  const scriptClose = html.indexOf("</script>", marker);
+  const rootEnd = html.lastIndexOf("</div>", scriptOpen);
+  if (scriptOpen === -1 || scriptClose === -1 || rootEnd < rootStart) return null;
+  return {
+    shell: html.slice(0, rootStart) + html.slice(scriptClose),
+    content: html.slice(rootStart + ROOT_OPEN.length, rootEnd)
+  };
 }
 async function loadCssFiles(paths) {
   const parts = await Promise.all(paths.map(async (p) => {
@@ -73344,7 +73369,8 @@ var COPY_CODE_JS = `
 (function(){'use strict';
 var CLIPBOARD_ICON='<svg viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>';
 var CHECK_ICON='<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
-document.querySelectorAll('pre').forEach(function(pre){
+function enhance(scope){
+scope.querySelectorAll('pre').forEach(function(pre){
   var code=pre.querySelector('code');
   if(!code||pre.parentElement.classList.contains('mdstyled-code-wrap'))return;
   var wrap=document.createElement('div');
@@ -73364,6 +73390,10 @@ document.querySelectorAll('pre').forEach(function(pre){
   });
   wrap.appendChild(btn);
 });
+}
+enhance(document);
+/* Blocks the in-preview editor swaps in after a save get the same treatment. */
+(window.mdstyledEnhancers=window.mdstyledEnhancers||[]).push(enhance);
 })();
 `;
 var MERMAID_CSS = `
@@ -73445,6 +73475,17 @@ function loadMermaid(){
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',loadMermaid);
 else loadMermaid();
+/* Diagrams the in-preview editor swaps in after a save. */
+(window.mdstyledEnhancers=window.mdstyledEnhancers||[]).push(function(scope){
+  var blocks=scope.querySelectorAll('code.language-mermaid');
+  if(!blocks.length)return;
+  if(window.mermaid){blocks.forEach(function(code){renderBlock(code);});return;}
+  mermaidBlocks=blocks;
+  var script=document.createElement('script');
+  script.src='__MERMAID_SRC__';
+  script.onload=renderBlocks;
+  document.head.appendChild(script);
+});
 })();
 `;
 var HIGHLIGHT_CSS = `
@@ -73552,7 +73593,7 @@ function getExtensionJs(enabledExtensions, options2) {
     let js = ext.js;
     if (name === "mermaid") {
       const src = options2?.mermaidSrc || "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js";
-      js = js.replace("__MERMAID_SRC__", src);
+      js = js.split("__MERMAID_SRC__").join(src);
     }
     return js;
   }).join("\n\n");
@@ -73692,6 +73733,7 @@ async function renderMdStyled(markdownFilePath, enabledExtensions, mermaidSrc, f
   renderMdStyled,
   resolveConfig,
   sanitizeHtml,
+  splitPreviewHtml,
   splitSourceLines
 });
 /*! Bundled license information:

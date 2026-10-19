@@ -15,7 +15,7 @@ export { MdStyledConfig, SelectorResult, ParseResult } from './types';
 export { resolveConfig } from './config';
 export { isMdStyledComment, parseSelectorComment, parseDirectiveComment } from './parser';
 export { applyMdStyledDirectives } from './transformer';
-export { buildPreviewHtml, loadCssFiles, loadJsFiles } from './renderer';
+export { buildPreviewHtml, loadCssFiles, loadJsFiles, splitPreviewHtml } from './renderer';
 export { BUILTIN_EXTENSIONS, getExtensionCss, getExtensionJs } from './extensions';
 export { SOURCE_LINE_ATTR, annotateSourceLines, computeLineOffset, splitSourceLines } from './sourceMap';
 export type { MdStyledExtensionDef, ExtensionJsOptions } from './extensions';

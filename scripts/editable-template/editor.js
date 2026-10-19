@@ -430,26 +430,33 @@
     /* ── Editable blocks ── */
 
     var hosts = [];
-    root.querySelectorAll('[data-mdstyled-line]').forEach(function (node) {
-      var parts = (node.getAttribute('data-mdstyled-line') || '').split(',');
-      var start = parseInt(parts[0], 10);
-      var end = parseInt(parts[1], 10);
-      if (isNaN(start) || isNaN(end)) return;
+    markHosts();
 
-      /* A fence carries the attribute on <code>, and tables have been wrapped by now. */
-      var host = node;
-      if (host.tagName === 'CODE' && host.parentElement && host.parentElement.tagName === 'PRE') {
-        host = host.parentElement;
-      }
-      if (host.tagName === 'TABLE' && host.parentElement && host.parentElement.classList.contains('table-wrapper')) {
-        host = host.parentElement;
-      }
+    /* Every rendered block that maps back to source lines becomes an editable host.
+       Runs again after a save patches blocks in, so it has to be safe to repeat. */
+    function markHosts() {
+      hosts = [];
+      root.querySelectorAll('[data-mdstyled-line]').forEach(function (node) {
+        var parts = (node.getAttribute('data-mdstyled-line') || '').split(',');
+        var start = parseInt(parts[0], 10);
+        var end = parseInt(parts[1], 10);
+        if (isNaN(start) || isNaN(end)) return;
 
-      host.classList.add('mdstyled-editable');
-      host.setAttribute('data-mdstyled-start', String(start));
-      host.setAttribute('data-mdstyled-end', String(end));
-      hosts.push(host);
-    });
+        /* A fence carries the attribute on <code>, and tables have been wrapped by now. */
+        var host = node;
+        if (host.tagName === 'CODE' && host.parentElement && host.parentElement.tagName === 'PRE') {
+          host = host.parentElement;
+        }
+        if (host.tagName === 'TABLE' && host.parentElement && host.parentElement.classList.contains('table-wrapper')) {
+          host = host.parentElement;
+        }
+
+        host.classList.add('mdstyled-editable');
+        host.setAttribute('data-mdstyled-start', String(start));
+        host.setAttribute('data-mdstyled-end', String(end));
+        hosts.push(host);
+      });
+    }
 
     /* Controls the interactive template adds around a block belong to it while editing. */
     function groupFor(host) {
@@ -784,7 +791,7 @@
         focusLine = prevBlank ? line : line + 1;
       }
 
-      api.saveBlock(line, line, prefix + markdown + suffix, '').then(function () {
+      saveBlock(line, line, prefix + markdown + suffix, '').then(function () {
         patchState({ focusLine: focusLine + (focusOffset || 0), editMode: true, scrollY: window.scrollY });
       }, function (err) {
         reportError(err);
@@ -830,7 +837,7 @@
 
         lines[i] = parts[1] + (box.checked ? 'x' : ' ') + parts[3];
         patchState({ scrollY: window.scrollY, place: placeOf(start, list) });
-        api.saveBlock(start, end, lines.join('\n'), original).catch(reportError);
+        saveBlock(start, end, lines.join('\n'), original).catch(reportError);
         return;
       }
     });
@@ -896,19 +903,22 @@
       /* After a re-render the restore below owns the scroll position. */
       if (restoring || top == null || !open || !open.wrap) return;
 
+      /* Typing does not scroll the page, so only scrolling or clicking lets go - the
+         rich surface can fill in after the first keys are already down. */
+      var wrap = open.wrap;
       var stopped = false;
       function stop() { stopped = true; }
-      ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(function (type) {
+      ['wheel', 'touchstart', 'mousedown'].forEach(function (type) {
         window.addEventListener(type, stop, { once: true, passive: true });
       });
       function pin() {
-        if (stopped || !open || !open.wrap.isConnected) return;
-        var delta = open.wrap.getBoundingClientRect().top - top;
+        if (stopped || !open || open.wrap !== wrap || !wrap.isConnected) return;
+        var delta = wrap.getBoundingClientRect().top - top;
         if (Math.abs(delta) >= 1) jump(window.scrollY + delta);
       }
       pin();
       requestAnimationFrame(pin);
-      [60, 150, 350].forEach(function (ms) { setTimeout(pin, ms); });
+      [60, 150, 350, 700, 1200].forEach(function (ms) { setTimeout(pin, ms); });
     }
 
     function openBlockEditorAt(host, clickTarget, clickPoint) {
@@ -1122,7 +1132,7 @@
       function addCard() {
         var text = '<div class="mdstyled-cards cols-2">\n\n' + composed() + '\n\n' + CARD_MARKDOWN + '\n\n</div>';
         patchState({ scrollY: window.scrollY, editMode: true, focusLine: rangeStart + 2 });
-        api.saveBlock(rangeStart, end, text, original).catch(reportError);
+        saveBlock(rangeStart, end, text, original).catch(reportError);
       }
 
       /* colour swatches */
@@ -1723,7 +1733,7 @@
         status.textContent = 'Saving...';
         patchState({ scrollY: window.scrollY, editMode: true, place: placeOf(rangeStart, wrap) });
 
-        api.saveBlock(rangeStart, end, markdown, original).then(function () {
+        saveBlock(rangeStart, end, markdown, original).then(function () {
           status.textContent = 'Saved';
           closeBlockEditor();
         }, function (err) {
@@ -1784,7 +1794,7 @@
         }
 
         patchState({ scrollY: window.scrollY, editMode: true, place: placeOf(rangeStart, wrap) });
-        api.saveBlock(rangeStart, deleteEnd, '', original + trailing).then(function () {
+        saveBlock(rangeStart, deleteEnd, '', original + trailing).then(function () {
           closeBlockEditor();
         }, function (err) {
           disarmDelete();
@@ -2832,7 +2842,7 @@
         say('Saving...');
         patchState({ scrollY: window.scrollY, editMode: true, place: placeOf(design.from, wrap) });
 
-        api.saveBlock(design.from, design.to, text, original).then(function () {
+        saveBlock(design.from, design.to, text, original).then(function () {
           say('Saved');
           closeBlockEditor();
         }, function (err) {
@@ -2876,7 +2886,7 @@
 
         setBusy(true);
         patchState({ scrollY: window.scrollY, editMode: true, place: placeOf(design.from, wrap) });
-        api.saveBlock(design.from, deleteEnd, '', original + trailing).then(function () {
+        saveBlock(design.from, deleteEnd, '', original + trailing).then(function () {
           closeBlockEditor();
         }, function (err) {
           setBusy(false);
@@ -3285,7 +3295,7 @@
         setBusy(true);
         say('Saving...');
         patchState({ scrollY: window.scrollY, editMode: true, place: placeOf(design.from, wrap) });
-        api.saveBlock(design.from, design.to, text, original).then(function () {
+        saveBlock(design.from, design.to, text, original).then(function () {
           say('Saved');
           closeBlockEditor();
         }, function (err) {
@@ -3326,7 +3336,7 @@
         }
         setBusy(true);
         patchState({ scrollY: window.scrollY, editMode: true, place: placeOf(design.from, wrap) });
-        api.saveBlock(design.from, deleteEnd, '', original + trailing).then(function () {
+        saveBlock(design.from, deleteEnd, '', original + trailing).then(function () {
           closeBlockEditor();
         }, function (err) {
           setBusy(false);
@@ -3395,7 +3405,7 @@
         status.textContent = 'Saving...';
         patchState({ scrollY: window.scrollY });
 
-        api.saveBlock(0, api.lineCount, ta.value, original).then(function () {
+        saveBlock(0, api.lineCount, ta.value, original).then(function () {
           status.textContent = 'Saved';
           close();
         }, function (err) {
@@ -3419,33 +3429,198 @@
     /* ── Restore what the last render was doing ── */
 
     if (state.editMode) setEditing(true);
+    restoreRendered(state);
 
-    if (typeof state.focusLine === 'number') {
-      var target = root.querySelector('[data-mdstyled-start="' + state.focusLine + '"]');
-      patchState({ focusLine: null });
-      if (target) {
-        /* A new block inside a folded section would open out of sight. */
-        var folded = target.closest('.accordion-content');
-        while (folded) {
-          if (folded.style.display === 'none') {
-            var tg = folded.parentElement.querySelector(':scope > .accordion-header > .accordion-toggle');
-            if (tg) tg.click();
+    /* What a save asked the next render to do: open a block, or keep one in place. */
+    function restoreRendered(state) {
+      if (typeof state.focusLine === 'number') {
+        var target = root.querySelector('[data-mdstyled-start="' + state.focusLine + '"]');
+        patchState({ focusLine: null });
+        if (target) {
+          /* A new block inside a folded section would open out of sight. */
+          var folded = target.closest('.accordion-content');
+          while (folded) {
+            if (folded.style.display === 'none') {
+              var tg = folded.parentElement.querySelector(':scope > .accordion-header > .accordion-toggle');
+              if (tg) tg.click();
+            }
+            folded = folded.parentElement && folded.parentElement.closest('.accordion-content');
           }
-          folded = folded.parentElement && folded.parentElement.closest('.accordion-content');
+          if (!editing) setEditing(true);
+          openBlockEditor(target, null, null, true);
+          if (!state.place && open && open.wrap && typeof open.wrap.scrollIntoView === 'function') {
+            var r = open.wrap.getBoundingClientRect();
+            /* Only travel when the new block would otherwise be out of sight. */
+            if (r.bottom < 0 || r.top > window.innerHeight) open.wrap.scrollIntoView({ block: 'center' });
+          }
         }
-        if (!editing) setEditing(true);
-        openBlockEditor(target, null, null, true);
-        if (!state.place && open && open.wrap && typeof open.wrap.scrollIntoView === 'function') {
-          var r = open.wrap.getBoundingClientRect();
-          /* Only travel when the new block would otherwise be out of sight. */
-          if (r.bottom < 0 || r.top > window.innerHeight) open.wrap.scrollIntoView({ block: 'center' });
-        }
+      }
+
+      if (state.place) {
+        patchState({ place: null });
+        restorePlace(state.place);
       }
     }
 
-    if (state.place) {
-      patchState({ place: null });
-      restorePlace(state.place);
+    /* ── Saving without a reload ── */
+
+    /* Every write goes through here. The extension answers with the freshly rendered
+       content and the edited blocks are swapped in where they stand: nothing reloads,
+       so nothing moves. What cannot be patched safely - headings, which reshape the
+       sections; cards and raw HTML - falls back to a full re-render. */
+    function saveBlock(from, to, text, original) {
+      var saved = api.saveBlock(from, to, text, original, { patch: true });
+      saved.then(function (res) {
+        /* Let the caller's own handlers run first: they close their editor and leave
+           word of what to open or keep in place. */
+        Promise.resolve().then(function () {
+          if (res && res.patch && !patchBlocks(res.patch)) api.reload();
+        });
+      }, function () {});
+      return saved;
+    }
+
+    function lineRange(node) {
+      var parts = (node.getAttribute('data-mdstyled-line') || '').split(',');
+      return [parseInt(parts[0], 10), parseInt(parts[1], 10)];
+    }
+
+    function hostStart(host) { return parseInt(host.getAttribute('data-mdstyled-start'), 10); }
+    function hostEnd(host) { return parseInt(host.getAttribute('data-mdstyled-end'), 10); }
+
+    /* A block and everything templates and extensions put around it. */
+    function outerGroup(host) {
+      return groupFor(host).map(function (node) {
+        var parent = node.parentElement;
+        return parent && parent.classList.contains('mdstyled-code-wrap') ? parent : node;
+      });
+    }
+
+    function plainParent(node) {
+      var parent = node.parentElement;
+      return parent === root || (parent && parent.classList.contains('accordion-content'));
+    }
+
+    var HEADING = 'h1, h2, h3, h4, h5, h6';
+
+    function reshapes(node) {
+      return node.matches(HEADING) || !!node.querySelector(HEADING) || !!node.closest('.accordion-header')
+        || node.classList.contains('mdstyled-cards') || !!node.closest('.mdstyled-cards');
+    }
+
+    /* Every non-blank line in [from, to) belongs to one of `ranges`: otherwise there is
+       content (raw HTML, say) the patch would lose or leave behind. */
+    function covered(lineAt, from, to, ranges) {
+      for (var i = from; i < to; i++) {
+        if ((lineAt(i) || '').trim() === '') continue;
+        var inside = ranges.some(function (r) { return i >= r[0] && i < r[1]; });
+        if (!inside) return false;
+      }
+      return true;
+    }
+
+    function patchBlocks(patch) {
+      /* Another block is mid-edit, and its line numbers are about to go stale. */
+      if (open) return false;
+
+      var from = patch.from;
+      var to = patch.to;
+      var delta = patch.lines.length - api.lineCount;
+      var newTo = to + delta;
+
+      var fresh = document.createElement('div');
+      fresh.innerHTML = patch.html;
+      var incoming = Array.prototype.filter.call(fresh.children, function (node) {
+        var r = lineRange(node);
+        return r[0] >= from && r[0] < newTo;
+      });
+      var outgoing = hosts.filter(function (host) {
+        var start = hostStart(host);
+        return start >= from && start < to;
+      });
+
+      if (hosts.some(function (host) { return hostStart(host) < from && hostEnd(host) > from; })) return false;
+      if (outgoing.some(function (host) { return !host.isConnected || reshapes(host) || !plainParent(outerGroup(host)[0]); })) return false;
+      if (incoming.some(reshapes)) return false;
+      if (!covered(function (i) { return api.getSource(i, i + 1); }, from, to,
+        outgoing.map(function (host) { return [hostStart(host), hostEnd(host)]; }))) return false;
+      if (!covered(function (i) { return patch.lines[i]; }, from, newTo, incoming.map(lineRange))) return false;
+
+      /* Where the new blocks go: where the old ones were, or - for an insert - right
+         after the block before, inside its section. */
+      root.querySelectorAll('.mdstyled-insert-line').forEach(function (strip) { strip.remove(); });
+      var anchor = null;
+      var where = 'before';
+      if (outgoing.length) {
+        anchor = outerGroup(outgoing[0])[0];
+      } else {
+        var prev = null;
+        var next = null;
+        hosts.forEach(function (host) {
+          if (hostEnd(host) <= from) prev = host;
+          else if (!next && hostStart(host) >= to) next = host;
+        });
+        if (prev) {
+          var prevGroup = outerGroup(prev);
+          anchor = prevGroup[prevGroup.length - 1];
+          where = 'after';
+          if (anchor.classList.contains('accordion-header')) {
+            var content = anchor.parentNode.querySelector(':scope > .accordion-content');
+            if (content) { anchor = content; where = 'prepend'; }
+          } else if (!plainParent(anchor)) {
+            anchor = null;
+          }
+        } else if (next) {
+          anchor = outerGroup(next)[0];
+          if (!plainParent(anchor)) anchor = null;
+        } else {
+          anchor = root;
+          where = 'append';
+        }
+      }
+      if (!anchor) {
+        buildInsertLines();
+        return false;
+      }
+
+      /* The blocks after the edit move by however many lines it added or removed. */
+      root.querySelectorAll('[data-mdstyled-line]').forEach(function (node) {
+        var r = lineRange(node);
+        if (r[0] >= to) node.setAttribute('data-mdstyled-line', (r[0] + delta) + ',' + (r[1] + delta));
+      });
+
+      incoming.forEach(function (node) {
+        if (where === 'append') root.appendChild(node);
+        else if (where === 'prepend') anchor.insertBefore(node, anchor.firstChild);
+        else if (where === 'after') anchor.parentNode.insertBefore(node, anchor.nextSibling);
+        else anchor.parentNode.insertBefore(node, anchor);
+        if (where !== 'before') { anchor = node; where = 'after'; }
+      });
+      outgoing.forEach(function (host) {
+        outerGroup(host).forEach(function (node) { if (node.parentNode) node.parentNode.removeChild(node); });
+      });
+
+      api.setSource(patch.lines);
+
+      /* What the template and the extensions do to a freshly rendered block. */
+      if (typeof initInteractiveTables === 'function') initInteractiveTables();
+      if (typeof initTaskProgress === 'function') initTaskProgress();
+      var scopes = [];
+      incoming.forEach(function (node) {
+        if (node.parentNode && scopes.indexOf(node.parentNode) === -1) scopes.push(node.parentNode);
+      });
+      (window.mdstyledEnhancers || []).forEach(function (enhance) {
+        scopes.forEach(function (scope) {
+          try { enhance(scope); } catch (err) {}
+        });
+      });
+
+      markHosts();
+      buildInsertLines();
+      setCheckboxesEditable(editing);
+      restoreRendered(window.mdstyled.getState());
+      document.dispatchEvent(new CustomEvent('mdstyled:patched'));
+      return true;
     }
 
     /* Puts the saved block back where it was on screen, and keeps it there while the

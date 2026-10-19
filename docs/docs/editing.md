@@ -13,6 +13,7 @@ The **editable-light** and **editable-dark** templates add full Markdown editing
 When you preview a file with an editable template, a small toolbar floats at the bottom-right of the preview:
 
 - **✎ Edit**: toggles edit mode.
+- **Default / Full**: switches between the normal reading width and the full width of the window.
 - **Source**: opens the whole Markdown file in a full-window editor.
 
 ## Editing a block
@@ -22,7 +23,7 @@ When you preview a file with an editable template, a small toolbar floats at the
 3. A textarea opens with that block's Markdown source.
 4. Make your edits, then **Save** (or press `Ctrl`/`Cmd`+`Enter`).
 
-The preview re-renders instantly and your scroll position is preserved. Press **Cancel** or `Esc` to discard the edit.
+The edited block is updated in place: the preview does not reload, and the page stays exactly where it was. (Editing a heading reshapes the collapsible sections, so that one re-renders the page, which then returns to the same spot.) Press **Cancel** or `Esc` to discard the edit.
 
 ## Editing the whole file
 

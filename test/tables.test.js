@@ -156,7 +156,7 @@ async function open(markdown, opts = {}) {
     beforeParse(win) {
       let y = 0;
       Object.defineProperty(win, 'scrollY', { get: () => y, configurable: true });
-      win.scrollTo = (x, next) => { scrolls.push(next); y = next; };
+      win.scrollTo = (x, next) => { if (x && typeof x === 'object') next = x.top; scrolls.push(next); y = next; };
       /* The table sits 520px down the page. */
       win.Element.prototype.getBoundingClientRect = function () {
         const inTable = this.matches && this.matches('.table-wrapper, .table-interactive-controls');

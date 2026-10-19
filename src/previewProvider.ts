@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-import { renderMdStyled, renderMarkdownFragment, hasFileLevelStyling, TemplateFallback } from './engine';
+import { renderMdStyled, renderMarkdownFragment, hasFileLevelStyling, splitPreviewHtml, splitSourceLines, TemplateFallback } from './engine';
 import { resolveDefaultTemplateAssets, getTemplateAssets } from './defaultTemplate';
-import { planBlockEdit } from './blockEdit';
+import { planBlockEdit, applyBlockEditPlan } from './blockEdit';
 import { editableForTheme } from './templates';
 import sanitizeHtml from 'sanitize-html';
 
@@ -76,6 +76,11 @@ export class MdStyledPreviewProvider {
   private templateOverride: string | undefined;
   /** Turn the in-preview editor on with the next render, once. */
   private startEditing = false;
+  /** Everything but the content of the page last put in the webview. */
+  private lastShell: string | undefined;
+  /** The text a save from the preview leaves the file with. The preview patches itself
+      for that change, so the change event it causes must not re-render the page. */
+  private patchedText: string | undefined;
 
   /** Opens or brings forward the preview of a file. Without a template in `options`
       the file is shown with its own styling again. */
@@ -165,6 +170,12 @@ export class MdStyledPreviewProvider {
     this.disposables.push(
       vscode.workspace.onDidChangeTextDocument(e => {
         if (this.isRelatedDocument(e.document.uri)) {
+          if (this.patchedText !== undefined && e.document.uri.toString() === this.documentUri.toString()
+            && e.document.getText() === this.patchedText) {
+            // Only that one change - an undo and redo back to the same text must re-render.
+            this.patchedText = undefined;
+            return;
+          }
           this.refresh();
         }
       })
@@ -255,6 +266,12 @@ export class MdStyledPreviewProvider {
       return;
     }
 
+    if (msg.type === 'mdstyled.reload') {
+      this.patchedText = undefined;
+      this.updateWebview();
+      return;
+    }
+
     if (msg.type === 'mdstyled.navigate') {
       const href = typeof msg.href === 'string' ? msg.href : '';
       const target = this.resolveMarkdownLink(href);
@@ -329,11 +346,32 @@ export class MdStyledPreviewProvider {
       const edit = new vscode.WorkspaceEdit();
       edit.replace(doc.uri, range, plan.replacement);
 
+      const expected = applyBlockEditPlan(doc.getText(), plan);
+      if (msg.patch) this.patchedText = expected;
       if (!(await vscode.workspace.applyEdit(edit))) {
+        this.patchedText = undefined;
         await reply(false, 'VS Code rejected the edit.');
         return;
       }
       await doc.save();
+
+      // Send the re-rendered content back for the page to swap in, instead of reloading
+      // it. Anything more than this one edit (format on save, a changed template) still
+      // gets a full re-render.
+      if (msg.patch) {
+        const html = doc.getText() === expected ? await this.buildHtml().catch(() => undefined) : undefined;
+        const parts = html ? splitPreviewHtml(html) : null;
+        if (!parts || parts.shell !== this.lastShell) {
+          this.patchedText = undefined;
+          await reply(true);
+          this.updateWebview();
+          return;
+        }
+        await reply(true, undefined, {
+          patch: { from: plan.start, to: plan.end, html: parts.content, lines: splitSourceLines(expected) },
+        });
+        return;
+      }
       await reply(true);
     } catch (err) {
       await reply(false, err instanceof Error ? err.message : String(err));
@@ -382,34 +420,11 @@ export class MdStyledPreviewProvider {
     }
 
     try {
-      const extConfig = vscode.workspace.getConfiguration('mdstyled.extensions');
-      const enabledExtensions = extConfig.get<string[]>('enabled', ['mermaid', 'copy-code', 'highlight']);
-      const mermaidUri = this.panel.webview.asWebviewUri(
-        vscode.Uri.joinPath(this.extensionUri, 'node_modules', 'mermaid', 'dist', 'mermaid.min.js')
-      );
-      // The file declares no styles or scripts of its own -> use the global default template.
-      const editingEnabled = vscode.workspace.getConfiguration('mdstyled').get<boolean>('editing.enabled', true);
-
-      // A template picked for this preview (MdStyled Edit) wins over the file's own.
-      const overrideName = this.templateOverride === EDIT_TEMPLATE ? editableForTheme() : this.templateOverride;
-      const templateOverride = overrideName ? getTemplateAssets(this.extensionUri.fsPath, overrideName) : undefined;
-
-      let fallback: TemplateFallback | undefined;
-      if (!templateOverride && !(await hasFileLevelStyling(this.documentUri.fsPath))) {
-        fallback = await resolveDefaultTemplateAssets(this.extensionUri.fsPath, { prompt: true });
-      }
-      const startEditing = this.startEditing;
-      this.startEditing = false;
-      const rawHtml = await renderMdStyled(this.documentUri.fsPath, enabledExtensions, mermaidUri.toString(), fallback, editingEnabled, this.history.length > 0,
-        { templateOverride, startEditing });
-      const sanitized = sanitizeHtml(rawHtml, SANITIZE_OPTIONS);
-      const styleMatch = sanitized.match(/<style>([\s\S]*?)<\/style>/i);
-      const cssLen = styleMatch ? styleMatch[1].trim().length : 0;
-      const debugInfo = `<script>console.log('[MdStyled] Preview loaded, CSS length: ${cssLen} bytes');</script>`;
-      const finalHtml = sanitized.replace('</body>', debugInfo + '\n</body>');
-      const htmlWithWebviewUris = this.convertWebviewUris(finalHtml);
-      this.panel.webview.html = htmlWithWebviewUris;
+      const html = await this.buildHtml();
+      this.lastShell = splitPreviewHtml(html)?.shell;
+      this.panel.webview.html = html;
     } catch (err) {
+      this.lastShell = undefined;
       const errorMessage = err instanceof Error ? err.message : String(err);
       this.panel.webview.html = `<!DOCTYPE html>
 <html lang="en">
@@ -437,6 +452,36 @@ export class MdStyledPreviewProvider {
 </body>
 </html>`;
     }
+  }
+
+  /** The whole preview page for the file as it is on disk. */
+  private async buildHtml(): Promise<string> {
+    const extConfig = vscode.workspace.getConfiguration('mdstyled.extensions');
+    const enabledExtensions = extConfig.get<string[]>('enabled', ['mermaid', 'copy-code', 'highlight']);
+    const mermaidUri = this.panel.webview.asWebviewUri(
+      vscode.Uri.joinPath(this.extensionUri, 'node_modules', 'mermaid', 'dist', 'mermaid.min.js')
+    );
+    // The file declares no styles or scripts of its own -> use the global default template.
+    const editingEnabled = vscode.workspace.getConfiguration('mdstyled').get<boolean>('editing.enabled', true);
+
+    // A template picked for this preview (MdStyled Edit) wins over the file's own.
+    const overrideName = this.templateOverride === EDIT_TEMPLATE ? editableForTheme() : this.templateOverride;
+    const templateOverride = overrideName ? getTemplateAssets(this.extensionUri.fsPath, overrideName) : undefined;
+
+    let fallback: TemplateFallback | undefined;
+    if (!templateOverride && !(await hasFileLevelStyling(this.documentUri.fsPath))) {
+      fallback = await resolveDefaultTemplateAssets(this.extensionUri.fsPath, { prompt: true });
+    }
+    const startEditing = this.startEditing;
+    this.startEditing = false;
+    const rawHtml = await renderMdStyled(this.documentUri.fsPath, enabledExtensions, mermaidUri.toString(), fallback, editingEnabled, this.history.length > 0,
+      { templateOverride, startEditing });
+    const sanitized = sanitizeHtml(rawHtml, SANITIZE_OPTIONS);
+    const styleMatch = sanitized.match(/<style>([\s\S]*?)<\/style>/i);
+    const cssLen = styleMatch ? styleMatch[1].trim().length : 0;
+    const debugInfo = `<script>console.log('[MdStyled] Preview loaded, CSS length: ${cssLen} bytes');</script>`;
+    const finalHtml = sanitized.replace('</body>', debugInfo + '\n</body>');
+    return this.convertWebviewUris(finalHtml);
   }
 
   private escapeHtml(text: string): string {

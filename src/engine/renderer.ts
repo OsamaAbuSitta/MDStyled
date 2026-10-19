@@ -4,7 +4,11 @@ const SOURCE_PLACEHOLDER = '__MDSTYLED_SOURCE__';
 const BACK_PLACEHOLDER = '__MDSTYLED_CAN_GO_BACK__';
 const START_EDITING_PLACEHOLDER = '__MDSTYLED_START_EDITING__';
 
-const MDSTYLED_RUNTIME = `
+/** Marks the runtime script, so a rendered page can be split into its shell and its content. */
+const RUNTIME_MARKER = '/* mdstyled-runtime */';
+const ROOT_OPEN = '<div class="mdstyled-root">';
+
+const MDSTYLED_RUNTIME = `${RUNTIME_MARKER}
 (function () {
   var vscodeApi;
   try {
@@ -62,14 +66,23 @@ const MDSTYLED_RUNTIME = `
         return source.slice(startLine, endLine).join('\\n');
       },
       getDocument: function() { return source ? source.join('\\n') : ''; },
-      saveBlock: function(startLine, endLine, text, original) {
+      /* With options.patch the page updates itself from the reply instead of being
+         re-rendered, so it never reloads under the reader. */
+      saveBlock: function(startLine, endLine, text, original, options) {
         return request({
           type: 'mdstyled.saveBlock',
           startLine: startLine,
           endLine: endLine,
           text: text,
-          original: (typeof original === 'string') ? original : undefined
+          original: (typeof original === 'string') ? original : undefined,
+          patch: !!(options && options.patch)
         });
+      },
+      /* The file as it now stands, after the page patched itself. */
+      setSource: function(lines) { if (Array.isArray(lines)) source = lines; },
+      /* The page could not patch itself: ask for a full re-render. */
+      reload: function() {
+        try { if (vscodeApi) vscodeApi.postMessage({ type: 'mdstyled.reload' }); } catch (e) {}
       },
       /* Following a link to another Markdown file, and stepping back out again. */
       canGoBack: canGoBack,
@@ -153,13 +166,33 @@ export function buildPreviewHtml(params: { html: string; css: string; scripts: s
     + `<style>\n${allCss}\n</style>\n`
     + '</head>\n<body>\n'
     + applyTemplateBanner
-    + `<div class="mdstyled-root">\n${params.html}\n</div>\n`
+    + `${ROOT_OPEN}\n${params.html}\n</div>\n`
     + `<script>\n${MDSTYLED_RUNTIME
         .replace(SOURCE_PLACEHOLDER, () => encodeSource(params.sourceLines))
         .replace(BACK_PLACEHOLDER, () => (params.canGoBack ? 'true' : 'false'))
         .replace(START_EDITING_PLACEHOLDER, () => (params.startEditing ? 'true' : 'false'))}\n</script>\n`
     + (scriptTags ? scriptTags + '\n' : '')
     + '</body>\n</html>';
+}
+
+/**
+ * Splits a rendered preview page into its content (what is inside `.mdstyled-root`)
+ * and its shell (everything else: styles, template scripts). The runtime script, which
+ * carries the file's source, belongs to neither. Two renders with the same shell differ
+ * only in content, so the page can swap the content in without reloading.
+ */
+export function splitPreviewHtml(html: string): { shell: string; content: string } | null {
+  const rootStart = html.indexOf(ROOT_OPEN);
+  const marker = html.lastIndexOf(RUNTIME_MARKER);
+  if (rootStart === -1 || marker === -1 || marker < rootStart) return null;
+  const scriptOpen = html.lastIndexOf('<script>', marker);
+  const scriptClose = html.indexOf('</script>', marker);
+  const rootEnd = html.lastIndexOf('</div>', scriptOpen);
+  if (scriptOpen === -1 || scriptClose === -1 || rootEnd < rootStart) return null;
+  return {
+    shell: html.slice(0, rootStart) + html.slice(scriptClose),
+    content: html.slice(rootStart + ROOT_OPEN.length, rootEnd),
+  };
 }
 
 export async function loadCssFiles(paths: string[]): Promise<string> {

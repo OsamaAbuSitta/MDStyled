@@ -72,13 +72,13 @@ const tick = () => new Promise(r => setTimeout(r, 20));
   await tick();
 
   const bar = doc.querySelector('.mdstyled-edit-bar');
-  check('toolbar carries Back, Edit, zoom, Export and Source',
-    bar && bar.querySelectorAll('.mdstyled-edit-btn, .mdstyled-zoom').length === 5,
+  check('toolbar carries Back, Edit, zoom, width, Export and Source',
+    bar && bar.querySelectorAll('.mdstyled-edit-btn, .mdstyled-zoom').length === 6,
     bar && Array.from(bar.children).map(b => b.textContent).join(' | '));
   check('the toolbar splits into a left and right group',
     !!bar.querySelector('.mdstyled-bar-spacer'));
   check('bar labels are elements, so they can collapse to icons',
-    bar.querySelectorAll('.mdstyled-btn-label').length === 4,
+    bar.querySelectorAll('.mdstyled-btn-label').length === 5,
     Array.from(bar.querySelectorAll('.mdstyled-btn-label')).map(l => l.textContent).join(', '));
   check('the export button offers both formats, not just PDF',
     bar.querySelector('.mdstyled-edit-export .mdstyled-btn-label').textContent === 'Export',
